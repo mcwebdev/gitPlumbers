@@ -1,32 +1,22 @@
-import { Injectable, inject } from '@angular/core';
-import { PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 import {
   Firestore,
-  addDoc,
-  arrayUnion,
   collection,
-  collectionData,
   doc,
-  orderBy,
-  query,
-  serverTimestamp,
+  addDoc,
   updateDoc,
+  query,
   where,
+  orderBy,
+  collectionData,
+  serverTimestamp,
+  getDoc,
 } from '@angular/fire/firestore';
-import { map, Observable, of, tap } from 'rxjs';
-import { UserProfile, UserRole } from './auth-user.service';
+import { Observable, of, map, catchError } from 'rxjs';
+import { UserProfile } from './auth-user.service';
 
 export type RequestStatus = 'new' | 'in_progress' | 'waiting_on_user' | 'resolved' | 'closed';
-
-export interface SupportRequestNote {
-  id: string;
-  authorId: string;
-  authorName: string;
-  role: UserRole;
-  message: string;
-  createdAt: unknown;
-}
 
 export interface SupportRequest {
   id: string;
@@ -34,12 +24,22 @@ export interface SupportRequest {
   userName: string;
   userEmail: string;
   message: string;
-  githubRepo?: string;
-  filePath?: string | null;
+  githubRepo: string;
+  filePath: string | null;
   status: RequestStatus;
+  notes: RequestNote[];
   createdAt: unknown;
   updatedAt: unknown;
-  notes: SupportRequestNote[];
+}
+
+export interface RequestNote {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorEmail: string;
+  role: 'user' | 'admin';
+  message: string;
+  createdAt: unknown;
 }
 
 export interface CreateSupportRequestPayload {
@@ -54,7 +54,13 @@ export class RequestsService {
   private readonly platformId = inject(PLATFORM_ID);
 
   async createRequest(user: UserProfile, payload: CreateSupportRequestPayload): Promise<string> {
-    console.debug('[RequestsService] createRequest', { user: user.uid });
+    if (!user?.uid) {
+      throw new Error('User ID is required to create a support request');
+    }
+    if (!payload?.message?.trim()) {
+      throw new Error('Message is required to create a support request');
+    }
+
     const docRef = await addDoc(collection(this.firestore, 'supportRequests'), {
       userId: user.uid,
       userName: user.displayName || user.email,
@@ -72,239 +78,135 @@ export class RequestsService {
   }
 
   listenForUserRequests(userId: string): Observable<SupportRequest[]> {
+    if (!userId?.trim()) {
+      throw new Error('User ID is required to listen for user requests');
+    }
+
     const isServer = isPlatformServer(this.platformId);
     if (isServer) {
-      console.debug('[RequestsService] listenForUserRequests skipped on server', { userId });
       return of([]);
     }
-    console.log('[RequestsService] Starting listenForUserRequests', {
-      userId,
-      firestoreInstance: !!this.firestore,
-      firestoreType: this.firestore?.constructor?.name,
-    });
+
+    if (!this.firestore) {
+      throw new Error('Firestore instance is not available');
+    }
 
     try {
-      // Check if firestore is properly initialized
-      if (!this.firestore) {
-        console.error('[RequestsService] Firestore instance is null/undefined');
-        return of([]);
-      }
-
-      console.log('[RequestsService] Creating collection reference...');
       const collectionRef = collection(this.firestore, 'supportRequests');
-      console.log('[RequestsService] Collection reference created', {
-        collectionRef: !!collectionRef,
-        collectionType: collectionRef?.constructor?.name,
-      });
-
-      console.log('[RequestsService] Creating query with userId:', userId);
       const q = query(collectionRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
-      console.log('[RequestsService] Query created successfully', {
-        query: !!q,
-        queryType: q?.constructor?.name,
-      });
 
-      console.log('[RequestsService] Setting up collectionData listener...');
       return collectionData(q, { idField: 'id' }).pipe(
-        tap({
-          next: (docs) => {
-            console.log('[RequestsService] listenForUserRequests SUCCESS', {
-              userId,
-              count: docs?.length || 0,
-              docsType: typeof docs,
-              isArray: Array.isArray(docs),
-              sampleDoc: docs?.[0]
-                ? {
-                    id: docs[0].id,
-                    hasCreatedAt: !!docs[0]['createdAt'],
-                    createdAtType: typeof docs[0]['createdAt'],
-                    createdAtValue: docs[0]['createdAt'],
-                    hasUserId: !!docs[0]['userId'],
-                    userIdValue: docs[0]['userId'],
-                    userIdMatch: docs[0]['userId'] === userId,
-                    allKeys: Object.keys(docs[0]),
-                  }
-                : 'No documents found',
-            });
-          },
-          error: (error) => {
-            console.error('[RequestsService] listenForUserRequests ERROR - Detailed Analysis', {
-              userId,
-              errorMessage: (error as any)?.message || 'No message',
-              errorCode: (error as any)?.code || 'No code',
-              errorName: (error as any)?.name || 'No name',
-              errorType: typeof error,
-              errorConstructor: (error as any)?.constructor?.name || 'No constructor',
-              errorStack: (error as any)?.stack || 'No stack trace',
-              firestoreState: {
-                hasFirestore: !!this.firestore,
-                firestoreType: this.firestore?.constructor?.name,
-              },
-              queryInfo: {
-                userId,
-                collection: 'supportRequests',
-              },
-              fullErrorObject: error,
-            });
-          },
+        catchError((error) => {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          throw new Error(`Failed to listen for user requests: ${errorMessage}`);
         }),
         map((docs) => {
-          console.log('[RequestsService] Mapping documents to SupportRequest[]', {
-            count: docs?.length,
-            mappedSuccessfully: true,
-          });
-          return docs as SupportRequest[];
+          return docs.map((doc) => ({
+            id: doc.id,
+            userId: doc['userId'],
+            userName: doc['userName'],
+            userEmail: doc['userEmail'],
+            message: doc['message'],
+            githubRepo: doc['githubRepo'],
+            filePath: doc['filePath'],
+            status: doc['status'] as RequestStatus,
+            notes: doc['notes'] || [],
+            createdAt: doc['createdAt'],
+            updatedAt: doc['updatedAt'],
+          }));
         })
       );
     } catch (error) {
-      console.error('[RequestsService] listenForUserRequests SETUP FAILED - Detailed Analysis', {
-        userId,
-        errorMessage: (error as any)?.message || 'No message',
-        errorCode: (error as any)?.code || 'No code',
-        errorName: (error as any)?.name || 'No name',
-        errorType: typeof error,
-        errorConstructor: (error as any)?.constructor?.name || 'No constructor',
-        errorStack: (error as any)?.stack || 'No stack trace',
-        firestoreState: {
-          hasFirestore: !!this.firestore,
-          firestoreType: this.firestore?.constructor?.name,
-          platformId: this.platformId,
-        },
-        fullErrorObject: error,
-      });
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to setup user requests listener: ${errorMessage}`);
     }
   }
 
   listenForAllRequests(): Observable<SupportRequest[]> {
     const isServer = isPlatformServer(this.platformId);
     if (isServer) {
-      console.debug('[RequestsService] listenForAllRequests skipped on server');
       return of([]);
     }
 
-    console.log('[RequestsService] Starting listenForAllRequests', {
-      firestoreInstance: !!this.firestore,
-      firestoreType: this.firestore?.constructor?.name,
-    });
+    if (!this.firestore) {
+      throw new Error('Firestore instance is not available');
+    }
 
     try {
-      if (!this.firestore) {
-        console.error(
-          '[RequestsService] Firestore instance is null/undefined for listenForAllRequests'
-        );
-        return of([]);
-      }
-
-      console.log('[RequestsService] Creating collection reference for all requests...');
       const collectionRef = collection(this.firestore, 'supportRequests');
-      console.log('[RequestsService] Collection reference created for all requests', {
-        collectionRef: !!collectionRef,
-        collectionType: collectionRef?.constructor?.name,
-      });
-
-      console.log('[RequestsService] Creating query for all requests...');
       const q = query(collectionRef, orderBy('createdAt', 'desc'));
-      console.log('[RequestsService] Query created successfully for all requests', {
-        query: !!q,
-        queryType: q?.constructor?.name,
-      });
 
-      console.log('[RequestsService] Setting up collectionData listener for all requests...');
       return collectionData(q, { idField: 'id' }).pipe(
-        tap({
-          next: (docs) => {
-            console.log('[RequestsService] listenForAllRequests SUCCESS', {
-              count: docs?.length || 0,
-              docsType: typeof docs,
-              isArray: Array.isArray(docs),
-              sampleDoc: docs?.[0]
-                ? {
-                    id: docs[0].id,
-                    hasCreatedAt: !!docs[0]['createdAt'],
-                    createdAtType: typeof docs[0]['createdAt'],
-                    createdAtValue: docs[0]['createdAt'],
-                    hasUserId: !!docs[0]['userId'],
-                    userIdValue: docs[0]['userId'],
-                    status: docs[0]['status'],
-                    allKeys: Object.keys(docs[0]),
-                  }
-                : 'No documents found',
-            });
-          },
-          error: (error) => {
-            console.error('[RequestsService] listenForAllRequests ERROR - Detailed Analysis', {
-              errorMessage: (error as any)?.message || 'No message',
-              errorCode: (error as any)?.code || 'No code',
-              errorName: (error as any)?.name || 'No name',
-              errorType: typeof error,
-              errorConstructor: (error as any)?.constructor?.name || 'No constructor',
-              errorStack: (error as any)?.stack || 'No stack trace',
-              firestoreState: {
-                hasFirestore: !!this.firestore,
-                firestoreType: this.firestore?.constructor?.name,
-              },
-              queryInfo: {
-                collection: 'supportRequests',
-                orderBy: 'createdAt desc',
-              },
-              fullErrorObject: error,
-            });
-          },
+        catchError((error) => {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          throw new Error(`Failed to listen for all requests: ${errorMessage}`);
         }),
         map((docs) => {
-          console.log('[RequestsService] Mapping all documents to SupportRequest[]', {
-            count: docs?.length,
-            mappedSuccessfully: true,
-          });
-          return docs as SupportRequest[];
+          return docs.map((doc) => ({
+            id: doc.id,
+            userId: doc['userId'],
+            userName: doc['userName'],
+            userEmail: doc['userEmail'],
+            message: doc['message'],
+            githubRepo: doc['githubRepo'],
+            filePath: doc['filePath'],
+            status: doc['status'] as RequestStatus,
+            notes: doc['notes'] || [],
+            createdAt: doc['createdAt'],
+            updatedAt: doc['updatedAt'],
+          }));
         })
       );
     } catch (error) {
-      console.error('[RequestsService] listenForAllRequests SETUP FAILED - Detailed Analysis', {
-        errorMessage: (error as any)?.message || 'No message',
-        errorCode: (error as any)?.code || 'No code',
-        errorName: (error as any)?.name || 'No name',
-        errorType: typeof error,
-        errorConstructor: (error as any)?.constructor?.name || 'No constructor',
-        errorStack: (error as any)?.stack || 'No stack trace',
-        firestoreState: {
-          hasFirestore: !!this.firestore,
-          firestoreType: this.firestore?.constructor?.name,
-          platformId: this.platformId,
-        },
-        fullErrorObject: error,
-      });
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to setup all requests listener: ${errorMessage}`);
     }
   }
 
   async updateStatus(requestId: string, status: RequestStatus): Promise<void> {
-    console.debug('[RequestsService] updateStatus', { requestId, status });
-    const ref = doc(this.firestore, 'supportRequests', requestId);
-    await updateDoc(ref, {
+    if (!requestId?.trim()) {
+      throw new Error('Request ID is required to update status');
+    }
+    if (!status) {
+      throw new Error('Status is required to update request');
+    }
+
+    const docRef = doc(this.firestore, 'supportRequests', requestId);
+    await updateDoc(docRef, {
       status,
       updatedAt: serverTimestamp(),
     });
   }
 
   async addNote(requestId: string, author: UserProfile, message: string): Promise<void> {
-    console.debug('[RequestsService] addNote', { requestId, authorId: author.uid });
-    const ref = doc(this.firestore, 'supportRequests', requestId);
-    const note: SupportRequestNote = {
-      id:
-        typeof crypto !== 'undefined' && 'randomUUID' in crypto
-          ? crypto.randomUUID()
-          : Math.random().toString(36).slice(2),
+    if (!requestId?.trim()) {
+      throw new Error('Request ID is required to add a note');
+    }
+    if (!author?.uid) {
+      throw new Error('Author information is required to add a note');
+    }
+    if (!message?.trim()) {
+      throw new Error('Message is required to add a note');
+    }
+
+    const docRef = doc(this.firestore, 'supportRequests', requestId);
+    const newNote: RequestNote = {
+      id: Date.now().toString(),
       authorId: author.uid,
-      authorName: author.displayName,
+      authorName: author.displayName || author.email,
+      authorEmail: author.email,
       role: author.role,
-      message,
-      createdAt: serverTimestamp(),
+      message: message.trim(),
+      createdAt: new Date(), // Use regular Date instead of serverTimestamp() for array items
     };
 
-    await updateDoc(ref, {
-      notes: arrayUnion(note),
+    // Get current notes and add the new one
+    const currentDoc = await getDoc(docRef);
+    const currentData = currentDoc.data();
+    const currentNotes = currentData?.['notes'] || [];
+
+    await updateDoc(docRef, {
+      notes: [...currentNotes, newNote],
       updatedAt: serverTimestamp(),
     });
   }

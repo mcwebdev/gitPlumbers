@@ -34,8 +34,8 @@
             <span>Status</span>
             <select
               [disabled]="isStatusBusy(request.id)"
-              [value]="request.status"
-              (change)="changeStatus(request.id, $any($event.target).value)"
+              [ngModel]="request.status"
+              (ngModelChange)="changeStatus(request.id, $event)"
             >
               @for (option of statusOptions; track option.value) {
               <option [value]="option.value">

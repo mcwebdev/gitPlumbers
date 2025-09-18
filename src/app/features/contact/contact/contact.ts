@@ -73,14 +73,34 @@ export class ContactComponent {
       }
     });
 
-    // if your store exposes isSubmitting() (signal/getter), mirror to local loading
+    // Monitor store state for UI updates
     effect(() => {
-      try {
-        // @ts-ignore: optional at runtime
-        const s = this.store.isSubmitting?.();
-        if (typeof s === 'boolean') this.loading = s;
-      } catch {
-        /* ignore if not present */
+      const isSubmitting = this.store.isSubmitting();
+      this.loading = isSubmitting;
+    });
+
+    // Handle success/error states from store
+    effect(() => {
+      const isSuccess = this.store.isSuccess();
+      const error = this.store.error();
+
+      if (isSuccess) {
+        this.messages.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Your message has been sent!',
+        });
+        this.contactForm.reset();
+        this.selectedFile = undefined;
+        this.uploader?.clear();
+      }
+
+      if (error) {
+        this.messages.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error,
+        });
       }
     });
   }
@@ -161,5 +181,3 @@ export class ContactComponent {
     this.messages.add({ severity: 'info', summary: 'Attachment added', detail: file.name });
   }
 }
-
-

@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -81,56 +75,20 @@ export class UserDashboardComponent {
 
   protected readonly requests = toSignal(
     this.profile$.pipe(
-      tap((profile) => {
-        console.log('[UserDashboard] Profile changed', {
-          hasProfile: !!profile,
-          uid: profile?.uid,
-          email: profile?.email,
-          role: profile?.role,
-        });
-      }),
       switchMap((profile) => {
         if (!profile) {
-          console.log('[UserDashboard] No profile, returning empty array');
           return of<SupportRequest[]>([]);
         }
 
-        console.log('[UserDashboard] Starting to listen for user requests', {
-          uid: profile.uid,
-          email: profile.email,
-        });
-
         return this.requestsService.listenForUserRequests(profile.uid).pipe(
-          tap((requests) => {
-            console.log('[UserDashboard] Received requests from service', {
-              uid: profile.uid,
-              count: requests?.length || 0,
-              requests: requests,
-            });
-          }),
           catchError((error) => {
-            console.error('[UserDashboard] listenForUserRequests failed - DETAILED', {
-              error,
-              uid: profile.uid,
-              errorMessage: error?.message,
-              errorCode: error?.code,
-              errorName: error?.name,
-              errorType: typeof error,
-              fullError: error,
-            });
+            // Handle error silently - component will show appropriate UI state
             return of([]);
           }),
-          map((items) => {
-            console.log('[UserDashboard] Mapping items', {
-              items: items ?? [],
-              itemsLength: (items ?? []).length,
-            });
-            return items ?? [];
-          })
+          map((items) => items ?? [])
         );
       })
     ),
-
     { initialValue: [] }
   );
 
@@ -141,26 +99,11 @@ export class UserDashboardComponent {
     const sortBy = this.sortBy();
     const sortOrder = this.sortOrder();
 
-    console.log('[UserDashboard] filteredAndSortedRequests - raw requests:', {
-      count: requests.length,
-      requests: requests,
-      sampleRequest: requests[0] || 'No requests',
-    });
-
     // Filter out any invalid requests and filter by status
     let filtered = requests.filter((request) => request && request.id);
 
-    console.log('[UserDashboard] After filtering invalid requests:', {
-      count: filtered.length,
-      filtered: filtered,
-    });
-
     if (statusFilter !== 'all') {
       filtered = filtered.filter((request) => request.status === statusFilter);
-      console.log('[UserDashboard] After status filtering:', {
-        statusFilter,
-        count: filtered.length,
-      });
     }
 
     // Sort requests
@@ -322,7 +265,6 @@ export class UserDashboardComponent {
       try {
         filePath = await this.uploadAttachment(this.selectedFile);
       } catch (error) {
-        console.error('Failed to upload attachment', error);
         this.feedback.set('We could not upload your attachment. Please try again.');
         this.feedbackTone.set('error');
         this.form.enable({ emitEvent: false });
@@ -354,7 +296,6 @@ export class UserDashboardComponent {
       // Clear file selection
       this.selectedFile = null;
     } catch (error) {
-      console.error('Failed to create request', error);
       this.feedback.set('We could not send that request. Please try again.');
       this.feedbackTone.set('error');
     } finally {

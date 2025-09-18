@@ -1,0 +1,36 @@
+<div class="file-upload-wrapper">
+  <label class="field-label">{{ config().label }}</label>
+
+  <p-fileUpload
+    #uploader
+    mode="basic"
+    [accept]="config().accept"
+    [maxFileSize]="config().maxFileSize"
+    [auto]="false"
+    chooseLabel="Choose File"
+    [showUploadButton]="false"
+    [showCancelButton]="false"
+    (onSelect)="onFileSelect($event)"
+    (onClear)="onClear()"
+    class="custom-file-upload"
+  />
+
+  @if (selectedFileName()) {
+  <div class="selected-file">
+    <div class="file-info">
+      <i class="pi pi-file"></i>
+      <span class="file-name">{{ selectedFileName() }}</span>
+      <button type="button" class="remove-file-btn" (click)="clearFile()" title="Remove file">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </div>
+  } @if (error()) {
+  <div class="upload-error">
+    <i class="pi pi-exclamation-triangle"></i>
+    {{ error() }}
+  </div>
+  } @if (config().hint && !error()) {
+  <div class="upload-hint">{{ config().hint }}</div>
+  }
+</div>

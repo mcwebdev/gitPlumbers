@@ -55,8 +55,8 @@ export class SupportRequestsService {
         });
       }),
       catchError((error) => {
-        console.error('Error fetching support requests:', error);
-        return throwError(() => new Error('Failed to fetch support requests'));
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return throwError(() => new Error(`Failed to fetch support requests: ${errorMessage}`));
       })
     );
   }
@@ -79,8 +79,8 @@ export class SupportRequestsService {
         } as SupportRequest;
       }),
       catchError((error) => {
-        console.error('Error fetching support request:', error);
-        return throwError(() => new Error('Failed to fetch support request'));
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return throwError(() => new Error(`Failed to fetch support request: ${errorMessage}`));
       })
     );
   }
@@ -115,8 +115,8 @@ export class SupportRequestsService {
           } as SupportRequest)
       ),
       catchError((error) => {
-        console.error('Error creating support request:', error);
-        return throwError(() => new Error('Failed to create support request'));
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return throwError(() => new Error(`Failed to create support request: ${errorMessage}`));
       })
     );
   }
@@ -134,8 +134,8 @@ export class SupportRequestsService {
     return from(updateDoc(docRef, updateData)).pipe(
       switchMap(() => this.getSupportRequestById(id)),
       catchError((error) => {
-        console.error('Error updating support request:', error);
-        return throwError(() => new Error('Failed to update support request'));
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return throwError(() => new Error(`Failed to update support request: ${errorMessage}`));
       })
     );
   }

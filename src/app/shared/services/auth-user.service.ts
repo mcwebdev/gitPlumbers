@@ -90,11 +90,10 @@ export class AuthUserService {
       return ctor?.name ?? typeof value;
     };
 
-    console.debug('[AuthUserService] ensureUserDocument attempt', {
-      uid: user.uid,
-      hasSnapshot: snapshot.exists(),
-      overrideKeys: overrides ? Object.keys(overrides) : [],
-    });
+    // Validate user data before processing
+    if (!user?.uid) {
+      throw new Error('User ID is required to ensure user document');
+    }
 
     if (!snapshot.exists()) {
       const payload: UserDocument = {
@@ -105,20 +104,16 @@ export class AuthUserService {
         updatedAt: serverTimestamp(),
       };
 
-      console.debug('[AuthUserService] creating user document', {
-        uid: user.uid,
-        email: payload.email,
-        displayName: payload.displayName,
-        role: payload.role,
-        createdAtType: describe(payload.createdAt),
-        updatedAtType: describe(payload.updatedAt),
-      });
+      // Validate payload before creating document
+      if (!payload.email || !payload.displayName) {
+        throw new Error('Email and display name are required to create user document');
+      }
 
       try {
         await setDoc(userDocRef, payload, { merge: true });
       } catch (error) {
-        console.error('[AuthUserService] setDoc failed', { uid: user.uid, error });
-        throw error;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to create user document: ${errorMessage}`);
       }
 
       return {
@@ -140,12 +135,10 @@ export class AuthUserService {
       updatedAt: currentData.updatedAt,
     };
 
-    console.debug('[AuthUserService] merging user document', {
-      uid: user.uid,
-      emailChanged: merged.email !== currentData.email,
-      displayNameChanged: merged.displayName !== currentData.displayName,
-      roleChanged: merged.role !== currentData.role,
-    });
+    // Validate merged data before processing
+    if (!merged.email || !merged.displayName) {
+      throw new Error('Email and display name are required to update user document');
+    }
 
     if (
       overrides?.email ||
@@ -162,8 +155,8 @@ export class AuthUserService {
           updatedAt: serverTimestamp(),
         });
       } catch (error) {
-        console.error('[AuthUserService] updateDoc failed', { uid: user.uid, error });
-        throw error;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to update user document: ${errorMessage}`);
       }
     }
 

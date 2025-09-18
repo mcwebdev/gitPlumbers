@@ -31,51 +31,11 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(),
     provideHttpClient(withFetch()),
     MessageService,
-    provideFirebaseApp(() => {
-      console.log('[Firebase] Initializing Firebase app with config:', {
-        apiKey: firebaseConfig.apiKey?.substring(0, 10) + '...',
-        authDomain: firebaseConfig.authDomain,
-        projectId: firebaseConfig.projectId,
-      });
-      const app = initializeApp(firebaseConfig);
-      console.log('[Firebase] Firebase app initialized:', {
-        name: app.name,
-        options: {
-          projectId: app.options.projectId,
-          authDomain: app.options.authDomain,
-        },
-      });
-      return app;
-    }),
+    provideFirebaseApp(() => initializeApp(firebaseConfig)),
     // Never wire up emulators here; this app should always use the hosted Firebase services.
-    provideAuth(() => {
-      console.log('[Firebase] Initializing Auth...');
-      const auth = getAuth();
-      console.log('[Firebase] Auth initialized:', {
-        app: auth.app.name,
-        currentUser: !!auth.currentUser,
-      });
-      return auth;
-    }),
-    provideFirestore(() => {
-      console.log('[Firebase] Initializing Firestore...');
-      const firestore = getFirestore();
-      console.log('[Firebase] Firestore initialized:', {
-        app: firestore.app.name,
-        type: firestore.type,
-        settings: 'private',
-      });
-      return firestore;
-    }),
-    provideFunctions(() => {
-      console.log('[Firebase] Initializing Functions...');
-      const functions = getFunctions();
-      console.log('[Firebase] Functions initialized:', {
-        app: functions.app.name,
-        region: functions.region,
-      });
-      return functions;
-    }),
+    provideAuth(() => getAuth()),
+    provideFirestore(() => getFirestore()),
+    provideFunctions(() => getFunctions()),
     providePrimeNG({
       theme: {
         preset: Aura,

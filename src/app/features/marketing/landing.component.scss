@@ -82,7 +82,11 @@
   color: rgba(255, 255, 255, 0.75);
   margin-bottom: 1.2rem;
 }
-
+.cta-card {
+  .eyebrow {
+    color: var(--color-ink);
+  }
+}
 .hero h1 {
   font-size: 3.6rem;
   line-height: 1.05;

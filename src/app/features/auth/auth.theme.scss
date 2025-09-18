@@ -4,7 +4,6 @@
   justify-content: center;
   align-items: center;
   padding: clamp(2rem, 6vw, 5rem) clamp(1.25rem, 4vw, 3.5rem) clamp(3rem, 8vw, 5rem);
-  min-height: calc(100vh - 120px);
   overflow: hidden;
   background: linear-gradient(140deg, #0b1f2efa, #004c89e0);
   color: #fff;
@@ -245,7 +244,6 @@ form {
 @media (max-width: 768px) {
   .auth-shell {
     padding: 6rem 1.25rem 4rem;
-    min-height: calc(100vh - 80px);
   }
 
   .auth-card {

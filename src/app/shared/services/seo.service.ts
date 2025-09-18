@@ -32,14 +32,14 @@ export class SeoService {
   private readonly _isBrowser = isPlatformBrowser(this._platformId);
 
   private readonly defaultMetadata: SeoMetadata = {
-    title: 'GitPlumbers - Enterprise Code Optimization & Modernization',
+    title: 'GitPlumbers - Full-Stack Technical Consultancy & Expert Network',
     description:
-      'Transform AI-generated chaos into clean, scalable applications. Expert code reviews, tech debt resolution, and enterprise modernization services.',
+      'Curated network of senior developers across all frameworks. React, Vue, Angular, Node.js, Python specialists for enterprise modernization and code optimization.',
     keywords:
-      'code review, tech debt, enterprise development, code optimization, modernization, AI code cleanup, software consulting',
-    ogTitle: 'GitPlumbers - Enterprise Code Optimization & Modernization',
+      'technical consultancy, full stack experts, React consultants, Vue specialists, Angular developers, Node.js experts, Python consultants, enterprise modernization, code review services',
+    ogTitle: 'GitPlumbers - Full-Stack Technical Consultancy & Expert Network',
     ogDescription:
-      'Transform AI-generated chaos into clean, scalable applications. Expert code reviews, tech debt resolution, and enterprise modernization services.',
+      'Curated network of senior developers across all frameworks. React, Vue, Angular, Node.js, Python specialists for enterprise modernization and code optimization.',
     ogImage: 'https://gitplumbers-35d92.firebaseapp.com/logo.png',
     ogUrl: 'https://gitplumbers-35d92.firebaseapp.com',
     twitterCard: 'summary_large_image',
@@ -151,22 +151,22 @@ export class SeoService {
   // Predefined metadata for different pages
   getHomePageMetadata(): SeoMetadata {
     return {
-      title: 'GitPlumbers - Transform AI Code Chaos into Clean, Scalable Apps',
+      title: 'GitPlumbers - Curated Network of Senior Full-Stack Developers',
       description:
-        'Expert code optimization and modernization services. Transform AI-generated codebases into production-ready applications. 70% faster delivery, 99.98% uptime guaranteed.',
+        'Access vetted specialists across React, Vue, Angular, Node.js, Python & more. Scalable technical teams for enterprise modernization. 70% faster delivery, zero hiring overhead.',
       keywords:
-        'AI code cleanup, enterprise development, code review, tech debt, modernization, software consulting, code optimization',
+        'technical consultancy, React specialists, Vue experts, Angular consultants, Node.js developers, Python experts, full stack teams, enterprise modernization, code optimization',
       ogUrl: 'https://gitplumbers-35d92.firebaseapp.com/',
     };
   }
 
   getContactPageMetadata(): SeoMetadata {
     return {
-      title: 'Contact GitPlumbers - Get Your Code Audit Today',
+      title: 'Contact GitPlumbers - Assemble Your Technical Dream Team',
       description:
-        'Ready to transform your codebase? Contact GitPlumbers for expert code reviews, modernization services, and enterprise application development.',
+        'Ready to scale your development? Get matched with our curated network of React, Vue, Angular, Node.js, and Python specialists for your next project.',
       keywords:
-        'contact gitplumbers, code audit, software consulting, enterprise development contact',
+        'contact gitplumbers, technical team assembly, React consultants, Vue specialists, Angular experts, Node.js developers, Python consultants',
       ogUrl: 'https://gitplumbers-35d92.firebaseapp.com/contact',
     };
   }

@@ -1,0 +1,214 @@
+@if (profile(); as user) {
+<div class="dashboard-shell">
+  <!-- Hero Section with Actions -->
+  <section class="dashboard-hero">
+    <div class="hero-content">
+      <div class="hero-copy">
+        <p class="hero-eyebrow">Welcome back</p>
+        <h1>Hey {{ user.displayName || 'there' }}, let's keep shipping.</h1>
+        <p class="hero-body">
+          Raise requests, track progress, and keep in sync with the gitPlumbers support crew. We've
+          got your back when releases get wild.
+        </p>
+        <div class="hero-actions">
+          <button
+            type="button"
+            class="new-request-btn"
+            (click)="toggleForm()"
+            [class.active]="showForm()"
+          >
+            <i class="pi pi-plus"></i>
+            {{ showForm() ? 'Cancel' : 'New Request' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Collapsible Form -->
+  @if (showForm()) {
+  <section class="form-section">
+    <div class="form-container">
+      <header class="form-header">
+        <h2>Submit a support request</h2>
+        <p>
+          Drop the details of your next audit or unblocker. We'll follow up fast with notes and next
+          steps.
+        </p>
+      </header>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="form-grid">
+          <label class="field-group">
+            <span class="field-label">Repository link (optional)</span>
+            <input
+              type="url"
+              placeholder="https://github.com/org/repo"
+              formControlName="githubRepo"
+            />
+          </label>
+
+          <label class="field-group field-group--full">
+            <span class="field-label">What do you need help with?</span>
+            <textarea
+              rows="4"
+              placeholder="Tell us about the failure modes, blockers, or goals you're targeting."
+              formControlName="message"
+            ></textarea>
+            @if (form.controls.message.invalid && form.controls.message.touched) {
+            <small class="hint">
+              A quick overview (at least 10 characters) helps us triage accurately.
+            </small>
+            }
+          </label>
+
+          <div class="field-group field-group--full">
+            <app-file-upload [config]="fileUploadConfig" (fileSelected)="onFileSelected($event)" />
+          </div>
+        </div>
+
+        @if (feedback(); as message) {
+        <div class="form-feedback">
+          <span [class]="'chip chip--' + feedbackTone()">{{ message }}</span>
+        </div>
+        }
+
+        <div class="form-actions">
+          <button type="submit" class="primary" [disabled]="submitting()">
+            {{ submitting() ? 'Sending...' : 'Send request' }}
+          </button>
+          <button type="button" class="secondary" (click)="toggleForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </section>
+  }
+
+  <!-- Main Content: Request History -->
+  <section class="requests-section">
+    <div class="requests-header">
+      <div class="requests-title">
+        <h2>Your request history</h2>
+        @if (hasRequests()) {
+        <span class="requests-count"
+          >{{ filteredAndSortedRequests().length }} of {{ requests().length }}</span
+        >
+        } @else {
+        <span class="requests-count">No requests yet</span>
+        }
+      </div>
+
+      @if (hasRequests()) {
+      <!-- Filter and Sort Controls -->
+      <div class="request-controls">
+        <div class="filter-group">
+          <label for="status-filter">Filter:</label>
+          <select
+            id="status-filter"
+            [value]="statusFilter()"
+            (change)="onStatusFilterChange($event)"
+            class="filter-select"
+          >
+            @for (option of statusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="sort-group">
+          <label for="sort-by">Sort:</label>
+          <select
+            id="sort-by"
+            [value]="sortBy()"
+            (change)="onSortByChange($event)"
+            class="sort-select"
+          >
+            @for (option of sortOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+
+          <button
+            type="button"
+            class="sort-order-btn"
+            (click)="toggleSortOrder()"
+            [title]="'Sort ' + (sortOrder() === 'asc' ? 'ascending' : 'descending')"
+          >
+            @if (sortOrder() === 'asc') { ↑ } @else { ↓ }
+          </button>
+        </div>
+
+        <button
+          type="button"
+          class="clear-filters-btn"
+          (click)="clearFilters()"
+          [class.visible]="
+            statusFilter() !== 'all' || sortBy() !== 'date' || sortOrder() !== 'desc'
+          "
+        >
+          Clear filters
+        </button>
+      </div>
+      }
+    </div>
+
+    @if (hasRequests()) { @if (hasFilteredRequests()) {
+    <div class="requests-container">
+      <div class="requests">
+        <article
+          class="request"
+          *ngFor="let request of filteredAndSortedRequests(); trackBy: trackByRequestId"
+        >
+          <header class="request-header">
+            <span class="chip" [class]="'chip chip--' + statusCopy(request.status).tone">
+              {{ statusCopy(request.status).label }}
+            </span>
+            <span class="timestamp">{{ formatTimestamp(request.createdAt) }}</span>
+          </header>
+
+          <p class="request-message">{{ request.message }}</p>
+
+          @if (request.githubRepo) {
+          <p class="request-meta">Linked repo: {{ request.githubRepo }}</p>
+          } @if (request.notes.length) {
+          <section class="notes">
+            <h3>Updates</h3>
+            <article class="note" *ngFor="let note of request.notes">
+              <div class="note-meta">
+                <strong>{{ note.authorName }}</strong>
+                <span>{{ formatTimestamp(note.createdAt) }}</span>
+              </div>
+              <p>{{ note.message }}</p>
+            </article>
+          </section>
+          }
+        </article>
+      </div>
+    </div>
+    } @else {
+    <div class="empty-state">
+      <i class="pi pi-filter-slash"></i>
+      <p>No requests match your current filters.</p>
+      <button type="button" class="clear-filters-btn" (click)="clearFilters()">
+        Show all requests
+      </button>
+    </div>
+    } } @else {
+    <div class="empty-state empty-state--first-time">
+      <i class="pi pi-inbox"></i>
+      <h3>Ready to get started?</h3>
+      <p>Submit your first support request to see it appear here with live status updates.</p>
+      <button type="button" class="new-request-btn" (click)="toggleForm()">
+        <i class="pi pi-plus"></i>
+        Create your first request
+      </button>
+    </div>
+    }
+  </section>
+</div>
+} @else {
+<div class="dashboard-loading">
+  <i class="pi pi-spin pi-spinner"></i>
+  Loading your dashboard...
+</div>
+}

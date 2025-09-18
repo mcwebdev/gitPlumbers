@@ -40,17 +40,18 @@ export class ForgotPasswordComponent {
     this.submitting.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);
+    this.form.disable({ emitEvent: false });
 
     try {
       await sendPasswordResetEmail(this.auth, email);
-      this.successMessage.set('We’ve sent a reset link to your inbox. Check spam just in case.');
+      this.successMessage.set("We've sent a reset link to your inbox. Check spam just in case.");
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'We could not send the reset email. Try again in a moment.';
       this.errorMessage.set(message);
     } finally {
+      this.form.enable({ emitEvent: false });
       this.submitting.set(false);
     }
   }
 }
-

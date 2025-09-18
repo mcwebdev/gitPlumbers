@@ -9,7 +9,7 @@
       <p class="auth-eyebrow">Get ready</p>
       <h1>Create your gitPlumbers account</h1>
       <p class="auth-blurb">
-        Align your team with technical debt free delivery. Spin up your access, collaborate with our
+        Align your team with elite Angular delivery. Spin up your access, collaborate with our
         specialists, and accelerate every release.
       </p>
     </header>
@@ -28,14 +28,10 @@
           autocomplete="name"
           formControlName="fullName"
           placeholder="Jordan DevOps"
-          [disabled]="submitting()"
         />
-        <p
-          class="field-error"
-          *ngIf="form.controls.fullName.invalid && form.controls.fullName.touched"
-        >
-          Let us know who we're collaborating with.
-        </p>
+        @if (form.controls.fullName.invalid && form.controls.fullName.touched) {
+        <p class="field-error">Let us know who we're collaborating with.</p>
+        }
       </div>
 
       <div
@@ -49,11 +45,10 @@
           autocomplete="email"
           formControlName="email"
           placeholder="you@product.team"
-          [disabled]="submitting()"
         />
-        <p class="field-error" *ngIf="form.controls.email.invalid && form.controls.email.touched">
-          Use a valid email so we can verify and keep you updated.
-        </p>
+        @if (form.controls.email.invalid && form.controls.email.touched) {
+        <p class="field-error">Use a valid email so we can verify and keep you updated.</p>
+        }
       </div>
 
       <div
@@ -70,14 +65,10 @@
           formControlName="password"
           minlength="6"
           placeholder="Create a secure password"
-          [disabled]="submitting()"
         />
-        <p
-          class="field-error"
-          *ngIf="form.controls.password.invalid && form.controls.password.touched"
-        >
-          Password must be at least 6 characters.
-        </p>
+        @if (form.controls.password.invalid && form.controls.password.touched) {
+        <p class="field-error">Password must be at least 6 characters.</p>
+        }
       </div>
 
       <div
@@ -94,14 +85,10 @@
           formControlName="confirmPassword"
           minlength="6"
           placeholder="Re-type your password"
-          [disabled]="submitting()"
         />
-        <p
-          class="field-error"
-          *ngIf="form.controls.confirmPassword.invalid && form.controls.confirmPassword.touched"
-        >
-          Please confirm your password.
-        </p>
+        @if (form.controls.confirmPassword.invalid && form.controls.confirmPassword.touched) {
+        <p class="field-error">Please confirm your password.</p>
+        }
       </div>
 
       <label
@@ -122,9 +109,11 @@
       </button>
     </form>
 
-    <div class="auth-footer" aria-live="polite" *ngIf="errorMessage() as error">
+    @if (errorMessage(); as error) {
+    <div class="auth-footer" aria-live="polite">
       <p class="auth-feedback" role="alert">{{ error }}</p>
     </div>
+    }
 
     <footer class="auth-switcher">
       <span>Already part of the squad?</span>

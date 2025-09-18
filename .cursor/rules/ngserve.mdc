@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+---
+never run ng serve its already running

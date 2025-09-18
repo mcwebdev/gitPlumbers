@@ -1,0 +1,5 @@
+---
+description:Rule: Do not use any or unknown. All values must be given explicit, concrete types defined via interface, type, or generics. If the shape is not yet known, define a placeholder interface and refine it later — but never fall back to any or unknown.
+globs:
+alwaysApply: true
+---

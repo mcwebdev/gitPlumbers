@@ -1,0 +1,103 @@
+@if (profile(); as admin) {
+<div class="admin-shell">
+  <section class="admin-hero">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">Admin control</p>
+      <h1>On-call for the gitPlumbers crew</h1>
+      <p class="hero-body">
+        Review every incoming request, nudge statuses forward, and keep customers in the loop with
+        live notes.
+      </p>
+      <div class="admin-actions">
+        <a routerLink="/support-requests" class="admin-link">
+          <i class="pi pi-inbox"></i>
+          View Support Requests
+        </a>
+      </div>
+    </div>
+    <div class="hero-meta">
+      <span class="badge">Signed in as {{ admin.displayName || admin.email }}</span>
+    </div>
+  </section>
+
+  @if (hasRequests()) {
+  <section class="requests-board">
+    @for (request of requests(); track request.id) {
+    <article class="request">
+      <header class="request-header">
+        <div class="request-owner">
+          <h2>{{ request.userName || request.userEmail }}</h2>
+          <p>{{ request.userEmail }}</p>
+        </div>
+        <div class="request-status">
+          <label>
+            <span>Status</span>
+            <select
+              [disabled]="isStatusBusy(request.id)"
+              [value]="request.status"
+              (change)="changeStatus(request.id, $any($event.target).value)"
+            >
+              @for (option of statusOptions; track option.value) {
+              <option [value]="option.value">
+                {{ option.label }}
+              </option>
+              }
+            </select>
+          </label>
+        </div>
+      </header>
+
+      <div class="request-body">
+        <p class="timestamp">Opened {{ formatTimestamp(request.createdAt) }}</p>
+        <p class="message">{{ request.message }}</p>
+        @if (request.githubRepo) {
+        <p class="meta">Repo: {{ request.githubRepo }}</p>
+        }
+      </div>
+
+      @if (request.notes.length) {
+      <section class="notes">
+        <h3>Notes</h3>
+        @for (note of request.notes; track note.createdAt) {
+        <article class="note">
+          <div class="note-meta">
+            <strong>{{ note.authorName }}</strong>
+            <span class="role">{{ note.role | titlecase }}</span>
+            <span class="time">{{ formatTimestamp(note.createdAt) }}</span>
+          </div>
+          <p>{{ note.message }}</p>
+        </article>
+        }
+      </section>
+      }
+
+      <section class="note-editor">
+        <label>
+          <span>Add an update</span>
+          <textarea
+            rows="3"
+            [value]="noteDraft(request.id)"
+            (input)="updateDraft(request.id, $any($event.target).value)"
+            placeholder="Share status changes, blockers, or next steps."
+          ></textarea>
+        </label>
+        <button
+          type="button"
+          (click)="sendNote(request.id)"
+          [disabled]="isNoteBusy(request.id) || !noteDraft(request.id).trim()"
+        >
+          {{ isNoteBusy(request.id) ? 'Sending...' : 'Post update' }}
+        </button>
+      </section>
+    </article>
+    }
+  </section>
+  } @else {
+  <div class="admin-empty">
+    <p>No requests yet. Once customers submit from their dashboard, they'll show up here.</p>
+  </div>
+  }
+</div>
+} @else {
+<div class="admin-loading">Loading the admin console.</div>
+}

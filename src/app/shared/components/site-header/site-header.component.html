@@ -1,12 +1,23 @@
 <div class="site-header-shell">
   <header class="site-header">
     <div class="brand">
-      <img src="cropped/logo-cropped.png" alt="gitPlumbers" class="brand-logo" />
+      <a routerLink="/" class="brand-link">
+        <img src="cropped/logo-cropped.png" alt="gitPlumbers" class="brand-logo" />
+      </a>
     </div>
 
     <nav class="header-actions" aria-label="Primary">
-      <a class="header-link" routerLink="/login">Log in</a>
-      <a class="header-cta" routerLink="/contact" [innerText]="'Book an audit'"></a>
+      <div class="nav-group">
+        @if (!isLoggedIn()) {
+        <a class="nav-link" routerLink="/login">Log in</a>
+        } @else {
+        <a class="nav-link" [routerLink]="dashboardUrl()">Dashboard</a>
+        <button class="nav-link logout-btn" (click)="logout()">Log out</button>
+        }
+      </div>
+      @if (!isLoggedIn()) {
+      <a class="cta-button" routerLink="/contact">Book an audit</a>
+      }
     </nav>
   </header>
 </div>

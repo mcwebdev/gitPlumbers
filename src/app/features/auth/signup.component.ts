@@ -4,6 +4,8 @@ import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Auth, createUserWithEmailAndPassword, updateProfile } from '@angular/fire/auth';
 
+import { AuthUserService } from '../../shared/services/auth-user.service';
+
 @Component({
   selector: 'app-signup',
   standalone: true,
@@ -16,6 +18,7 @@ export class SignupComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  private readonly userService = inject(AuthUserService);
 
   protected readonly form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -44,6 +47,7 @@ export class SignupComponent {
     if (password !== confirmPassword) {
       this.errorMessage.set('Passwords need to match.');
       this.form.controls.confirmPassword.setErrors({ mismatch: true });
+      this.form.controls.confirmPassword.markAsTouched();
       return;
     }
 
@@ -51,22 +55,29 @@ export class SignupComponent {
 
     this.submitting.set(true);
     this.errorMessage.set(null);
+    this.form.disable({ emitEvent: false });
 
     try {
-      const result = await createUserWithEmailAndPassword(this.auth, email, password);
+      const credential = await createUserWithEmailAndPassword(this.auth, email, password);
 
-      if (result.user && fullName.trim().length > 1) {
-        await updateProfile(result.user, { displayName: fullName.trim() });
+      if (credential.user && fullName.trim().length > 1) {
+        await updateProfile(credential.user, { displayName: fullName.trim() });
       }
 
-      await this.router.navigate(['/']);
+      await this.userService.ensureUserDocument(credential.user, {
+        displayName: fullName.trim(),
+        email,
+        role: 'user',
+      });
+
+      await this.router.navigate(['/dashboard']);
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'We could not create your account right now. Try again later.';
       this.errorMessage.set(message);
     } finally {
+      this.form.enable({ emitEvent: false });
       this.submitting.set(false);
     }
   }
 }
-

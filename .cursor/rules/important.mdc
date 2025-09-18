@@ -1,0 +1,2507 @@
+---
+alwaysApply: true
+---
+
+# 🚨 CRITICAL: NgRx SignalStore Architecture Rules
+
+## **NGRX010: No External State Mutation** - BLOCKING ERROR
+
+- ❌ Services CANNOT inject AuthStore (pass parameters instead)
+- ❌ Components/Services CANNOT use patchState (store only)
+- ✅ Services must be pure data utilities only
+- ✅ Stores handle ALL state management
+
+## **NGRX011: Service Architecture Pattern** - BLOCKING ERROR
+
+- ❌ Services with AuthStore or side effects
+- ✅ Services: Pure data operations with parameters
+- ✅ Stores: Handle all state operations
+
+## **NGRX012: Component Message Handling** - REQUIRED
+
+- ✅ Components handle UI concerns (toast notifications)
+- ✅ Stores handle business state only
+- ✅ Clear separation of concerns
+
+```json
+{
+  "$schema": "https://angular-rules.dev/schema/v1/rules.json",
+  "version": "2025.1.0",
+  "lastUpdated": "2025-07-22",
+  "schemaVersion": "1.0",
+  "metadata": {
+    "generatedBy": "Angular Rules Compiler",
+    "targetFrameworks": {
+      "angular": ">=20.0.0",
+      "ngrx": ">=19.2.0",
+      "rxjs": ">=7.8.0",
+      "typescript": ">=5.4.0"
+    }
+  },
+  "severityLevels": {
+    "error": { "code": 2, "blocking": true },
+    "warning": { "code": 1, "blocking": false },
+    "info": { "code": 0, "blocking": false }
+  },
+  "categories": {
+    "ngrx_core": "NgRx SignalStore Core",
+    "ngrx_perf": "NgRx Performance",
+    "angular_signals": "Angular Signals",
+    "angular_components": "Angular Components",
+    "rxjs_patterns": "RxJS Patterns",
+    "typescript": "TypeScript Configuration",
+    "deprecations": "Deprecated Patterns",
+    "performance": "Performance Optimization",
+    "testing": "Testing Patterns",
+    "a11y": "Accessibility"
+  },
+  "validationPatterns": {
+    "signalInput": "^\\s*(public\\s+)?(\\w+)\\s*=\\s*input(\\.required)?\\s*<[^>]+>\\s*\\(",
+    "signalOutput": "^\\s*(public\\s+)?(\\w+)\\s*=\\s*output\\s*<[^>]+>\\s*\\(",
+    "patchState": "patchState\\s*\\(\\s*store\\s*,\\s*\\{[^}]+\\}\\s*\\)",
+    "computed": "computed\\s*\\(\\s*\\(\\)\\s*=>",
+    "signalStore": "signalStore\\s*\\(",
+    "withProps": "withProps\\s*\\(\\s*\\(\\)\\s*=>",
+    "rxMethod": "rxMethod\\s*<[^>]*>\\s*\\(",
+    "takeUntilDestroyed": "takeUntilDestroyed\\s*\\(\\s*\\)",
+    "controlFlow": "@(if|for|switch|defer)\\s*\\(",
+    "decoratorInput": "@Input\\s*\\(\\s*\\)",
+    "decoratorOutput": "@Output\\s*\\(\\s*\\)"
+  },
+  "rules": [
+    {
+      "id": "NGRX001",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "SignalStore Composition Pattern",
+      "appliesTo": ["*.store.ts"],
+      "validationPattern": "signalStore",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "organize-signal-store-features",
+         "docs": "https://ngrx.io/guide/signals/signal-store"
+      },
+      "detection": {
+        "ast": {
+          "type": "CallExpression",
+          "callee": "signalStore",
+          "validateOrder": ["withProps", "withState", "withEntities", "withComputed", "withMethods", "withHooks"]
+        }
+      },
+      "relatedRules": ["NGRX002", "NGRX003", "NGRX007"],
+      "violations": {
+        "wrongOrder": "SignalStore features must be in correct order",
+        "missingState": "SignalStore must have withState",
+        "duplicateFeature": "Duplicate SignalStore feature detected"
+      }
+    },
+    {
+      "id": "NGRX002",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Service Injection via withProps",
+      "appliesTo": ["*.store.ts"],
+      "validationPattern": "withProps",
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true,
+        "codeAction": "convert-to-withprops"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "inject\\([^)]+\\)(?!.*withProps)",
+            "message": "Use withProps() for dependency injection"
+          },
+          {
+            "invalid": "(?<!_)\\w+Service(?=:)",
+            "message": "Prefix private services with underscore"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX001", "TS002"],
+      "codeTemplate": "withProps(() => ({\\n  _${1:service}: inject(${2:Service})\\n}))"
+    },
+    {
+      "id": "NGRX003",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Immutable State Updates",
+      "appliesTo": ["*.store.ts", "*.ts"],
+      "validationPattern": "patchState",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "fix-mutable-update"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "patchState\\s*\\([^,]+,\\s*\\([^)]+\\)\\s*=>\\s*\\{[^}]*\\.[^=]+=",
+            "message": "State mutations are not allowed"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX001", "NGRX006", "NGRX010"],
+      "breakingChange": {
+        "version": "19.0",
+        "description": "Object.freeze applied in dev mode"
+      }
+    },
+    {
+      "id": "NGRX004",
+      "category": "ngrx_core",
+      "severity": "warning",
+      "title": "Entity Management Pattern",
+      "appliesTo": ["*.store.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true,
+        "codeAction": "add-entity-management"
+      },
+      "detection": {
+        "heuristic": "collection_without_entities",
+        "patterns": [
+          {
+            "detect": "\\[]\\s*as\\s*\\w+\\[]",
+            "suggest": "Consider using withEntities for collections"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX001", "NGRX008", "PERF004"],
+      "providedMethods": [
+        "addEntity", "updateEntity", "removeEntity",
+        "setEntities", "clearEntities"
+      ]
+    },
+    {
+      "id": "NGRX005",
+      "category": "ngrx_core",
+      "severity": "info",
+      "title": "Events Plugin (Experimental)",
+      "appliesTo": ["*.store.ts"],
+      "experimental": true,
+      "minVersion": "19.2",
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": false
+      },
+      "detection": {
+        "imports": ["eventGroup", "withReducer"],
+        "patterns": ["eventGroup\\s*\\(", "withReducer\\s*\\("]
+      },
+      "relatedRules": ["NGRX001", "DEP003"],
+      "useWhen": [
+        "largeApplication",
+        "complexCommunication",
+        "migrationFromClassic"
+      ]
+    },
+    {
+      "id": "NGRX006",
+      "category": "ngrx_core",
+      "severity": "warning",
+      "title": "RxJS Integration with rxMethod",
+      "appliesTo": ["*.store.ts"],
+      "validationPattern": "rxMethod",
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true,
+        "codeAction": "convert-to-rxmethod"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "pipe\\s*\\([^)]*debounceTime",
+            "suggest": "Use rxMethod for debounced operations"
+          }
+        ]
+      },
+      "relatedRules": ["RX001", "RX002", "RX003", "NGRX003"],
+      "useCases": ["debouncing", "asyncPipelines", "switchableRequests"]
+    },
+    {
+      "id": "NGRX007",
+      "category": "ngrx_perf",
+      "severity": "warning",
+      "title": "Memory Management",
+      "appliesTo": ["*.store.ts", "*.component.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "subscribe\\s*\\([^)]*\\)(?!.*takeUntil)",
+            "message": "Subscription without cleanup detected"
+          }
+        ]
+      },
+      "relatedRules": ["RX002", "NGRX001", "PERF001"],
+      "requiredPatterns": [
+        "takeUntilDestroyed",
+        "shareReplay(1)",
+        "withHooks.onDestroy"
+      ]
+    },
+    {
+      "id": "NGRX008",
+      "category": "ngrx_perf",
+      "severity": "info",
+      "title": "Feature Composition Limit",
+      "appliesTo": ["*.store.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": false
+      },
+      "detection": {
+        "ast": {
+          "countFeatures": true,
+          "maxFeatures": 16
+        }
+      },
+      "relatedRules": ["NGRX001", "NGRX004"],
+      "suggestion": "Combine related features to avoid TypeScript limit"
+    },
+    {
+      "id": "NGRX009",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Direct Signal Access",
+      "appliesTo": ["*.component.ts", "*.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "\\.select\\s*\\(",
+            "message": "Use direct signal access, not select()"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "ANG006"],
+      "correctPattern": "store.signal()"
+    },
+    {
+      "id": "NGRX010",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "No External State Mutation",
+      "appliesTo": ["*.component.ts", "*.service.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "patchState\\s*\\(",
+            "inFiles": ["*.component.ts", "*.service.ts"],
+            "message": "patchState cannot be used outside store"
+          },
+          {
+            "invalid": "_messageService\\.add\\s*\\(",
+            "inFiles": ["*.service.ts"],
+            "message": "Services should not handle messaging - components handle UI concerns"
+          },
+          {
+            "invalid": "inject\\(MessageService\\)",
+            "inFiles": ["*.service.ts"],
+            "message": "Services should not inject MessageService - pure data operations only"
+          },
+          {
+            "invalid": "inject\\(AuthStore\\)",
+            "inFiles": ["*.service.ts"],
+            "message": "Services should not inject AuthStore - pass companyId as parameter"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX003", "ANG004"],
+      "correctPattern": "Store handles all state management and messaging"
+    },
+    {
+      "id": "NGRX011",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Service Architecture Pattern",
+      "appliesTo": ["*.service.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "MessageService",
+            "inFiles": ["*.service.ts"],
+            "message": "Services must be pure data utilities - no MessageService"
+          },
+          {
+            "invalid": "AuthStore",
+            "inFiles": ["*.service.ts"],
+            "message": "Services must be pure data utilities - no AuthStore"
+          },
+          {
+            "invalid": "console\\.log",
+            "inFiles": ["*.service.ts"],
+            "message": "Services should not have side effects - pure data operations only"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX010", "TS002"],
+      "correctPattern": "Pure data operations with parameters, no side effects"
+    },
+    {
+      "id": "NGRX012",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Component Message Handling",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "inject\\(MessageService\\)",
+            "inFiles": ["*.store.ts"],
+            "message": "Stores should not handle UI concerns - components handle toast notifications"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX010", "NGRX002"],
+      "correctPattern": "Components handle UI concerns, stores handle business state"
+    },
+    {
+      "id": "NGRX013",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Service Data Validation",
+      "appliesTo": ["*.service.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "required": "validation|validate",
+            "inFiles": ["*.service.ts"],
+            "message": "Services must validate input data before processing"
+          },
+          {
+            "required": "throw new Error",
+            "inFiles": ["*.service.ts"],
+            "message": "Services must throw descriptive errors for validation failures"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX010", "NGRX011"],
+      "correctPattern": "Pure data operations with robust validation and error throwing"
+    },
+    {
+      "id": "NGRX014",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Component Effect Cleanup",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "effect\\s*\\([^)]*\\)(?!.*takeUntilDestroyed)",
+            "message": "Effects must use takeUntilDestroyed for cleanup"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX007", "RX002"],
+      "correctPattern": "effect(() => { /* logic */ })"
+    },
+    {
+      "id": "NGRX015",
+      "category": "angular_components",
+      "severity": "error",
+      "title": "Separate Template and Styles",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "template:\\s*`",
+            "message": "Use templateUrl instead of inline template"
+          },
+          {
+            "invalid": "styles:\\s*\\[",
+            "message": "Use styleUrl instead of inline styles"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "ANG002"],
+      "correctPattern": "templateUrl: './component.html', styleUrl: './component.scss'"
+    },
+    {
+      "id": "ANG001",
+      "category": "angular_signals",
+      "severity": "error",
+      "title": "Signal Input Migration",
+      "appliesTo": ["*.component.ts"],
+      "validationPattern": "signalInput",
+      "migrationCommand": "ng generate @angular/core:signal-input-migration",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "convert-to-signal-input"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "@Input\\s*\\(\\s*\\)",
+            "replacement": "input.required<${type}>()"
+          }
+        ]
+      },
+      "relatedRules": ["ANG002", "ANG003", "DEP001", "NGRX009"],
+      "templates": {
+        "required": "${name} = input.required<${type}>();",
+        "optional": "${name} = input<${type}>(${default});",
+        "transform": "${name} = input(${default}, { transform: ${transformer} });"
+      }
+    },
+    {
+      "id": "ANG002",
+      "category": "angular_signals",
+      "severity": "error",
+      "title": "Signal Output Migration",
+      "appliesTo": ["*.component.ts"],
+      "validationPattern": "signalOutput",
+      "migrationCommand": "ng generate @angular/core:output-migration",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "convert-to-signal-output"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "@Output\\s*\\(\\s*\\).*EventEmitter",
+            "replacement": "output<${type}>()"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "DEP001"]
+    },
+    {
+      "id": "ANG003",
+      "category": "angular_signals",
+      "severity": "info",
+      "title": "Model Binding Pattern",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "\\[\\(\\w+\\)\\]",
+            "suggest": "Consider using model() for two-way binding"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "ANG008"],
+      "useCases": ["formControls", "toggleStates", "simpleSync"]
+    },
+    {
+      "id": "ANG004",
+      "category": "angular_components",
+      "severity": "error",
+      "title": "Single Responsibility Principle",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": false
+      },
+      "detection": {
+        "metrics": {
+          "maxLines": 200,
+          "maxMethods": 10,
+          "maxInputs": 7,
+          "maxComplexity": 10
+        }
+      },
+      "relatedRules": ["NGRX010", "ANG005", "PERF002"],
+      "componentTypes": {
+        "smart": ["businessLogic", "dataFetching", "stateManagement"],
+        "dumb": ["uiRendering", "userInteraction", "noServices"]
+      }
+    },
+    {
+      "id": "ANG005",
+      "category": "angular_components",
+      "severity": "warning",
+      "title": "Standalone Components",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "convert-to-standalone"
+      },
+      "detection": {
+        "ast": {
+          "decorator": "Component",
+          "property": "standalone",
+          "value": true
+        }
+      },
+      "relatedRules": ["ANG004", "PERF002", "PERF003"]
+    },
+    {
+      "id": "ANG006",
+      "category": "angular_components",
+      "severity": "warning",
+      "title": "OnPush Change Detection",
+      "appliesTo": ["*.component.ts"],
+      "validationPattern": "computed",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "add-onpush-strategy"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "changeDetection(?!.*OnPush)",
+            "message": "Use OnPush change detection"
+          },
+          {
+            "invalid": "template:.*\\{\\{\\s*\\w+\\(\\)\\s*\\}\\}",
+            "whenMissing": "computed",
+            "message": "Use computed() instead of methods in templates"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "NGRX009", "PERF001"]
+    },
+    {
+      "id": "ANG007",
+      "category": "angular_components",
+      "severity": "error",
+      "title": "Control Flow Syntax",
+      "appliesTo": ["*.component.ts", "*.component.html"],
+      "validationPattern": "controlFlow",
+      "migrationCommand": "ng generate @angular/core:control-flow",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "migrate-control-flow"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "\\*ngIf=",
+            "replacement": "@if"
+          },
+          {
+            "invalid": "\\*ngFor=",
+            "replacement": "@for"
+          },
+          {
+            "invalid": "\\*ngSwitch=",
+            "replacement": "@switch"
+          }
+        ]
+      },
+      "relatedRules": ["DEP001", "ANG006"]
+    },
+    {
+      "id": "ANG008",
+      "category": "angular_signals",
+      "severity": "info",
+      "title": "Form Integration Patterns",
+      "appliesTo": ["*.component.ts", "*.store.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "imports": ["FormBuilder", "FormGroup", "FormControl"],
+        "patterns": [
+          {
+            "detect": "FormGroup.*withProps",
+            "validate": true
+          }
+        ]
+      },
+      "relatedRules": ["NGRX002", "ANG003"]
+    },
+    {
+      "id": "RX001",
+      "category": "rxjs_patterns",
+      "severity": "warning",
+      "title": "Signal-Observable Conversion",
+      "appliesTo": ["*.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "imports": ["toSignal", "toObservable"],
+        "patterns": [
+          {
+            "suggest": "toSignal",
+            "when": "Observable.*subscribe"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX006", "RX002", "RX003"],
+      "requiredImport": "@angular/core/rxjs-interop"
+    },
+    {
+      "id": "RX002",
+      "category": "rxjs_patterns",
+      "severity": "error",
+      "title": "Subscription Cleanup",
+      "appliesTo": ["*.component.ts", "*.directive.ts"],
+      "validationPattern": "takeUntilDestroyed",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "add-cleanup-operator"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "subscribe\\([^)]*\\)(?!.*takeUntil)",
+            "message": "Subscription without cleanup"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX007", "RX001", "DEP004"]
+    },
+    {
+      "id": "RX003",
+      "category": "rxjs_patterns",
+      "severity": "error",
+      "title": "No Nested Subscriptions",
+      "appliesTo": ["*.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "flatten-subscriptions"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "subscribe\\([^)]*\\{[^}]*subscribe\\(",
+            "message": "Nested subscription detected"
+          }
+        ]
+      },
+      "relatedRules": ["RX001", "NGRX006", "DEP004"],
+      "suggestedOperators": ["switchMap", "mergeMap", "concatMap", "exhaustMap"]
+    },
+    {
+      "id": "TS001",
+      "category": "typescript",
+      "severity": "error",
+      "title": "Strict Mode Configuration",
+      "appliesTo": ["tsconfig.json"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "jsonPath": "compilerOptions.strict",
+        "requiredValue": true
+      },
+      "relatedRules": ["TS002", "TS003"],
+      "requiredOptions": {
+        "compilerOptions": {
+          "strict": true,
+          "noImplicitReturns": true,
+          "noFallthroughCasesInSwitch": true,
+          "forceConsistentCasingInFileNames": true,
+          "noImplicitOverride": true,
+          "noPropertyAccessFromIndexSignature": true,
+          "noUncheckedIndexedAccess": true
+        },
+        "angularCompilerOptions": {
+          "strictTemplates": true,
+          "strictInjectionParameters": true,
+          "strictInputAccessModifiers": true,
+          "strictNullInputTypes": true
+        }
+      }
+    },
+    {
+      "id": "TS002",
+      "category": "typescript",
+      "severity": "error",
+      "title": "Explicit Type Annotations",
+      "appliesTo": ["*.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "(let|const|var)\\s+\\w+\\s*=(?!.*:)",
+            "message": "Missing type annotation"
+          },
+          {
+            "invalid": "\\)\\s*\\{(?!.*:)",
+            "message": "Missing return type"
+          }
+        ]
+      },
+      "relatedRules": ["TS001", "NGRX002", "TS003"]
+    },
+    {
+      "id": "TS003",
+      "category": "typescript",
+      "severity": "warning",
+      "title": "Naming Conventions",
+      "appliesTo": ["*.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "pattern": "private\\s+(?!_)\\w+Service",
+            "message": "Private services should be prefixed with underscore"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX002", "TS002"],
+      "conventions": {
+        "privateServices": "_serviceNam
+        "signals": "isLoading, hasError",
+        "methods": "loadData, updateUser",
+        "computed": "filteredUsers, totalCount"
+      }
+    },
+    {
+      "id": "DEP001",
+      "category": "deprecations",
+      "severity": "error",
+      "title": "Decorator-Based Inputs/Outputs",
+      "appliesTo": ["*.component.ts"],
+      "deprecatedIn": "19.0",
+      "removedIn": "21.0",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "@Input\\(\\)",
+            "replacement": "input"
+          },
+          {
+            "invalid": "@Output\\(\\)",
+            "replacement": "output"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "ANG002", "ANG007"],
+      "migrationGuide": "https://angular.dev/guide/signals/migration"
+    },
+    {
+      "id": "DEP002",
+      "category": "deprecations",
+      "severity": "error",
+      "title": "ViewChild Decorators",
+      "appliesTo": ["*.component.ts"],
+      "deprecatedIn": "19.0",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "@ViewChild\\(",
+            "replacement": "viewChild"
+          },
+          {
+            "invalid": "@ViewChildren\\(",
+            "replacement": "viewChildren"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001"]
+    },
+    {
+      "id": "DEP003",
+      "category": "deprecations",
+      "severity": "error",
+      "title": "ComponentStore",
+      "appliesTo": ["*.ts"],
+      "deprecatedIn": "18.0",
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": false
+      },
+      "detection": {
+        "imports": ["ComponentStore"],
+        "patterns": ["extends\\s+ComponentStore"]
+      },
+      "relatedRules": ["NGRX001", "NGRX005"],
+      "migrationGuide": "https://ngrx.io/guide/migration/v18#component-store"
+    },
+    {
+      "id": "DEP004",
+      "category": "deprecations",
+      "severity": "warning",
+      "title": "Code Smells",
+      "appliesTo": ["*.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "codeSmells": [
+          {
+            "pattern": "setTimeout|setInterval",
+            "severity": "error",
+            "message": "Use RxJS timer/interval instead"
+          },
+          {
+            "pattern": "subscribe\\([^)]*\\)(?!.*takeUntil)",
+            "severity": "error",
+            "message": "Manual subscription without cleanup"
+          },
+          {
+            "pattern": "BehaviorSubject",
+            "severity": "warning",
+            "message": "Consider using signal instead"
+          },
+          {
+            "pattern": "\\{\\{\\s*\\w+\\(\\)\\s*\\}\\}",
+            "severity": "error",
+            "message": "Methods in templates harm performance"
+          },
+          {
+            "pattern": ":\\s*any",
+            "severity": "error",
+            "message": "Avoid 'any' type"
+          }
+        ]
+      },
+      "relatedRules": ["RX002", "RX003", "ANG006"]
+    },
+    {
+      "id": "PERF001",
+      "category": "performance",
+      "severity": "warning",
+      "title": "Bundle Size Limits",
+      "appliesTo": ["angular.json"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "jsonPath": "projects.*.architect.build.options.budgets",
+        "validate": true
+      },
+      "relatedRules": ["PERF002", "PERF003", "ANG006"],
+      "requiredBudgets": [
+        {
+          "type": "initial",
+          "maximumWarning": "2mb",
+          "maximumError": "5mb"
+        },
+        {
+          "type": "anyComponentStyle",
+          "maximumWarning": "6kb",
+          "maximumError": "10kb"
+        }
+      ]
+    },
+    {
+      "id": "PERF002",
+      "category": "performance",
+      "severity": "info",
+      "title": "Tree Shaking Optimization",
+      "appliesTo": ["*.component.ts", "*.module.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "import\\s*\\{\\s*CommonModule\\s*\\}",
+            "suggest": "Import specific directives for tree shaking"
+          }
+        ]
+      },
+      "relatedRules": ["ANG004", "ANG005", "PERF001"]
+    },
+    {
+      "id": "PERF003",
+      "category": "performance",
+      "severity": "warning",
+      "title": "Lazy Loading Routes",
+      "appliesTo": ["*-routing.module.ts", "*.routes.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "component:\\s*\\w+",
+            "suggest": "Consider lazy loading with loadComponent"
+          }
+        ]
+      },
+      "relatedRules": ["ANG005", "PERF001"]
+    },
+    {
+      "id": "PERF004",
+      "category": "performance",
+      "severity": "info",
+      "title": "Large Collection Performance",
+      "appliesTo": ["*.component.ts", "*.component.html"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": false
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "@for.*track\\s+\\$index",
+            "message": "Use unique ID for tracking, not index"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX004", "ANG007"],
+      "techniques": [
+        "virtualScrolling",
+        "trackByFunction",
+        "pagination",
+        "infiniteScroll"
+      ]
+    },
+    {
+      "id": "TEST001",
+      "category": "testing",
+      "severity": "info",
+      "title": "SignalStore Testing",
+      "appliesTo": ["*.spec.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true,
+        "codeTemplate": true
+      },
+      "relatedRules": ["NGRX001", "TEST002"],
+      "template": "createMockStore"
+    },
+    {
+      "id": "TEST002",
+      "category": "testing",
+      "severity": "info",
+      "title": "Signal Component Testing",
+      "appliesTo": ["*.spec.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true,
+        "codeTemplate": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "component\\.\\w+\\.set\\(",
+            "validate": true
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "ANG002", "TEST001"]
+    },
+    {
+      "id": "A11Y001",
+      "category": "a11y",
+      "severity": "error",
+      "title": "ARIA Attributes",
+      "appliesTo": ["*.component.html", "*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "<button(?!.*aria-label)",
+            "whenHasOnly": "icon",
+            "message": "Icon buttons need aria-label"
+          }
+        ]
+      },
+      "relatedRules": ["A11Y002"],
+      "requiredAttributes": [
+        "aria-label",
+        "aria-describedby",
+        "role"
+      ]
+    },
+    {
+      "id": "A11Y002",
+      "category": "a11y",
+      "severity": "warning",
+      "title": "Keyboard Navigation",
+      "appliesTo": ["*.component.html", "*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "(click)=",
+            "requireAlso": "(keyup.enter|keyup.space)",
+            "message": "Click handlers should support keyboard"
+          }
+        ]
+      },
+      "relatedRules": ["A11Y001"]
+    }
+  ],
+  "enforcement": {
+    "ide": {
+      "realTime": true,
+      "showInlineErrors": true,
+      "quickFixPriority": ["error", "warning", "info"],
+      "codeActionsOnSave": ["NGRX001", "NGRX003", "ANG001", "ANG002"]
+    },
+    "cli": {
+      "preCommit": {
+        "error": "block",
+        "warning": "warn",
+        "info": "log"
+      },
+      "ci": {
+        "failOn": "error",
+        "reportOn": ["error", "warning"],
+        "generateReport": true
+      }
+    },
+    "reporting": {
+      "format": "json",
+      "output": "./angular-rules-report.json",
+      "includeFixed": false,
+      "groupBy": "category"
+    }
+  },
+  "autofixPriority": [
+    "NGRX010", "NGRX011", "NGRX012", "NGRX013", "NGRX014", "NGRX001", "NGRX003",
+    "DEP001", "DEP002", "ANG001", "ANG002", "ANG007",
+    "RX002", "TS001"
+  ],
+  "crossReferences": {
+    "NGRX001": ["NGRX002", "NGRX003", "NGRX007"],
+    "NGRX003": ["NGRX001", "NGRX006", "NGRX010"],
+    "ANG001": ["ANG002", "ANG003", "DEP001", "NGRX009"],
+    "RX002": ["NGRX007", "RX001", "DEP004"],
+    "TS001": ["TS002", "TS003"],
+    "DEP004": ["RX002", "RX003", "ANG006"]
+  },
+  "migrationPaths": {
+    "classicToSignalStore": ["NGRX001", "NGRX002", "NGRX003", "NGRX005"],
+    "decoratorsToSignals": ["DEP001", "DEP002", "ANG001", "ANG002"],
+    "structuralToControlFlow": ["ANG007"],
+    "rxjsToSignals": ["RX001", "RX002"]
+  },
+  "telemetry": {
+    "enabled": false,
+    "anonymize": true,
+    "events": ["ruleFired", "autoFixed", "quickFixApplied"]
+  }
+}
+```
+
+# 📋 **RULE SUMMARY: Preventing Pattern Violations**
+
+## **🚨 BLOCKING ERRORS (Will Stop Development)**
+
+### **NGRX010: No External State Mutation**
+
+- **Services CANNOT** inject MessageService or AuthStore
+- **Services CANNOT** handle messaging or side effects
+- **Services MUST** be pure data utilities only
+- **Stores handle** ALL messaging and state management
+
+### **NGRX011: Service Architecture Pattern**
+
+- **Services CANNOT** have MessageService, AuthStore, or console.log
+- **Services MUST** be pure data operations with parameters
+- **Stores MUST** handle all messaging and side effects
+
+### **NGRX012: Component Message Handling**
+
+- **Components handle** UI concerns (toast notifications)
+- **Stores handle** business state only
+- **Clear separation** of UI and business logic
+
+### **NGRX013: Service Data Validation**
+
+- **Services MUST** validate all input data before processing
+- **Services MUST** throw descriptive errors for validation failures
+- **Services MUST** ensure data integrity and security
+
+### **NGRX014: Component Effect Cleanup**
+
+- **Effects MUST** use proper cleanup patterns
+- **Effects MUST** prevent memory leaks
+- **Effects MUST** follow reactive best practices
+
+### **NGRX015: Separate Template and Styles**
+
+- **Components MUST** use templateUrl instead of inline template
+- **Components MUST** use styleUrl instead of inline styles
+- **HTML and CSS MUST** be in separate files
+
+## **✅ CORRECT PATTERNS**
+
+### **Service Pattern (Pure Utility)**
+
+```typescript
+@Injectable({ providedIn: "root" })
+export class DataService {
+  private readonly _firestore = inject(Firestore);
+
+  async getData(companyId: string): Promise<Data[]> {
+    // Pure data operation, no side effects
+    return data;
+  }
+}
+```
+
+### **Store Pattern (State Management)**
+
+```typescript
+export const DataStore = signalStore(
+  withProps(() => ({
+    _dataService: inject(DataService),
+  })),
+  withMethods((store) => ({
+    loadData: rxMethod(() =>
+      store._dataService
+        .getData(store.companyId())
+        .then((data) => {
+          patchState(store, { data, loading: false });
+        })
+        .catch((error) => {
+          patchState(store, { error: error.message, loading: false });
+        })
+    ),
+  }))
+);
+```
+
+### **Component Pattern (UI Concerns)**
+
+```typescript
+@Component({
+  providers: [MessageService],
+})
+export class DataComponent {
+  private _messageService = inject(MessageService);
+  private _dataStore = inject(DataStore);
+
+  ngOnInit() {
+    // Listen to store state and show toast notifications
+    effect(() => {
+      const error = this._dataStore.error();
+      if (error) {
+        this._messageService.add({
+          severity: "error",
+          detail: error,
+        });
+      }
+    });
+  }
+}
+```
+
+## **🔍 DETECTION PATTERNS**
+
+- `inject(MessageService)` in `*.service.ts` → **BLOCKING ERROR**
+- `inject(AuthStore)` in `*.service.ts` → **BLOCKING ERROR**
+- `_messageService.add()` in `*.service.ts` → **BLOCKING ERROR**
+- `inject(MessageService)` in `*.store.ts` → **BLOCKING ERROR**
+- Missing `validation` in `*.service.ts` → **BLOCKING ERROR**
+- Missing proper `effect()` cleanup patterns → **BLOCKING ERROR**
+- ` template: \`` in  `\*.component.ts` → **BLOCKING ERROR**
+- `styles: [` in `*.component.ts` → **BLOCKING ERROR**
+
+---
+
+**These rules are ALWAYS APPLIED and will prevent future pattern violations!**
+
+# 🚨 CRITICAL: NgRx SignalStore Architecture Rules
+
+## **NGRX010: No External State Mutation** - BLOCKING ERROR
+
+- ❌ Services CANNOT inject AuthStore (pass parameters instead)
+- ❌ Components/Services CANNOT use patchState (store only)
+- ✅ Services must be pure data utilities only
+- ✅ Stores handle ALL state management
+
+## **NGRX011: Service Architecture Pattern** - BLOCKING ERROR
+
+- ❌ Services with AuthStore or side effects
+- ✅ Services: Pure data operations with parameters
+- ✅ Stores: Handle all state operations
+
+## **NGRX012: Component Message Handling** - REQUIRED
+
+- ✅ Components handle UI concerns (toast notifications)
+- ✅ Stores handle business state only
+- ✅ Clear separation of concerns
+
+```json
+{
+  "$schema": "https://angular-rules.dev/schema/v1/rules.json",
+  "version": "2025.1.0",
+  "lastUpdated": "2025-07-22",
+  "schemaVersion": "1.0",
+  "metadata": {
+    "generatedBy": "Angular Rules Compiler",
+    "targetFrameworks": {
+      "angular": ">=20.0.0",
+      "ngrx": ">=19.2.0",
+      "rxjs": ">=7.8.0",
+      "typescript": ">=5.4.0"
+    }
+  },
+  "severityLevels": {
+    "error": { "code": 2, "blocking": true },
+    "warning": { "code": 1, "blocking": false },
+    "info": { "code": 0, "blocking": false }
+  },
+  "categories": {
+    "ngrx_core": "NgRx SignalStore Core",
+    "ngrx_perf": "NgRx Performance",
+    "angular_signals": "Angular Signals",
+    "angular_components": "Angular Components",
+    "rxjs_patterns": "RxJS Patterns",
+    "typescript": "TypeScript Configuration",
+    "deprecations": "Deprecated Patterns",
+    "performance": "Performance Optimization",
+    "testing": "Testing Patterns",
+    "a11y": "Accessibility"
+  },
+  "validationPatterns": {
+    "signalInput": "^\\s*(public\\s+)?(\\w+)\\s*=\\s*input(\\.required)?\\s*<[^>]+>\\s*\\(",
+    "signalOutput": "^\\s*(public\\s+)?(\\w+)\\s*=\\s*output\\s*<[^>]+>\\s*\\(",
+    "patchState": "patchState\\s*\\(\\s*store\\s*,\\s*\\{[^}]+\\}\\s*\\)",
+    "computed": "computed\\s*\\(\\s*\\(\\)\\s*=>",
+    "signalStore": "signalStore\\s*\\(",
+    "withProps": "withProps\\s*\\(\\s*\\(\\)\\s*=>",
+    "rxMethod": "rxMethod\\s*<[^>]*>\\s*\\(",
+    "takeUntilDestroyed": "takeUntilDestroyed\\s*\\(\\s*\\)",
+    "controlFlow": "@(if|for|switch|defer)\\s*\\(",
+    "decoratorInput": "@Input\\s*\\(\\s*\\)",
+    "decoratorOutput": "@Output\\s*\\(\\s*\\)"
+  },
+  "rules": [
+    {
+      "id": "NGRX001",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "SignalStore Composition Pattern",
+      "appliesTo": ["*.store.ts"],
+      "validationPattern": "signalStore",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "organize-signal-store-features",
+         "docs": "https://ngrx.io/guide/signals/signal-store"
+      },
+      "detection": {
+        "ast": {
+          "type": "CallExpression",
+          "callee": "signalStore",
+          "validateOrder": ["withProps", "withState", "withEntities", "withComputed", "withMethods", "withHooks"]
+        }
+      },
+      "relatedRules": ["NGRX002", "NGRX003", "NGRX007"],
+      "violations": {
+        "wrongOrder": "SignalStore features must be in correct order",
+        "missingState": "SignalStore must have withState",
+        "duplicateFeature": "Duplicate SignalStore feature detected"
+      }
+    },
+    {
+      "id": "NGRX002",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Service Injection via withProps",
+      "appliesTo": ["*.store.ts"],
+      "validationPattern": "withProps",
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true,
+        "codeAction": "convert-to-withprops"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "inject\\([^)]+\\)(?!.*withProps)",
+            "message": "Use withProps() for dependency injection"
+          },
+          {
+            "invalid": "(?<!_)\\w+Service(?=:)",
+            "message": "Prefix private services with underscore"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX001", "TS002"],
+      "codeTemplate": "withProps(() => ({\\n  _${1:service}: inject(${2:Service})\\n}))"
+    },
+    {
+      "id": "NGRX003",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Immutable State Updates",
+      "appliesTo": ["*.store.ts", "*.ts"],
+      "validationPattern": "patchState",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "fix-mutable-update"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "patchState\\s*\\([^,]+,\\s*\\([^)]+\\)\\s*=>\\s*\\{[^}]*\\.[^=]+=",
+            "message": "State mutations are not allowed"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX001", "NGRX006", "NGRX010"],
+      "breakingChange": {
+        "version": "19.0",
+        "description": "Object.freeze applied in dev mode"
+      }
+    },
+    {
+      "id": "NGRX004",
+      "category": "ngrx_core",
+      "severity": "warning",
+      "title": "Entity Management Pattern",
+      "appliesTo": ["*.store.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true,
+        "codeAction": "add-entity-management"
+      },
+      "detection": {
+        "heuristic": "collection_without_entities",
+        "patterns": [
+          {
+            "detect": "\\[]\\s*as\\s*\\w+\\[]",
+            "suggest": "Consider using withEntities for collections"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX001", "NGRX008", "PERF004"],
+      "providedMethods": [
+        "addEntity", "updateEntity", "removeEntity",
+        "setEntities", "clearEntities"
+      ]
+    },
+    {
+      "id": "NGRX005",
+      "category": "ngrx_core",
+      "severity": "info",
+      "title": "Events Plugin (Experimental)",
+      "appliesTo": ["*.store.ts"],
+      "experimental": true,
+      "minVersion": "19.2",
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": false
+      },
+      "detection": {
+        "imports": ["eventGroup", "withReducer"],
+        "patterns": ["eventGroup\\s*\\(", "withReducer\\s*\\("]
+      },
+      "relatedRules": ["NGRX001", "DEP003"],
+      "useWhen": [
+        "largeApplication",
+        "complexCommunication",
+        "migrationFromClassic"
+      ]
+    },
+    {
+      "id": "NGRX006",
+      "category": "ngrx_core",
+      "severity": "warning",
+      "title": "RxJS Integration with rxMethod",
+      "appliesTo": ["*.store.ts"],
+      "validationPattern": "rxMethod",
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true,
+        "codeAction": "convert-to-rxmethod"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "pipe\\s*\\([^)]*debounceTime",
+            "suggest": "Use rxMethod for debounced operations"
+          }
+        ]
+      },
+      "relatedRules": ["RX001", "RX002", "RX003", "NGRX003"],
+      "useCases": ["debouncing", "asyncPipelines", "switchableRequests"]
+    },
+    {
+      "id": "NGRX007",
+      "category": "ngrx_perf",
+      "severity": "warning",
+      "title": "Memory Management",
+      "appliesTo": ["*.store.ts", "*.component.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "subscribe\\s*\\([^)]*\\)(?!.*takeUntil)",
+            "message": "Subscription without cleanup detected"
+          }
+        ]
+      },
+      "relatedRules": ["RX002", "NGRX001", "PERF001"],
+      "requiredPatterns": [
+        "takeUntilDestroyed",
+        "shareReplay(1)",
+        "withHooks.onDestroy"
+      ]
+    },
+    {
+      "id": "NGRX008",
+      "category": "ngrx_perf",
+      "severity": "info",
+      "title": "Feature Composition Limit",
+      "appliesTo": ["*.store.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": false
+      },
+      "detection": {
+        "ast": {
+          "countFeatures": true,
+          "maxFeatures": 16
+        }
+      },
+      "relatedRules": ["NGRX001", "NGRX004"],
+      "suggestion": "Combine related features to avoid TypeScript limit"
+    },
+    {
+      "id": "NGRX009",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Direct Signal Access",
+      "appliesTo": ["*.component.ts", "*.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "\\.select\\s*\\(",
+            "message": "Use direct signal access, not select()"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "ANG006"],
+      "correctPattern": "store.signal()"
+    },
+    {
+      "id": "NGRX010",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "No External State Mutation",
+      "appliesTo": ["*.component.ts", "*.service.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "patchState\\s*\\(",
+            "inFiles": ["*.component.ts", "*.service.ts"],
+            "message": "patchState cannot be used outside store"
+          },
+          {
+            "invalid": "_messageService\\.add\\s*\\(",
+            "inFiles": ["*.service.ts"],
+            "message": "Services should not handle messaging - components handle UI concerns"
+          },
+          {
+            "invalid": "inject\\(MessageService\\)",
+            "inFiles": ["*.service.ts"],
+            "message": "Services should not inject MessageService - pure data operations only"
+          },
+          {
+            "invalid": "inject\\(AuthStore\\)",
+            "inFiles": ["*.service.ts"],
+            "message": "Services should not inject AuthStore - pass companyId as parameter"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX003", "ANG004"],
+      "correctPattern": "Store handles all state management and messaging"
+    },
+    {
+      "id": "NGRX011",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Service Architecture Pattern",
+      "appliesTo": ["*.service.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "MessageService",
+            "inFiles": ["*.service.ts"],
+            "message": "Services must be pure data utilities - no MessageService"
+          },
+          {
+            "invalid": "AuthStore",
+            "inFiles": ["*.service.ts"],
+            "message": "Services must be pure data utilities - no AuthStore"
+          },
+          {
+            "invalid": "console\\.log",
+            "inFiles": ["*.service.ts"],
+            "message": "Services should not have side effects - pure data operations only"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX010", "TS002"],
+      "correctPattern": "Pure data operations with parameters, no side effects"
+    },
+    {
+      "id": "NGRX012",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Component Message Handling",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "inject\\(MessageService\\)",
+            "inFiles": ["*.store.ts"],
+            "message": "Stores should not handle UI concerns - components handle toast notifications"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX010", "NGRX002"],
+      "correctPattern": "Components handle UI concerns, stores handle business state"
+    },
+    {
+      "id": "NGRX013",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Service Data Validation",
+      "appliesTo": ["*.service.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "required": "validation|validate",
+            "inFiles": ["*.service.ts"],
+            "message": "Services must validate input data before processing"
+          },
+          {
+            "required": "throw new Error",
+            "inFiles": ["*.service.ts"],
+            "message": "Services must throw descriptive errors for validation failures"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX010", "NGRX011"],
+      "correctPattern": "Pure data operations with robust validation and error throwing"
+    },
+    {
+      "id": "NGRX014",
+      "category": "ngrx_core",
+      "severity": "error",
+      "title": "Component Effect Cleanup",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "effect\\s*\\([^)]*\\)(?!.*takeUntilDestroyed)",
+            "message": "Effects must use takeUntilDestroyed for cleanup"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX007", "RX002"],
+      "correctPattern": "effect(() => { /* logic */ })"
+    },
+    {
+      "id": "NGRX015",
+      "category": "angular_components",
+      "severity": "error",
+      "title": "Separate Template and Styles",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "template:\\s*`",
+            "message": "Use templateUrl instead of inline template"
+          },
+          {
+            "invalid": "styles:\\s*\\[",
+            "message": "Use styleUrl instead of inline styles"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "ANG002"],
+      "correctPattern": "templateUrl: './component.html', styleUrl: './component.scss'"
+    },
+    {
+      "id": "ANG001",
+      "category": "angular_signals",
+      "severity": "error",
+      "title": "Signal Input Migration",
+      "appliesTo": ["*.component.ts"],
+      "validationPattern": "signalInput",
+      "migrationCommand": "ng generate @angular/core:signal-input-migration",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "convert-to-signal-input"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "@Input\\s*\\(\\s*\\)",
+            "replacement": "input.required<${type}>()"
+          }
+        ]
+      },
+      "relatedRules": ["ANG002", "ANG003", "DEP001", "NGRX009"],
+      "templates": {
+        "required": "${name} = input.required<${type}>();",
+        "optional": "${name} = input<${type}>(${default});",
+        "transform": "${name} = input(${default}, { transform: ${transformer} });"
+      }
+    },
+    {
+      "id": "ANG002",
+      "category": "angular_signals",
+      "severity": "error",
+      "title": "Signal Output Migration",
+      "appliesTo": ["*.component.ts"],
+      "validationPattern": "signalOutput",
+      "migrationCommand": "ng generate @angular/core:output-migration",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "convert-to-signal-output"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "@Output\\s*\\(\\s*\\).*EventEmitter",
+            "replacement": "output<${type}>()"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "DEP001"]
+    },
+    {
+      "id": "ANG003",
+      "category": "angular_signals",
+      "severity": "info",
+      "title": "Model Binding Pattern",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "\\[\\(\\w+\\)\\]",
+            "suggest": "Consider using model() for two-way binding"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "ANG008"],
+      "useCases": ["formControls", "toggleStates", "simpleSync"]
+    },
+    {
+      "id": "ANG004",
+      "category": "angular_components",
+      "severity": "error",
+      "title": "Single Responsibility Principle",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": false
+      },
+      "detection": {
+        "metrics": {
+          "maxLines": 200,
+          "maxMethods": 10,
+          "maxInputs": 7,
+          "maxComplexity": 10
+        }
+      },
+      "relatedRules": ["NGRX010", "ANG005", "PERF002"],
+      "componentTypes": {
+        "smart": ["businessLogic", "dataFetching", "stateManagement"],
+        "dumb": ["uiRendering", "userInteraction", "noServices"]
+      }
+    },
+    {
+      "id": "ANG005",
+      "category": "angular_components",
+      "severity": "warning",
+      "title": "Standalone Components",
+      "appliesTo": ["*.component.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "convert-to-standalone"
+      },
+      "detection": {
+        "ast": {
+          "decorator": "Component",
+          "property": "standalone",
+          "value": true
+        }
+      },
+      "relatedRules": ["ANG004", "PERF002", "PERF003"]
+    },
+    {
+      "id": "ANG006",
+      "category": "angular_components",
+      "severity": "warning",
+      "title": "OnPush Change Detection",
+      "appliesTo": ["*.component.ts"],
+      "validationPattern": "computed",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "add-onpush-strategy"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "changeDetection(?!.*OnPush)",
+            "message": "Use OnPush change detection"
+          },
+          {
+            "invalid": "template:.*\\{\\{\\s*\\w+\\(\\)\\s*\\}\\}",
+            "whenMissing": "computed",
+            "message": "Use computed() instead of methods in templates"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "NGRX009", "PERF001"]
+    },
+    {
+      "id": "ANG007",
+      "category": "angular_components",
+      "severity": "error",
+      "title": "Control Flow Syntax",
+      "appliesTo": ["*.component.ts", "*.component.html"],
+      "validationPattern": "controlFlow",
+      "migrationCommand": "ng generate @angular/core:control-flow",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "migrate-control-flow"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "\\*ngIf=",
+            "replacement": "@if"
+          },
+          {
+            "invalid": "\\*ngFor=",
+            "replacement": "@for"
+          },
+          {
+            "invalid": "\\*ngSwitch=",
+            "replacement": "@switch"
+          }
+        ]
+      },
+      "relatedRules": ["DEP001", "ANG006"]
+    },
+    {
+      "id": "ANG008",
+      "category": "angular_signals",
+      "severity": "info",
+      "title": "Form Integration Patterns",
+      "appliesTo": ["*.component.ts", "*.store.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "imports": ["FormBuilder", "FormGroup", "FormControl"],
+        "patterns": [
+          {
+            "detect": "FormGroup.*withProps",
+            "validate": true
+          }
+        ]
+      },
+      "relatedRules": ["NGRX002", "ANG003"]
+    },
+    {
+      "id": "RX001",
+      "category": "rxjs_patterns",
+      "severity": "warning",
+      "title": "Signal-Observable Conversion",
+      "appliesTo": ["*.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "imports": ["toSignal", "toObservable"],
+        "patterns": [
+          {
+            "suggest": "toSignal",
+            "when": "Observable.*subscribe"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX006", "RX002", "RX003"],
+      "requiredImport": "@angular/core/rxjs-interop"
+    },
+    {
+      "id": "RX002",
+      "category": "rxjs_patterns",
+      "severity": "error",
+      "title": "Subscription Cleanup",
+      "appliesTo": ["*.component.ts", "*.directive.ts"],
+      "validationPattern": "takeUntilDestroyed",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "add-cleanup-operator"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "subscribe\\([^)]*\\)(?!.*takeUntil)",
+            "message": "Subscription without cleanup"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX007", "RX001", "DEP004"]
+    },
+    {
+      "id": "RX003",
+      "category": "rxjs_patterns",
+      "severity": "error",
+      "title": "No Nested Subscriptions",
+      "appliesTo": ["*.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true,
+        "codeAction": "flatten-subscriptions"
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "subscribe\\([^)]*\\{[^}]*subscribe\\(",
+            "message": "Nested subscription detected"
+          }
+        ]
+      },
+      "relatedRules": ["RX001", "NGRX006", "DEP004"],
+      "suggestedOperators": ["switchMap", "mergeMap", "concatMap", "exhaustMap"]
+    },
+    {
+      "id": "TS001",
+      "category": "typescript",
+      "severity": "error",
+      "title": "Strict Mode Configuration",
+      "appliesTo": ["tsconfig.json"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "jsonPath": "compilerOptions.strict",
+        "requiredValue": true
+      },
+      "relatedRules": ["TS002", "TS003"],
+      "requiredOptions": {
+        "compilerOptions": {
+          "strict": true,
+          "noImplicitReturns": true,
+          "noFallthroughCasesInSwitch": true,
+          "forceConsistentCasingInFileNames": true,
+          "noImplicitOverride": true,
+          "noPropertyAccessFromIndexSignature": true,
+          "noUncheckedIndexedAccess": true
+        },
+        "angularCompilerOptions": {
+          "strictTemplates": true,
+          "strictInjectionParameters": true,
+          "strictInputAccessModifiers": true,
+          "strictNullInputTypes": true
+        }
+      }
+    },
+    {
+      "id": "TS002",
+      "category": "typescript",
+      "severity": "error",
+      "title": "Explicit Type Annotations",
+      "appliesTo": ["*.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "(let|const|var)\\s+\\w+\\s*=(?!.*:)",
+            "message": "Missing type annotation"
+          },
+          {
+            "invalid": "\\)\\s*\\{(?!.*:)",
+            "message": "Missing return type"
+          }
+        ]
+      },
+      "relatedRules": ["TS001", "NGRX002", "TS003"]
+    },
+    {
+      "id": "TS003",
+      "category": "typescript",
+      "severity": "warning",
+      "title": "Naming Conventions",
+      "appliesTo": ["*.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "pattern": "private\\s+(?!_)\\w+Service",
+            "message": "Private services should be prefixed with underscore"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX002", "TS002"],
+      "conventions": {
+        "privateServices": "_serviceNam
+        "signals": "isLoading, hasError",
+        "methods": "loadData, updateUser",
+        "computed": "filteredUsers, totalCount"
+      }
+    },
+    {
+      "id": "DEP001",
+      "category": "deprecations",
+      "severity": "error",
+      "title": "Decorator-Based Inputs/Outputs",
+      "appliesTo": ["*.component.ts"],
+      "deprecatedIn": "19.0",
+      "removedIn": "21.0",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "@Input\\(\\)",
+            "replacement": "input"
+          },
+          {
+            "invalid": "@Output\\(\\)",
+            "replacement": "output"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "ANG002", "ANG007"],
+      "migrationGuide": "https://angular.dev/guide/signals/migration"
+    },
+    {
+      "id": "DEP002",
+      "category": "deprecations",
+      "severity": "error",
+      "title": "ViewChild Decorators",
+      "appliesTo": ["*.component.ts"],
+      "deprecatedIn": "19.0",
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "@ViewChild\\(",
+            "replacement": "viewChild"
+          },
+          {
+            "invalid": "@ViewChildren\\(",
+            "replacement": "viewChildren"
+          }
+        ]
+      },
+      "relatedRules": ["ANG001"]
+    },
+    {
+      "id": "DEP003",
+      "category": "deprecations",
+      "severity": "error",
+      "title": "ComponentStore",
+      "appliesTo": ["*.ts"],
+      "deprecatedIn": "18.0",
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": false
+      },
+      "detection": {
+        "imports": ["ComponentStore"],
+        "patterns": ["extends\\s+ComponentStore"]
+      },
+      "relatedRules": ["NGRX001", "NGRX005"],
+      "migrationGuide": "https://ngrx.io/guide/migration/v18#component-store"
+    },
+    {
+      "id": "DEP004",
+      "category": "deprecations",
+      "severity": "warning",
+      "title": "Code Smells",
+      "appliesTo": ["*.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "codeSmells": [
+          {
+            "pattern": "setTimeout|setInterval",
+            "severity": "error",
+            "message": "Use RxJS timer/interval instead"
+          },
+          {
+            "pattern": "subscribe\\([^)]*\\)(?!.*takeUntil)",
+            "severity": "error",
+            "message": "Manual subscription without cleanup"
+          },
+          {
+            "pattern": "BehaviorSubject",
+            "severity": "warning",
+            "message": "Consider using signal instead"
+          },
+          {
+            "pattern": "\\{\\{\\s*\\w+\\(\\)\\s*\\}\\}",
+            "severity": "error",
+            "message": "Methods in templates harm performance"
+          },
+          {
+            "pattern": ":\\s*any",
+            "severity": "error",
+            "message": "Avoid 'any' type"
+          }
+        ]
+      },
+      "relatedRules": ["RX002", "RX003", "ANG006"]
+    },
+    {
+      "id": "PERF001",
+      "category": "performance",
+      "severity": "warning",
+      "title": "Bundle Size Limits",
+      "appliesTo": ["angular.json"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "jsonPath": "projects.*.architect.build.options.budgets",
+        "validate": true
+      },
+      "relatedRules": ["PERF002", "PERF003", "ANG006"],
+      "requiredBudgets": [
+        {
+          "type": "initial",
+          "maximumWarning": "2mb",
+          "maximumError": "5mb"
+        },
+        {
+          "type": "anyComponentStyle",
+          "maximumWarning": "6kb",
+          "maximumError": "10kb"
+        }
+      ]
+    },
+    {
+      "id": "PERF002",
+      "category": "performance",
+      "severity": "info",
+      "title": "Tree Shaking Optimization",
+      "appliesTo": ["*.component.ts", "*.module.ts"],
+      "enforcement": {
+        "autoFix": true,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "import\\s*\\{\\s*CommonModule\\s*\\}",
+            "suggest": "Import specific directives for tree shaking"
+          }
+        ]
+      },
+      "relatedRules": ["ANG004", "ANG005", "PERF001"]
+    },
+    {
+      "id": "PERF003",
+      "category": "performance",
+      "severity": "warning",
+      "title": "Lazy Loading Routes",
+      "appliesTo": ["*-routing.module.ts", "*.routes.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "component:\\s*\\w+",
+            "suggest": "Consider lazy loading with loadComponent"
+          }
+        ]
+      },
+      "relatedRules": ["ANG005", "PERF001"]
+    },
+    {
+      "id": "PERF004",
+      "category": "performance",
+      "severity": "info",
+      "title": "Large Collection Performance",
+      "appliesTo": ["*.component.ts", "*.component.html"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": false
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "@for.*track\\s+\\$index",
+            "message": "Use unique ID for tracking, not index"
+          }
+        ]
+      },
+      "relatedRules": ["NGRX004", "ANG007"],
+      "techniques": [
+        "virtualScrolling",
+        "trackByFunction",
+        "pagination",
+        "infiniteScroll"
+      ]
+    },
+    {
+      "id": "TEST001",
+      "category": "testing",
+      "severity": "info",
+      "title": "SignalStore Testing",
+      "appliesTo": ["*.spec.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true,
+        "codeTemplate": true
+      },
+      "relatedRules": ["NGRX001", "TEST002"],
+      "template": "createMockStore"
+    },
+    {
+      "id": "TEST002",
+      "category": "testing",
+      "severity": "info",
+      "title": "Signal Component Testing",
+      "appliesTo": ["*.spec.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true,
+        "codeTemplate": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "component\\.\\w+\\.set\\(",
+            "validate": true
+          }
+        ]
+      },
+      "relatedRules": ["ANG001", "ANG002", "TEST001"]
+    },
+    {
+      "id": "A11Y001",
+      "category": "a11y",
+      "severity": "error",
+      "title": "ARIA Attributes",
+      "appliesTo": ["*.component.html", "*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "invalid": "<button(?!.*aria-label)",
+            "whenHasOnly": "icon",
+            "message": "Icon buttons need aria-label"
+          }
+        ]
+      },
+      "relatedRules": ["A11Y002"],
+      "requiredAttributes": [
+        "aria-label",
+        "aria-describedby",
+        "role"
+      ]
+    },
+    {
+      "id": "A11Y002",
+      "category": "a11y",
+      "severity": "warning",
+      "title": "Keyboard Navigation",
+      "appliesTo": ["*.component.html", "*.component.ts"],
+      "enforcement": {
+        "autoFix": false,
+        "ideQuickFix": true
+      },
+      "detection": {
+        "patterns": [
+          {
+            "detect": "(click)=",
+            "requireAlso": "(keyup.enter|keyup.space)",
+            "message": "Click handlers should support keyboard"
+          }
+        ]
+      },
+      "relatedRules": ["A11Y001"]
+    }
+  ],
+  "enforcement": {
+    "ide": {
+      "realTime": true,
+      "showInlineErrors": true,
+      "quickFixPriority": ["error", "warning", "info"],
+      "codeActionsOnSave": ["NGRX001", "NGRX003", "ANG001", "ANG002"]
+    },
+    "cli": {
+      "preCommit": {
+        "error": "block",
+        "warning": "warn",
+        "info": "log"
+      },
+      "ci": {
+        "failOn": "error",
+        "reportOn": ["error", "warning"],
+        "generateReport": true
+      }
+    },
+    "reporting": {
+      "format": "json",
+      "output": "./angular-rules-report.json",
+      "includeFixed": false,
+      "groupBy": "category"
+    }
+  },
+  "autofixPriority": [
+    "NGRX010", "NGRX011", "NGRX012", "NGRX013", "NGRX014", "NGRX001", "NGRX003",
+    "DEP001", "DEP002", "ANG001", "ANG002", "ANG007",
+    "RX002", "TS001"
+  ],
+  "crossReferences": {
+    "NGRX001": ["NGRX002", "NGRX003", "NGRX007"],
+    "NGRX003": ["NGRX001", "NGRX006", "NGRX010"],
+    "ANG001": ["ANG002", "ANG003", "DEP001", "NGRX009"],
+    "RX002": ["NGRX007", "RX001", "DEP004"],
+    "TS001": ["TS002", "TS003"],
+    "DEP004": ["RX002", "RX003", "ANG006"]
+  },
+  "migrationPaths": {
+    "classicToSignalStore": ["NGRX001", "NGRX002", "NGRX003", "NGRX005"],
+    "decoratorsToSignals": ["DEP001", "DEP002", "ANG001", "ANG002"],
+    "structuralToControlFlow": ["ANG007"],
+    "rxjsToSignals": ["RX001", "RX002"]
+  },
+  "telemetry": {
+    "enabled": false,
+    "anonymize": true,
+    "events": ["ruleFired", "autoFixed", "quickFixApplied"]
+  }
+}
+```
+
+# 📋 **RULE SUMMARY: Preventing Pattern Violations**
+
+## **🚨 BLOCKING ERRORS (Will Stop Development)**
+
+### **NGRX010: No External State Mutation**
+
+- **Services CANNOT** inject MessageService or AuthStore
+- **Services CANNOT** handle messaging or side effects
+- **Services MUST** be pure data utilities only
+- **Stores handle** ALL messaging and state management
+
+### **NGRX011: Service Architecture Pattern**
+
+- **Services CANNOT** have MessageService, AuthStore, or console.log
+- **Services MUST** be pure data operations with parameters
+- **Stores MUST** handle all messaging and side effects
+
+### **NGRX012: Component Message Handling**
+
+- **Components handle** UI concerns (toast notifications)
+- **Stores handle** business state only
+- **Clear separation** of UI and business logic
+
+### **NGRX013: Service Data Validation**
+
+- **Services MUST** validate all input data before processing
+- **Services MUST** throw descriptive errors for validation failures
+- **Services MUST** ensure data integrity and security
+
+### **NGRX014: Component Effect Cleanup**
+
+- **Effects MUST** use proper cleanup patterns
+- **Effects MUST** prevent memory leaks
+- **Effects MUST** follow reactive best practices
+
+### **NGRX015: Separate Template and Styles**
+
+- **Components MUST** use templateUrl instead of inline template
+- **Components MUST** use styleUrl instead of inline styles
+- **HTML and CSS MUST** be in separate files
+
+## **✅ CORRECT PATTERNS**
+
+### **Service Pattern (Pure Utility)**
+
+```typescript
+@Injectable({ providedIn: "root" })
+export class DataService {
+  private readonly _firestore = inject(Firestore);
+
+  async getData(companyId: string): Promise<Data[]> {
+    // Pure data operation, no side effects
+    return data;
+  }
+}
+```
+
+### **Store Pattern (State Management)**
+
+```typescript
+export const DataStore = signalStore(
+  withProps(() => ({
+    _dataService: inject(DataService),
+  })),
+  withMethods((store) => ({
+    loadData: rxMethod(() =>
+      store._dataService
+        .getData(store.companyId())
+        .then((data) => {
+          patchState(store, { data, loading: false });
+        })
+        .catch((error) => {
+          patchState(store, { error: error.message, loading: false });
+        })
+    ),
+  }))
+);
+```
+
+### **Component Pattern (UI Concerns)**
+
+```typescript
+@Component({
+  providers: [MessageService],
+})
+export class DataComponent {
+  private _messageService = inject(MessageService);
+  private _dataStore = inject(DataStore);
+
+  ngOnInit() {
+    // Listen to store state and show toast notifications
+    effect(() => {
+      const error = this._dataStore.error();
+      if (error) {
+        this._messageService.add({
+          severity: "error",
+          detail: error,
+        });
+      }
+    });
+  }
+}
+```
+
+## **🔍 DETECTION PATTERNS**
+
+- `inject(MessageService)` in `*.service.ts` → **BLOCKING ERROR**
+- `inject(AuthStore)` in `*.service.ts` → **BLOCKING ERROR**
+- `_messageService.add()` in `*.service.ts` → **BLOCKING ERROR**
+- `inject(MessageService)` in `*.store.ts` → **BLOCKING ERROR**
+- Missing `validation` in `*.service.ts` → **BLOCKING ERROR**
+- Missing proper `effect()` cleanup patterns → **BLOCKING ERROR**
+- ` template: \`` in  `\*.component.ts` → **BLOCKING ERROR**
+- `styles: [` in `*.component.ts` → **BLOCKING ERROR**
+
+---
+
+**These rules are ALWAYS APPLIED and will prevent future pattern violations!**

@@ -11,17 +11,9 @@ import { MessageService } from 'primeng/api';
 import Aura from '@primeuix/themes/aura';
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
+import { environment } from '../environments/environment';
 
-const firebaseConfig = {
-  apiKey: 'AIzaSyD-bfWuFt2M1plj_gamhS3RadtD7R34HRI',
-  authDomain: 'gitplumbers-35d92.firebaseapp.com',
-  databaseURL: 'https://gitplumbers-35d92-default-rtdb.firebaseio.com',
-  projectId: 'gitplumbers-35d92',
-  storageBucket: 'gitplumbers-35d92.firebasestorage.app',
-  messagingSenderId: '26354659373',
-  appId: '1:26354659373:web:41a73fb6c95a3098f5c8a4',
-  measurementId: 'G-QL89VJ3CC3',
-};
+const firebaseConfig = environment.firebase;
 
 export const appConfig: ApplicationConfig = {
   providers: [

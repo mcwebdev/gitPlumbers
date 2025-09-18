@@ -46,3 +46,9 @@ notes.txt
 src.zip
 .firebase
 .firebase/hosting.ZGlzdFxnaXRwbHVtYmVycy0zNWQ5Mlxicm93c2Vy.cache
+
+# Environment variables - NEVER commit these!
+.env
+.env.local
+.env.production
+.env.*.local

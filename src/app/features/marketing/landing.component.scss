@@ -1239,10 +1239,17 @@
   }
 
   .section-logo {
-    height: 2.5rem;
+    height: 128px;
   }
 
   .callout-logo {
-    height: 3rem;
+    height: 128px;
+  }
+
+  #proof {
+    background-image: url(/cropped/logo3-cropped.png);
+    background-size: 48px;
+    background-position: top 25px right 15px;
+    background-repeat: no-repeat;
   }
 }

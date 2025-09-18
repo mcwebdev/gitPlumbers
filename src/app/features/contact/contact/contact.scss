@@ -1,0 +1,170 @@
+/* ===== Layout & Background ===== */
+.contact-hero {
+  min-height: 100vh;
+  padding: 3rem 1rem;
+  background: radial-gradient(900px 500px at 15% 0%, #1c2a44 0%, transparent 60%),
+    radial-gradient(900px 600px at 95% 35%, #171b33 0%, transparent 60%),
+    linear-gradient(160deg, #0d1022, #0b0e1b);
+}
+.contact-container {
+  max-width: 640px; /* tighter = calmer visual rhythm */
+  margin: 0 auto;
+}
+
+/* ===== Card ===== */
+.contact-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(10, 20, 50, 0.06);
+  border-radius: 20px;
+  padding: clamp(1.25rem, 2vw + 1rem, 2rem);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px) saturate(140%);
+}
+
+/* ===== Header (no loud gradients) ===== */
+.card-head {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.title {
+  margin: 0;
+  font-size: clamp(1.4rem, 1.4vw + 1rem, 1.8rem);
+  font-weight: 700;
+  color: #0f172a;
+}
+.subtitle {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+}
+
+/* ===== Form ===== */
+.form-grid {
+  display: grid;
+  gap: 3rem;
+}
+.field {
+  display: grid;
+  gap: 0.375rem;
+}
+.field-label {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.hint {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+.muted {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* One wrapper that combines icon + float label (critical for correct behavior) */
+.field-control {
+  width: 100%;
+  display: inline-flex;
+  position: relative;
+}
+
+/* Icon inside input */
+.p-input-icon-left.field-control > i.pi {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #95a1b0;
+  pointer-events: none;
+}
+
+/* Inputs look consistent */
+.field-control > .p-inputtext,
+.field-control > .p-inputtextarea,
+.field-control > textarea.p-inputtextarea {
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding-left: 2.4rem; /* space for icon */
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.field-control > .p-inputtext:hover,
+.field-control > .p-inputtextarea:hover,
+.field-control > textarea.p-inputtextarea:hover {
+  border-color: rgba(0, 0, 0, 0.16);
+}
+.field-control > .p-inputtext:focus,
+.field-control > .p-inputtextarea:focus,
+.field-control > textarea.p-inputtextarea:focus {
+  border-color: #66b1ff;
+  box-shadow: 0 0 0 3px rgba(102, 177, 255, 0.25);
+}
+#message {
+  width: 100%;
+}
+/* Float label offset so it doesn't sit under the icon */
+.p-input-icon-left.p-float-label.field-control > label {
+  left: 2.4rem;
+  color: #6b7280;
+  position: absolute;
+  font-size: 8px;
+  top: -15px;
+  background-color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* FileUpload (basic) */
+.upload-basic .p-button {
+  width: 100%;
+  border-radius: 12px !important;
+  border: 1px dashed rgba(0, 0, 0, 0.16);
+  background: #ffffff;
+  padding: 0.9rem 1.1rem;
+  justify-content: center;
+}
+.upload-basic .p-button:hover {
+  border-color: #66b1ff;
+  background: #f7fbff;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.actions .p-button {
+  border-radius: 999px;
+  padding-inline: 1.1rem;
+}
+
+/* ===== Dark mode polish ===== */
+@media (prefers-color-scheme: dark) {
+  .contact-card {
+    background: rgba(25, 27, 40, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+  .title {
+    color: #e8ecf4;
+  }
+  .subtitle,
+  .hint,
+  .muted {
+    color: #aab0bb;
+  }
+  .field-control > .p-inputtext,
+  .field-control > .p-inputtextarea,
+  .field-control > textarea.p-inputtextarea {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #e8eaf0;
+  }
+  .p-input-icon-left.field-control > i.pi {
+    color: #aab0bb;
+  }
+}

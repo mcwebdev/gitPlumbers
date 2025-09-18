@@ -1,0 +1,215 @@
+<div class="page-shell">
+  <main>
+    <section class="hero" id="top">
+      <div class="hero__decor" aria-hidden="true">
+        <div class="orb orb--one"></div>
+        <div class="orb orb--two"></div>
+        <div class="grid-lines"></div>
+      </div>
+      <div class="hero__copy">
+        <p class="eyebrow">
+          We unclog your <span class="calloutBlurb">tech debt</span> so your code can flow.
+        </p>
+        <h1>Start shipping with confidence.</h1>
+        <h2 class="lead">
+          In today's fast-moving tech landscape,
+          <span class="calloutBlurb">vibe coding</span> breeds patchwork, bugs, and fragile systems.
+          <strong>gitPlumbers</strong> stabilizes foundations and unlocks sustainable velocity.
+        </h2>
+        <div class="hero__cta-group">
+          @for(cta of heroCtas; track cta.label) {
+          <a class="cta" [routerLink]="cta.href">
+            <span [innerText]="cta.label"></span>
+            <span class="cta__glow" aria-hidden="true"></span>
+          </a>
+          }
+          <nav class="site-nav" aria-label="Primary section links">
+            @for(anchor of heroAnchors; track anchor.label) {
+            <a [attr.href]="anchor.href" [innerText]="anchor.label"></a>
+            }
+          </nav>
+        </div>
+      </div>
+      <div class="hero__showcase" aria-label="Delivery snapshot">
+        <div class="showcase-card">
+          <div class="showcase-header">
+            <span class="dot dot--red"></span>
+            <span class="dot dot--yellow"></span>
+            <span class="dot dot--green"></span>
+            <span class="showcase-title">Release Health</span>
+          </div>
+          <div class="showcase-body">
+            <div class="metric">
+              <span class="metric-label">Mean time to resolve</span>
+              <span class="metric-value">-68%</span>
+              <span class="metric-sub">after gitPlumbers intervention</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Uptime</span>
+              <span class="metric-value">99.98%</span>
+              <span class="metric-sub">during modernization</span>
+            </div>
+            <div class="sparkline" role="presentation">
+              <span style="--p: 18"></span>
+              <span style="--p: 35"></span>
+              <span style="--p: 48"></span>
+              <span style="--p: 62"></span>
+              <span style="--p: 80"></span>
+              <span style="--p: 95"></span>
+            </div>
+          </div>
+          <footer class="showcase-footer">
+            <p>We orchestrate reliability while unlocking modern capabilities.</p>
+          </footer>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="services">
+      <div class="section__heading">
+        <div class="section-branding">
+          <img src="cropped/logo2-cropped.png" alt="gitPlumbers" class="section-logo" />
+        </div>
+        <p class="eyebrow">What we do</p>
+        <h2>Precision interventions for scale-minded teams</h2>
+        <p>
+          From enterprise refactors to futuristic interactions, we deliver clarity, velocity, and
+          trust with every engagement.
+        </p>
+      </div>
+      <div class="grid grid--services">
+        @for(item of differentiators; track item.title) {
+        <article class="card">
+          <h3 [innerText]="item.title"></h3>
+          <p [innerText]="item.description"></p>
+          <span class="card__accent" aria-hidden="true"></span>
+        </article>
+        }
+      </div>
+    </section>
+
+    <section class="section section--callout" id="callout">
+      <div class="callout-card">
+        <div class="callout-card__main">
+          <div class="callout-branding">
+            <img src="cropped/logo4-cropped.png" alt="gitPlumbers" class="callout-logo" />
+          </div>
+          <div class="spotlights" aria-hidden="true">
+            <span class="spotlight"></span>
+            <span class="spotlight"></span>
+            <span class="spotlight"></span>
+          </div>
+          <h2 [innerText]="calloutCard.hook"></h2>
+          <p [innerText]="calloutCard.benefit"></p>
+        </div>
+        <div class="callout-card__details">
+          <p class="callout-subheading" [innerText]="calloutCard.subheading"></p>
+          <ul class="callout-points">
+            @for(point of calloutCard.points; track point) {
+            <li [innerText]="point"></li>
+            }
+          </ul>
+        </div>
+        <div class="callout-glow" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <section class="section section--proof" id="proof">
+      
+      <div class="section__heading">
+        <p class="eyebrow">Why gitPlumbers?</p>
+        <h2>
+          <span class="slogan--calm">Operational calm.</span>
+          <span class="slogan--bold">Bold innovation.</span>
+          <span class="slogan--results">Documented results.</span>
+        </h2>
+      </div>
+      <div class="grid grid--proof">
+        @for(pillar of valuePillars; track pillar.title) {
+        <article class="pillar">
+          <h3 [innerText]="pillar.title"></h3>
+          <p [innerText]="pillar.copy"></p>
+        </article>
+        }
+      </div>
+      <div class="proof-points">
+        @for(item of proofPoints; track item.metric) {
+        <div class="proof-point">
+          <span class="proof-metric" [innerText]="item.metric"></span>
+          <span class="proof-copy" [innerText]="item.subcopy"></span>
+        </div>
+        }
+      </div>
+    </section>
+
+    <section class="section section--process" id="process">
+      <div class="section__heading">
+        <p class="eyebrow">How it works</p>
+        <h2>A frictionless partner journey in three beats</h2>
+      </div>
+      <ol class="process">
+        @for(step of process; track step.title; let i = $index) {
+        <li class="process-step">
+          <div class="process-index">
+            <span class="index-prefix">0</span>
+            <span class="index-number" [innerText]="i + 1"></span>
+          </div>
+          <div class="process-body">
+            <h3 [innerText]="step.title"></h3>
+            <p [innerText]="step.body"></p>
+          </div>
+        </li>
+        }
+      </ol>
+    </section>
+
+    <!-- <section class="section section--testimonials" id="case-studies">
+      <div class="section__heading">
+        <p class="eyebrow">Case studies</p>
+        <h2>Leaders who called gitPlumbers</h2>
+        <p>Stories from teams who turned shipping chaos into reliable rhythm.</p>
+      </div>
+      <div class="testimonial-carousel" role="list">
+        @for(quote of testimonials; track quote.author) {
+        <article class="testimonial" role="listitem">
+          <p class="testimonial-quote">&ldquo;<span [innerText]="quote.quote"></span>&rdquo;</p>
+          <p class="testimonial-author" [innerText]="quote.author"></p>
+          <p class="testimonial-title" [innerText]="quote.title"></p>
+        </article>
+        }
+      </div>
+    </section> -->
+
+    <section class="section section--cta" id="contact">
+      <div class="cta-card">
+        <p class="eyebrow">Ready for flow state?</p>
+        <h2>Book a 30-minute clarity session.</h2>
+        <p>
+          Bring your thorniest systems question. Leave with a plan to stabilize today and unlock the
+          next wave of innovation.
+        </p>
+        <div class="cta-actions">
+          <a class="cta cta--bright" routerLink="/contact">
+            <span [innerText]="'Share Your Code and Book an audit'"></span>
+          </a>
+          <a class="cta" href="#top">Explore from the top</a>
+        </div>
+      </div>
+      <div class="cta-badges" aria-hidden="true">
+        <span>Firebase Partner</span>
+        <span>Angular SSR Experts</span>
+        <span>Security First Delivery</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      &copy; <span [innerText]="currentYear"></span> gitPlumbers. Crafted to keep your code moving.
+    </p>
+    <div class="footer-links">
+      <a href="/legal/terms">Terms</a>
+      <a href="/legal/privacy">Privacy</a>
+    </div>
+  </footer>
+</div>

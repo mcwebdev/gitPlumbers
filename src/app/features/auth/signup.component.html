@@ -1,0 +1,134 @@
+<div class="auth-shell">
+  <div class="auth-decor" aria-hidden="true">
+    <div class="orb orb--one"></div>
+    <div class="orb orb--two"></div>
+  </div>
+
+  <section class="auth-card">
+    <header class="auth-header">
+      <p class="auth-eyebrow">Get ready</p>
+      <h1>Create your gitPlumbers account</h1>
+      <p class="auth-blurb">
+        Align your team with technical debt free delivery. Spin up your access, collaborate with our
+        specialists, and accelerate every release.
+      </p>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div
+        class="form-field"
+        [class.form-field--invalid]="
+          form.controls.fullName.invalid && form.controls.fullName.touched
+        "
+      >
+        <label for="signup-full-name">Full name</label>
+        <input
+          id="signup-full-name"
+          type="text"
+          autocomplete="name"
+          formControlName="fullName"
+          placeholder="Jordan DevOps"
+          [disabled]="submitting()"
+        />
+        <p
+          class="field-error"
+          *ngIf="form.controls.fullName.invalid && form.controls.fullName.touched"
+        >
+          Let us know who we're collaborating with.
+        </p>
+      </div>
+
+      <div
+        class="form-field"
+        [class.form-field--invalid]="form.controls.email.invalid && form.controls.email.touched"
+      >
+        <label for="signup-email">Work email</label>
+        <input
+          id="signup-email"
+          type="email"
+          autocomplete="email"
+          formControlName="email"
+          placeholder="you@product.team"
+          [disabled]="submitting()"
+        />
+        <p class="field-error" *ngIf="form.controls.email.invalid && form.controls.email.touched">
+          Use a valid email so we can verify and keep you updated.
+        </p>
+      </div>
+
+      <div
+        class="form-field"
+        [class.form-field--invalid]="
+          form.controls.password.invalid && form.controls.password.touched
+        "
+      >
+        <label for="signup-password">Password</label>
+        <input
+          id="signup-password"
+          type="password"
+          autocomplete="new-password"
+          formControlName="password"
+          minlength="6"
+          placeholder="Create a secure password"
+          [disabled]="submitting()"
+        />
+        <p
+          class="field-error"
+          *ngIf="form.controls.password.invalid && form.controls.password.touched"
+        >
+          Password must be at least 6 characters.
+        </p>
+      </div>
+
+      <div
+        class="form-field"
+        [class.form-field--invalid]="
+          form.controls.confirmPassword.invalid && form.controls.confirmPassword.touched
+        "
+      >
+        <label for="signup-confirm-password">Confirm password</label>
+        <input
+          id="signup-confirm-password"
+          type="password"
+          autocomplete="new-password"
+          formControlName="confirmPassword"
+          minlength="6"
+          placeholder="Re-type your password"
+          [disabled]="submitting()"
+        />
+        <p
+          class="field-error"
+          *ngIf="form.controls.confirmPassword.invalid && form.controls.confirmPassword.touched"
+        >
+          Please confirm your password.
+        </p>
+      </div>
+
+      <label
+        class="agreement"
+        [class.agreement--invalid]="
+          form.controls.agreeToTerms.invalid && form.controls.agreeToTerms.touched
+        "
+      >
+        <input type="checkbox" formControlName="agreeToTerms" [disabled]="submitting()" />
+        <span>
+          I agree to the <a href="/terms" target="_blank" rel="noopener">terms of engagement</a> and
+          understand how gitPlumbers partners with teams.
+        </span>
+      </label>
+
+      <button type="submit" class="primary-action" [disabled]="submitting()">
+        <span>{{ buttonLabel() }}</span>
+      </button>
+    </form>
+
+    <div class="auth-footer" aria-live="polite" *ngIf="errorMessage() as error">
+      <p class="auth-feedback" role="alert">{{ error }}</p>
+    </div>
+
+    <footer class="auth-switcher">
+      <span>Already part of the squad?</span>
+      <a routerLink="/login" class="switcher-link">Log in here</a>
+    </footer>
+  </section>
+</div>

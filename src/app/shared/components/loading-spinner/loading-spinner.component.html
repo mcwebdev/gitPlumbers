@@ -1,0 +1,10 @@
+﻿<div class="spinner-backdrop" *ngIf="active">
+  <figure class="spinner">
+    <div class="dot white"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </figure>
+  <p class="spinner-message" *ngIf="message as status">{{ status }}</p>
+</div>

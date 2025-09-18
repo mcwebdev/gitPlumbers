@@ -1,0 +1,53 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import 'primeicons/primeicons.css';
+:root {
+  color-scheme: light;
+  --color-primary: #004c89;
+  --color-highlight: #00e5ff;
+  --color-ink: #0b1f2e;
+  --color-ink-soft: rgba(11, 31, 46, 0.68);
+  --body-background: #e6f0f7;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--body-background);
+  color: var(--color-ink);
+  font-size: 12px;
+}
+
+body {
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+a {
+  color: var(--color-primary);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(0, 76, 137, 0.2);
+}

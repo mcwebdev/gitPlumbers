@@ -1,0 +1,90 @@
+<div class="contact-hero">
+  <div class="contact-container">
+    <p-toast></p-toast>
+    <app-loading-spinner
+      [active]="loading"
+      message="Sending your message..."
+    ></app-loading-spinner>
+
+    <div class="contact-card">
+      <header class="card-head">
+        <h2 class="title">Contact Us</h2>
+        <p class="subtitle">Tell us what you’re working on—we’ll get back fast.</p>
+      </header>
+
+      <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" novalidate [attr.aria-busy]="loading">
+        <div class="form-grid">
+          <!-- Name -->
+          <div class="field">
+            <span class="p-input-icon-left p-float-label field-control">
+              <i class="pi pi-user"></i>
+              <input id="name" type="text" pInputText formControlName="name" />
+              <label for="name">Full name</label>
+            </span>
+          </div>
+
+          <!-- Email -->
+          <div class="field">
+            <span class="p-input-icon-left p-float-label field-control">
+              <i class="pi pi-envelope"></i>
+              <input id="email" type="email" pInputText formControlName="email" />
+              <label for="email">Work email</label>
+            </span>
+          </div>
+
+          <!-- Message -->
+          <div class="field">
+            <span class="p-input-icon-left p-float-label field-control">
+
+              <!-- Using TextareaModule -> pTextarea -->
+              <textarea id="message" pTextarea rows="5" formControlName="message"></textarea>
+              <label for="message">How can we help?</label>
+            </span>
+            <small class="hint">Be as specific as you like.</small>
+          </div>
+
+          <!-- GitHub Repo -->
+          <div class="field">
+            <span class="p-input-icon-left p-float-label field-control">
+              <i class="pi pi-github"></i>
+              <input id="githubRepo" type="text" pInputText formControlName="githubRepo" />
+              <label for="githubRepo">GitHub repo (optional)</label>
+            </span>
+            <small class="hint">Use <code>user/repo</code> or a full URL.</small>
+          </div>
+
+          <!-- Attachment -->
+          <div class="field">
+            <label class="field-label">Attachment (optional, .zip)</label>
+            <p-fileUpload
+              name="attachment"
+              (onSelect)="onUpload($event)"
+              accept=".zip"
+              [showUploadButton]="false"
+              mode="basic"
+              chooseLabel="Choose .zip"
+              class="upload-basic"
+            ></p-fileUpload>
+            <small class="muted">Max 20MB. Drag &amp; drop supported.</small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <p-button
+            icon="pi pi-arrow-left"
+            label="Back"
+            styleClass="p-button-text"
+            routerLink="/"
+          ></p-button>
+          <p-button
+            icon="pi pi-send"
+            iconPos="right"
+            label="Submit"
+            type="submit"
+            [disabled]="contactForm.invalid || loading"
+          ></p-button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+{
+  "mail": {
+    "host": "smtp.office365.com",
+    "port": 587,
+    "secure": false,
+    "user": "hello@gitplumbers.com",
+    "password": "5tdzSnK$QkYvZ2&",
+    "from": "hello@gitplumbers.com"
+  }
+}

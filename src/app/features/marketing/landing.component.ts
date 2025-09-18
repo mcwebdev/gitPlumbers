@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { SeoService } from '../../shared/services/seo.service';
 
 @Component({
   selector: 'app-landing',
@@ -10,7 +11,12 @@ import { RouterLink } from '@angular/router';
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LandingComponent {
+export class LandingComponent implements OnInit {
+  private readonly _seoService = inject(SeoService);
+
+  ngOnInit(): void {
+    this._seoService.updateMetadata(this._seoService.getHomePageMetadata());
+  }
   protected readonly currentYear = new Date().getFullYear();
 
   protected readonly heroCtas: ReadonlyArray<{
@@ -26,36 +32,39 @@ export class LandingComponent {
 
   protected readonly differentiators = [
     {
-      title: 'Enterprise Application Development',
-      description: 'Scale-critical systems refactored and modernized to move at startup speed.',
-    },
-    {
-      title: 'Advanced Data Visualization',
-      description: 'Translate tangled data into boardroom-ready narratives and dashboards.',
-    },
-    {
-      title: 'AI Interfaces',
+      title: 'Full-Stack Team Assembly',
       description:
-        'Facial recognition, Body Pix AI, and voice flows for human-centered experiences.',
+        'We curate the perfect team of specialists for your specific technology stack and challenges.',
     },
     {
-      title: 'Web3 & Blockchain',
-      description: 'Ship smart contracts and decentralized tools with auditable reliability.',
+      title: 'Enterprise Application Modernization',
+      description:
+        'Scale-critical systems refactored and modernized by our network of senior experts.',
+    },
+    {
+      title: 'Cross-Framework Expertise',
+      description:
+        'React, Vue, Angular, Node.js, Python - we bring the right expert for each technology.',
+    },
+    {
+      title: 'End-to-End Project Delivery',
+      description:
+        'From architecture planning to deployment, our specialist teams handle complete transformations.',
     },
   ];
 
   protected readonly valuePillars = [
     {
-      title: 'Tech debt triage',
-      copy: 'We stabilize fragile pipelines fast, with zero-downtime refactors and chaos-free deployments.',
+      title: 'Curated Expert Network',
+      copy: 'Access senior-level specialists across all major frameworks without the overhead of full-time hiring.',
     },
     {
-      title: 'Bug resolution at scale',
-      copy: 'War rooms on autopilot. We automate observability and shrink MTTR with proven playbooks.',
+      title: 'Scalable Team Assembly',
+      copy: 'From solo code reviews to full transformation teams - we scale our expertise to match your needs.',
     },
     {
-      title: 'Pull Request Code Reviews',
-      copy: 'We review your pull requests and provide feedback to help you ship faster and with less bugs.',
+      title: 'Quality-First Delivery',
+      copy: 'Every specialist in our network is vetted for technical excellence and client communication skills.',
     },
   ];
 
@@ -109,5 +118,3 @@ export class LandingComponent {
     },
   ];
 }
-
-

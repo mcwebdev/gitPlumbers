@@ -1,4 +1,4 @@
-import { Component, ViewChild, effect, inject } from '@angular/core';
+import { Component, ViewChild, effect, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -9,6 +9,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { SeoService } from '../../../shared/services/seo.service';
 
 import { ContactFormData, ContactStore } from '../store/contact.store';
 
@@ -41,7 +42,8 @@ const GITHUB_REPO_REGEX =
   templateUrl: './contact.html',
   styleUrls: ['./contact.scss'],
 })
-export class ContactComponent {
+export class ContactComponent implements OnInit {
+  private readonly _seoService = inject(SeoService);
   @ViewChild('uploader') uploader!: FileUpload;
 
   contactForm: FormGroup;
@@ -49,6 +51,10 @@ export class ContactComponent {
 
   loading = false; // mirrored from store if available
   selectedFile?: File; // for label/clear UX
+
+  ngOnInit(): void {
+    this._seoService.updateMetadata(this._seoService.getContactPageMetadata());
+  }
 
   constructor(private fb: FormBuilder, private messages: MessageService) {
     this.contactForm = this.fb.group({

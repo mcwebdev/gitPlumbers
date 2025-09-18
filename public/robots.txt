@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://gitplumbers-35d92.firebaseapp.com/sitemap.xml
+
+# Block access to admin and dashboard areas for non-authenticated users
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /support-requests
+
+# Allow access to public pages
+Allow: /
+Allow: /contact
+Allow: /login
+Allow: /signup
+Allow: /forgot-password
+
+# Block common files that don't need indexing
+Disallow: /*.json$
+Disallow: /*.js$
+Disallow: /*.css$
+Disallow: /chunk-*

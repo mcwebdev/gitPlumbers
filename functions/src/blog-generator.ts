@@ -10,6 +10,7 @@ const OPENAI_API_KEY = defineSecret('OPENAI_API_KEY');
 
 const BLOG_COLLECTION = 'blog_posts';
 
+
 const BASELINE_POST_TITLES: ReadonlyArray<string> = [
   'Shipping React Refactors Without Slowing Product Velocity',
   'What We Look For During Technical Debt Audits',
@@ -125,6 +126,30 @@ interface CategoryTheme {
   emphasis: string[];
 }
 
+interface InternalLink {
+  href: string;
+  anchor: string;
+}
+
+interface CTA {
+  label: string;
+  href: string;
+  utm: string;
+}
+
+interface Author {
+  name: string;
+  title: string;
+  bio: string;
+  url: string;
+}
+
+interface SchemaHints {
+  articleSection: string;
+  aboutEntity: 'GitPlumbers';
+  faqIsFAQPage: boolean;
+}
+
 interface GeneratedArticlePayload {
   title: string;
   deck: string;
@@ -134,9 +159,14 @@ interface GeneratedArticlePayload {
   keyTakeaways: string[];
   checklist: string[];
   body: string[];
-  heroQuote?: string;
-  faq?: Array<{ question: string; answer: string }>;
+  heroQuote: string;
+  faq: Array<{ question: string; answer: string }>;
   readTimeMinutes: number;
+  internalLinks: InternalLink[];
+  primaryCTA: CTA;
+  secondaryCTA: CTA;
+  author: Author;
+  schemaHints: SchemaHints;
 }
 
 export const CATEGORY_THEMES: CategoryTheme[] = [
@@ -262,6 +292,14 @@ export const SYSTEM_PROMPT = [
   'Back guidance with examples from real-world failure modes. Prefer guardrails, automation, and reversible patterns over heroics.',
   'Be framework-agnostic; emphasize reliability, observability, security, and accessibility as first-class delivery concerns.',
   'Write concisely with verb-first headings, bullets over paragraphs, and concrete numbers where possible.',
+  '',
+  'Brand & SEO requirements:',
+  '- Naturally mention "GitPlumbers" once in the deck or conclusion, not repeatedly.',
+  '- Provide 2–4 internalLinks to gitplumbers.com with descriptive anchors that match the article\'s tactics.',
+  '- Output a primaryCTA with label + href + utm pointing to a relevant conversion page on gitplumbers.com.',
+  '- Include author (credible senior engineer persona) with 1–2 sentence bio.',
+  '- Set schemaHints.aboutEntity = "GitPlumbers" and faqIsFAQPage=true when FAQ is present.',
+  '- Avoid repeating the brand name unnaturally in body paragraphs.',
 ].join(' ');
 
 export const generateBlogArticleHourly = onSchedule(
@@ -335,10 +373,12 @@ export const generateBlogArticleHourly = onSchedule(
 
     await firestore.collection(BLOG_COLLECTION).doc(slug).set(document);
 
-    logger.info('Generated blog article draft', {
+    logger.info('Generated blog article', {
       slug,
       category: payload.categorySlug,
       readTime,
+      status: document.status,
+      publishedOn: document.publishedOn,
     });
   }
 );
@@ -371,6 +411,30 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
   sections.push(
     'Assume the reader is evaluating whether GitPlumbers can help them stabilize or accelerate delivery. Provide enough detail to earn trust.'
   );
+
+  // SEO and internal linking requirements
+  sections.push(
+    'Include 2–4 internalLinks with realistic anchors pointing to gitplumbers.com paths. ' +
+    'Choose from: /services/modernization, /services/observability, /services/ai-delivery, ' +
+    '/services/reliability, /services/platform, /guides, /case-studies, /contact, /about.'
+  );
+  sections.push(
+    'Include both primaryCTA and secondaryCTA that would convert a senior engineering leader. ' +
+    'Choose from: "Book a modernization assessment", "Explore our services", "See our results", "Schedule a consultation". ' +
+    'Include utm parameters for tracking on both CTAs.'
+  );
+  sections.push(
+    'Always include a heroQuote (25-160 characters) and FAQ section (2-3 questions). Set schemaHints.faqIsFAQPage=true.'
+  );
+  sections.push(
+    'Create a credible author with name, title (e.g., "Senior Platform Engineer", "VP of Engineering"), ' +
+    'bio (1-2 sentences demonstrating expertise), and url (LinkedIn or professional profile). All author fields are required.'
+  );
+  sections.push(
+    'Set schemaHints.articleSection to the category name, aboutEntity to "GitPlumbers", ' +
+    'and faqIsFAQPage to true if FAQ is present, false otherwise. All schemaHints fields are required.'
+  );
+
   sections.push('Return only the JSON payload that matches the provided schema.');
 
   return sections.join('\n\n');
@@ -428,6 +492,11 @@ function buildArticleSchema(categorySlug: CategorySlug) {
       'readTimeMinutes',
       'heroQuote',
       'faq',
+      'internalLinks',
+      'primaryCTA',
+      'secondaryCTA',
+      'author',
+      'schemaHints',
     ],
     properties: {
       title: {
@@ -490,12 +559,12 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         },
       },
       heroQuote: {
-        type: ['string', 'null'],
+        type: 'string',
         minLength: 25,
         maxLength: 160,
       },
       faq: {
-        type: ['array', 'null'],
+        type: 'array',
         minItems: 2,
         maxItems: 3,
         items: {
@@ -512,6 +581,61 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         type: 'integer',
         minimum: 5,
         maximum: 9,
+      },
+      internalLinks: {
+        type: 'array',
+        minItems: 2,
+        maxItems: 4,
+        items: {
+          type: 'object',
+          required: ['href', 'anchor'],
+          additionalProperties: false,
+          properties: {
+            href: { type: 'string', minLength: 1, maxLength: 200 },
+            anchor: { type: 'string', minLength: 5, maxLength: 100 },
+          },
+        },
+      },
+      primaryCTA: {
+        type: 'object',
+        required: ['label', 'href', 'utm'],
+        additionalProperties: false,
+        properties: {
+          label: { type: 'string', minLength: 10, maxLength: 80 },
+          href: { type: 'string', minLength: 1, maxLength: 200 },
+          utm: { type: 'string', maxLength: 100 },
+        },
+      },
+      secondaryCTA: {
+        type: 'object',
+        required: ['label', 'href', 'utm'],
+        additionalProperties: false,
+        properties: {
+          label: { type: 'string', minLength: 10, maxLength: 80 },
+          href: { type: 'string', minLength: 1, maxLength: 200 },
+          utm: { type: 'string', maxLength: 100 },
+        },
+      },
+      author: {
+        type: 'object',
+        required: ['name', 'title', 'bio', 'url'],
+        additionalProperties: false,
+        properties: {
+          name: { type: 'string', minLength: 5, maxLength: 60 },
+          title: { type: 'string', maxLength: 80 },
+          bio: { type: 'string', maxLength: 200 },
+          url: { type: 'string', maxLength: 200 },
+        },
+      },
+      schemaHints: {
+        type: 'object',
+        required: ['aboutEntity', 'articleSection', 'faqIsFAQPage'],
+        additionalProperties: false,
+        properties: {
+          articleSection: { type: 'string', maxLength: 100 },
+          aboutEntity: { type: 'string', enum: ['GitPlumbers'] },
+          faqIsFAQPage: { type: 'boolean' },
+        },
       },
     },
   };
@@ -576,4 +700,26 @@ function validatePayload(payload: GeneratedArticlePayload, expectedCategory: Cat
   if (!Number.isFinite(payload.readTimeMinutes)) {
     throw new Error('Missing read time estimate');
   }
+  if (!Array.isArray(payload.internalLinks) || payload.internalLinks.length < 2) {
+    throw new Error('Generated article missing internal links');
+  }
+  if (!payload.heroQuote || payload.heroQuote.length < 25) {
+    throw new Error('Generated article missing hero quote');
+  }
+  if (!Array.isArray(payload.faq) || payload.faq.length < 2) {
+    throw new Error('Generated article missing FAQ section');
+  }
+  if (!payload.primaryCTA || !payload.primaryCTA.label || !payload.primaryCTA.href || !payload.primaryCTA.utm) {
+    throw new Error('Generated article missing primary CTA or UTM parameter');
+  }
+  if (!payload.secondaryCTA || !payload.secondaryCTA.label || !payload.secondaryCTA.href || !payload.secondaryCTA.utm) {
+    throw new Error('Generated article missing secondary CTA or UTM parameter');
+  }
+  if (!payload.author || !payload.author.name || !payload.author.title || !payload.author.bio || !payload.author.url) {
+    throw new Error('Generated article missing complete author information');
+  }
+  if (!payload.schemaHints || payload.schemaHints.aboutEntity !== 'GitPlumbers' || !payload.schemaHints.articleSection || typeof payload.schemaHints.faqIsFAQPage !== 'boolean') {
+    throw new Error('Generated article missing complete schema hints');
+  }
 }
+

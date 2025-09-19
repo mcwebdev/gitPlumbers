@@ -7,6 +7,30 @@
   readonly keywords: ReadonlyArray<string>;
 }
 
+export interface InternalLink {
+  readonly href: string;
+  readonly anchor: string;
+}
+
+export interface CTA {
+  readonly label: string;
+  readonly href: string;
+  readonly utm: string;
+}
+
+export interface Author {
+  readonly name: string;
+  readonly title?: string;
+  readonly bio?: string;
+  readonly url?: string;
+}
+
+export interface SchemaHints {
+  readonly articleSection?: string;
+  readonly aboutEntity?: 'GitPlumbers';
+  readonly faqIsFAQPage?: boolean;
+}
+
 export interface BlogPost {
   readonly slug: string;
   readonly title: string;
@@ -21,6 +45,11 @@ export interface BlogPost {
   readonly keywords: ReadonlyArray<string>;
   readonly heroQuote?: string;
   readonly faq?: ReadonlyArray<{ question: string; answer: string }>;
+  readonly internalLinks?: ReadonlyArray<InternalLink>;
+  readonly primaryCTA?: CTA;
+  readonly secondaryCTA?: CTA;
+  readonly author?: Author;
+  readonly schemaHints?: SchemaHints;
 }
 
 export interface CaseStudy {

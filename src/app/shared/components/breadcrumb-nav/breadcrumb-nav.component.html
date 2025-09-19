@@ -1,0 +1,20 @@
+<nav class="breadcrumb-nav" aria-label="Breadcrumb navigation">
+  <!-- Structured Data -->
+  <script type="application/ld+json" [innerHTML]="structuredData() | json"></script>
+  
+  <ol class="breadcrumb-nav__list">
+    <li *ngFor="let item of items(); trackBy: trackByLabel" 
+        class="breadcrumb-nav__item"
+        [class.breadcrumb-nav__item--active]="item.isActive">
+      @if (item.url && !item.isActive) {
+        <a [routerLink]="item.url" class="breadcrumb-nav__link">
+          {{ item.label }}
+        </a>
+      } @else {
+        <span class="breadcrumb-nav__current" aria-current="page">
+          {{ item.label }}
+        </span>
+      }
+    </li>
+  </ol>
+</nav>

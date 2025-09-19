@@ -1,0 +1,12 @@
+<div class="reading-progress" 
+     [class.reading-progress--visible]="isVisible()"
+     role="progressbar"
+     [attr.aria-valuenow]="progress()"
+     aria-valuemin="0"
+     aria-valuemax="100"
+     [attr.aria-label]="'Reading progress: ' + progress() + '%'">
+  <div class="reading-progress__bar" 
+       [style.width.%]="progress()"
+       #progressBar>
+  </div>
+</div>

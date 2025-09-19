@@ -1,0 +1,62 @@
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(-100%);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+
+  &--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reading-progress__bar {
+  height: 100%;
+  background: linear-gradient(90deg, #004c89 0%, #0066cc 100%);
+  transition: width 0.1s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%
+    );
+    animation: shimmer 2s infinite;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .reading-progress {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .reading-progress__bar {
+    background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+  }
+}

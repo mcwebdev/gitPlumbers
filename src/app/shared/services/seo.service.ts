@@ -32,20 +32,20 @@ export class SeoService {
   private readonly _isBrowser = isPlatformBrowser(this._platformId);
 
   private readonly defaultMetadata: SeoMetadata = {
-    title: 'GitPlumbers - Full-Stack Technical Consultancy & Expert Network',
+    title: 'GitPlumbers - AI Code Optimization & Enterprise Modernization Experts',
     description:
-      'Curated network of senior developers across all frameworks. React, Vue, Angular, Node.js, Python specialists for enterprise modernization and code optimization.',
+      'Transform AI-generated codebases into production-ready applications. Expert network specializing in React, Vue, Angular, Node.js, Python optimization and enterprise modernization.',
     keywords:
-      'technical consultancy, full stack experts, React consultants, Vue specialists, Angular developers, Node.js experts, Python consultants, enterprise modernization, code review services',
-    ogTitle: 'GitPlumbers - Full-Stack Technical Consultancy & Expert Network',
+      'AI code optimization, enterprise modernization, React performance, Angular optimization, Vue.js scaling, Node.js experts, Python consultants, technical debt resolution, code review services, AI-generated code cleanup',
+    ogTitle: 'GitPlumbers - AI Code Optimization & Enterprise Modernization',
     ogDescription:
-      'Curated network of senior developers across all frameworks. React, Vue, Angular, Node.js, Python specialists for enterprise modernization and code optimization.',
+      'Expert network transforming AI-generated codebases into scalable, production-ready applications. Specialized in React, Vue, Angular, Node.js, and Python optimization.',
     ogImage: 'https://gitplumbers-35d92.firebaseapp.com/logo.png',
     ogUrl: 'https://gitplumbers-35d92.firebaseapp.com',
     twitterCard: 'summary_large_image',
-    twitterTitle: 'GitPlumbers - Enterprise Code Optimization & Modernization',
+    twitterTitle: 'GitPlumbers - Transform AI Code Chaos into Clean Applications',
     twitterDescription:
-      'Transform AI-generated chaos into clean, scalable applications. Expert code reviews, tech debt resolution, and enterprise modernization services.',
+      'Stop shipping fragile AI-generated code. Our expert network optimizes React, Angular, Vue, Node.js & Python applications for enterprise scale.',
     twitterImage: 'https://gitplumbers-35d92.firebaseapp.com/logo.png',
     robotsIndex: true,
     robotsFollow: true,
@@ -190,5 +190,117 @@ export class SeoService {
       keywords: 'gitplumbers signup, code transformation, software consulting registration',
       ogUrl: 'https://gitplumbers-35d92.firebaseapp.com/signup',
     };
+  }
+
+  /**
+   * Generate metadata optimized for AI search engines and LLMs
+   */
+  generateAiOptimizedMetadata(content: {
+    title: string;
+    description: string;
+    keywords: string[];
+    category?: string;
+    author?: string;
+    publishedAt?: Date;
+    url: string;
+  }): SeoMetadata {
+    const aiOptimizedTitle = this.optimizeForAi(content.title, content.keywords);
+    const aiOptimizedDescription = this.optimizeDescriptionForAi(
+      content.description,
+      content.keywords
+    );
+
+    return {
+      title: aiOptimizedTitle,
+      description: aiOptimizedDescription,
+      keywords: content.keywords.join(', '),
+      ogTitle: aiOptimizedTitle,
+      ogDescription: aiOptimizedDescription,
+      ogUrl: content.url,
+      ogImage: 'https://gitplumbers-35d92.firebaseapp.com/logo.png',
+      twitterCard: 'summary_large_image',
+      twitterTitle: aiOptimizedTitle,
+      twitterDescription: aiOptimizedDescription,
+      robotsIndex: true,
+      robotsFollow: true,
+    };
+  }
+
+  /**
+   * Optimize title for AI search engines
+   */
+  private optimizeForAi(title: string, keywords: string[]): string {
+    const primaryKeyword = keywords[0];
+
+    // Ensure primary keyword is in title
+    if (!title.toLowerCase().includes(primaryKeyword.toLowerCase())) {
+      return `${primaryKeyword}: ${title} | GitPlumbers`;
+    }
+
+    // Add GitPlumbers brand for authority
+    if (!title.includes('GitPlumbers')) {
+      return `${title} | GitPlumbers Expert Guide`;
+    }
+
+    return title;
+  }
+
+  /**
+   * Optimize description for AI understanding and citation
+   */
+  private optimizeDescriptionForAi(description: string, keywords: string[]): string {
+    const primaryKeyword = keywords[0];
+
+    // Ensure description starts with primary keyword for better AI understanding
+    if (!description.toLowerCase().startsWith(primaryKeyword.toLowerCase())) {
+      return `${primaryKeyword}: ${description}`;
+    }
+
+    // Add authority signals that AI models value
+    if (!description.includes('expert') && !description.includes('proven')) {
+      return `${description} Expert insights from senior developers with proven results.`;
+    }
+
+    return description;
+  }
+
+  /**
+   * Generate FAQ schema for better AI question answering
+   */
+  generateFaqSchema(faqs: { question: string; answer: string }[]): Record<string, unknown> {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.answer,
+        },
+      })),
+    };
+  }
+
+  /**
+   * Add structured data to page for better AI understanding
+   */
+  addStructuredData(schema: Record<string, unknown>): void {
+    if (!this._isBrowser) return;
+
+    // Remove existing structured data
+    const existingScript = this._document.querySelector(
+      'script[type="application/ld+json"][data-dynamic]'
+    );
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    // Add new structured data
+    const script = this._document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-dynamic', 'true');
+    script.textContent = JSON.stringify(schema);
+    this._document.head.appendChild(script);
   }
 }

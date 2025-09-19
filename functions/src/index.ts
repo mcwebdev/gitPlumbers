@@ -1,5 +1,5 @@
-import {onRequest} from 'firebase-functions/v2/https';
-import {resolve} from 'path';
+import { onRequest } from 'firebase-functions/v2/https';
+import { resolve } from 'path';
 import * as admin from 'firebase-admin';
 
 admin.initializeApp();
@@ -17,3 +17,5 @@ export const ssr = onRequest(async (request, response) => {
 });
 
 export * from './contact';
+export * from './ai-analytics';
+export * from './blog-generator';

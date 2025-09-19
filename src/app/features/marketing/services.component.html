@@ -1,0 +1,62 @@
+<section class="services-hero">
+  <div class="container">
+    <h1>Code Optimization Services</h1>
+    <p class="hero-subtitle">
+      Transform your AI-generated codebase into a production-ready, scalable application
+    </p>
+  </div>
+</section>
+
+<section class="services-grid">
+  <div class="container">
+    <h2>Our Services</h2>
+
+    @for (service of services; track service.title) {
+    <div class="service-card">
+      <h3>{{ service.title }}</h3>
+      <p>{{ service.description }}</p>
+
+      <div class="features">
+        <h4>What's Included:</h4>
+        <ul>
+          @for (feature of service.features; track feature) {
+          <li>{{ feature }}</li>
+          }
+        </ul>
+      </div>
+
+      <div class="frameworks">
+        <h4>Technologies:</h4>
+        <div class="tech-tags">
+          @for (framework of service.frameworks; track framework) {
+          <span class="tech-tag">{{ framework }}</span>
+          }
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+</section>
+
+<section class="process-section">
+  <div class="container">
+    <h2>Our Process</h2>
+    <div class="process-grid">
+      @for (step of processSteps; track step.step) {
+      <div class="process-step">
+        <div class="step-number">{{ step.step }}</div>
+        <h3>{{ step.title }}</h3>
+        <p>{{ step.description }}</p>
+      </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container">
+    <h2>Ready to Optimize Your Code?</h2>
+    <p>Get a free code audit and see how we can improve your application's performance.</p>
+    <a routerLink="/contact" class="cta-button">Get Free Audit</a>
+  </div>
+</section>

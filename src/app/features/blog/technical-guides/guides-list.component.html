@@ -1,0 +1,38 @@
+﻿<section class="guides-list" aria-labelledby="guidesHeading">
+  <header class="guides-list__hero">
+    <p class="guides-list__eyebrow">Playbooks from the field</p>
+    <h1 id="guidesHeading">Technical guides that accelerate remediation</h1>
+    <p>
+      Each guide distils the audits, workflows, and communication cadences we deploy when stabilising
+      platforms built with AI-assisted code. Use them as implementation templates with your teams.
+    </p>
+  </header>
+
+  <section class="guides-list__grid" aria-label="Guides">
+    <article *ngFor="let guide of guides" class="guide-card">
+      <header>
+        <p class="guide-card__level">{{ guide.level | titlecase }} guide</p>
+        <h2>
+          <a [routerLink]="['/blog/guides', guide.slug]">{{ guide.title }}</a>
+        </h2>
+      </header>
+      <p class="guide-card__summary">{{ guide.summary }}</p>
+      <section class="guide-card__section" aria-label="Key takeaways">
+        <h3>What you will learn</h3>
+        <ul>
+          <li *ngFor="let item of guide.takeaways">{{ item }}</li>
+        </ul>
+      </section>
+      <section class="guide-card__section" aria-label="Checkpoints">
+        <h3>Readiness checkpoints</h3>
+        <ul>
+          <li *ngFor="let checkpoint of guide.checkpoints">{{ checkpoint }}</li>
+        </ul>
+      </section>
+      <footer class="guide-card__footer">
+        <span>{{ guide.stack }}</span>
+        <a [routerLink]="['/blog/guides', guide.slug]">Open guide</a>
+      </footer>
+    </article>
+  </section>
+</section>

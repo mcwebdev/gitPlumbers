@@ -1,0 +1,145 @@
+﻿.case-study-detail {
+  max-width: 70rem;
+  margin: 0 auto;
+  display: grid;
+  gap: 2.5rem;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.case-study-detail__hero {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 56rem;
+}
+
+.case-study-detail__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.case-study-detail__client {
+  margin: 0;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.case-study-detail__summary {
+  margin: 0;
+  color: #111827;
+  line-height: 1.6;
+}
+
+.case-study-detail__alert {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+  border-radius: 0.75rem;
+}
+
+.case-study-detail__stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.case-study-detail__stack li {
+  border-radius: 9999px;
+  border: 1px solid rgba(12, 20, 36, 0.12);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  background: rgba(12, 20, 36, 0.05);
+}
+
+.case-study-detail__back {
+  align-self: start;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.case-study-detail__back:hover,
+.case-study-detail__back:focus {
+  text-decoration: underline;
+}
+
+.case-study-detail__section {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.case-study-detail__section ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.case-study-detail__metrics {
+  display: grid;
+  gap: 1rem;
+}
+
+.case-study-detail__metrics article {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(12, 20, 36, 0.1);
+  padding: 1.25rem;
+  background: #f5f7fb;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.case-study-detail__metric-value {
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.case-study-detail__metric-label {
+  margin: 0;
+  color: #4b5563;
+}
+
+.case-study-detail__related ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.case-study-detail__related a {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(12, 20, 36, 0.08);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.case-study-detail__related a:hover,
+.case-study-detail__related a:focus {
+  border-color: rgba(12, 20, 36, 0.2);
+  background: rgba(12, 20, 36, 0.03);
+}
+
+.case-study-detail__related-title {
+  font-weight: 600;
+}
+
+.case-study-detail__related-summary {
+  color: #4b5563;
+}
+
+@media (min-width: 960px) {
+  .case-study-detail__metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

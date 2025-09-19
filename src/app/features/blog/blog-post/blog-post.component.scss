@@ -1,0 +1,131 @@
+﻿.blog-post {
+  max-width: 70rem;
+  margin: 0 auto;
+  display: grid;
+  gap: 2.5rem;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.blog-post__hero {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 56rem;
+}
+
+.blog-post__meta {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.blog-post__deck {
+  margin: 0;
+  color: #111827;
+  line-height: 1.6;
+}
+
+.blog-post__alert {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+  border-radius: 0.75rem;
+}
+
+.blog-post__quote {
+  margin: 0;
+  padding-left: 1.25rem;
+  border-left: 3px solid rgba(12, 20, 36, 0.35);
+  font-style: italic;
+  color: #0f172a;
+}
+
+.blog-post__back {
+  align-self: start;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.blog-post__back:hover,
+.blog-post__back:focus {
+  text-decoration: underline;
+}
+
+.blog-post__body p {
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+  color: #1f2937;
+}
+
+.blog-post__takeaways,
+.blog-post__checklist,
+.blog-post__faq {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.blog-post__takeaways ul,
+.blog-post__checklist ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.blog-post__faq dl {
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.blog-post__faq dt {
+  font-weight: 600;
+}
+
+.blog-post__faq dd {
+  margin: 0.25rem 0 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.blog-post__related ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.blog-post__related a {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(12, 20, 36, 0.08);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.blog-post__related a:hover,
+.blog-post__related a:focus {
+  border-color: rgba(12, 20, 36, 0.2);
+  background: rgba(12, 20, 36, 0.03);
+}
+
+.blog-post__related-title {
+  font-weight: 600;
+}
+
+.blog-post__related-summary {
+  color: #4b5563;
+}
+
+@media (max-width: 640px) {
+  .blog-post {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

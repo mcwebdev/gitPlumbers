@@ -1,0 +1,99 @@
+<section class="about-hero">
+  <div class="container">
+    <h1>About GitPlumbers</h1>
+    <p class="hero-subtitle">
+      Expert network of senior developers transforming AI-generated code into production-ready
+      applications
+    </p>
+  </div>
+</section>
+
+<section class="mission-section">
+  <div class="container">
+    <div class="mission-content">
+      <h2>Our Mission</h2>
+      <p>
+        In the age of AI-assisted development, we bridge the gap between rapid prototyping and
+        production-ready code. Our expert network specializes in transforming AI-generated codebases
+        into scalable, maintainable, and secure applications that enterprises can rely on.
+      </p>
+      <p>
+        We believe that AI is a powerful tool for accelerating development, but human expertise is
+        irreplaceable when it comes to architecture decisions, performance optimization, and
+        security hardening.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      @for (stat of companyStats; track stat.label) {
+      <div class="stat-item">
+        <div class="stat-number">{{ stat.number }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="team-section">
+  <div class="container">
+    <h2>Meet Our Experts</h2>
+    <div class="team-grid">
+      @for (member of teamMembers; track member.name) {
+      <div class="team-card">
+        <div class="member-info">
+          <h3>{{ member.name }}</h3>
+          <p class="member-title">{{ member.title }}</p>
+          <p class="member-experience">{{ member.experience }} experience</p>
+          <p class="member-background">{{ member.background }}</p>
+        </div>
+
+        <div class="member-expertise">
+          <h4>Expertise</h4>
+          <div class="expertise-tags">
+            @for (skill of member.expertise; track skill) {
+            <span class="expertise-tag">{{ skill }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="member-achievements">
+          <h4>Achievements</h4>
+          <ul>
+            @for (achievement of member.achievements; track achievement) {
+            <li>{{ achievement }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="values-section">
+  <div class="container">
+    <h2>Our Values</h2>
+    <div class="values-grid">
+      @for (value of values; track value.title) {
+      <div class="value-card">
+        <div class="value-icon">{{ value.icon }}</div>
+        <h3>{{ value.title }}</h3>
+        <p>{{ value.description }}</p>
+      </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container">
+    <h2>Ready to Work with Us?</h2>
+    <p>Join hundreds of companies that trust GitPlumbers with their code optimization needs.</p>
+    <a routerLink="/contact" class="cta-button">Start Your Project</a>
+  </div>
+</section>

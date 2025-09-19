@@ -1,0 +1,55 @@
+﻿<section class="case-studies-list" aria-labelledby="caseStudiesHeading">
+  <header class="case-studies-list__hero">
+    <p class="case-studies-list__eyebrow">Proof in production</p>
+    <h1 id="caseStudiesHeading">Modernisation success stories</h1>
+    <p>
+      Transparent breakdowns of the remediation programmes we lead. Each case study covers the
+      initial risk, the playbook we applied, and the measurable outcomes that executives share.
+    </p>
+  </header>
+
+  <section class="case-studies-list__grid" aria-label="Client case studies">
+    <article *ngFor="let study of studies" class="case-card">
+      <header>
+        <p class="case-card__client">{{ study.client }} &middot; {{ study.industry }}</p>
+        <h2>
+          <a [routerLink]="['/blog/case-studies', study.slug]">{{ study.title }}</a>
+        </h2>
+        <ul class="case-card__stack">
+          <li *ngFor="let tech of study.stack">{{ tech }}</li>
+        </ul>
+      </header>
+      <p class="case-card__summary">{{ study.summary }}</p>
+
+      <section aria-label="Challenge" class="case-card__section">
+        <h3>Challenge</h3>
+        <p>{{ study.challenge }}</p>
+      </section>
+
+      <section aria-label="Approach" class="case-card__section">
+        <h3>Approach</h3>
+        <ul>
+          <li *ngFor="let item of study.approach">{{ item }}</li>
+        </ul>
+      </section>
+
+      <section aria-label="Outcomes" class="case-card__section">
+        <h3>Outcomes</h3>
+        <ul>
+          <li *ngFor="let item of study.outcomes">{{ item }}</li>
+        </ul>
+      </section>
+
+      <ul class="case-card__metrics" aria-label="Key metrics">
+        <li *ngFor="let metric of study.metrics">
+          <span class="case-card__metric-value">{{ metric.metric }}</span>
+          <span class="case-card__metric-label">{{ metric.label }}</span>
+        </li>
+      </ul>
+
+      <footer class="case-card__footer">
+        <a [routerLink]="['/blog/case-studies', study.slug]">See full engagement breakdown</a>
+      </footer>
+    </article>
+  </section>
+</section>

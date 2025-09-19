@@ -1,16 +1,83 @@
 import { Routes } from '@angular/router';
 import { adminGuard, userGuard } from './shared/guards/auth.guards';
+import { blogRoutes } from './features/blog/blog.routes';
 
 export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
       import('./features/marketing/landing.component').then((m) => m.LandingComponent),
+    data: {
+      seo: {
+        title: 'GitPlumbers - AI Code Optimization & Enterprise Modernization',
+        description:
+          'Transform AI-generated codebases into production-ready applications. Expert network specializing in React, Vue, Angular, Node.js, Python optimization.',
+        keywords: [
+          'AI code optimization',
+          'enterprise modernization',
+          'React performance',
+          'Angular optimization',
+          'Vue.js scaling',
+          'technical debt resolution',
+        ],
+      },
+    },
   },
   {
     path: 'contact',
     loadComponent: () =>
       import('./features/contact/contact/contact').then((m) => m.ContactComponent),
+    data: {
+      seo: {
+        title: 'Contact GitPlumbers - Get Your Code Audit Today',
+        description:
+          'Ready to transform your AI-generated codebase? Contact our expert network for code audits, optimization, and enterprise modernization services.',
+        keywords: [
+          'code audit',
+          'technical consultation',
+          'enterprise development',
+          'code review services',
+        ],
+      },
+    },
+  },
+  {
+    path: 'services',
+    loadComponent: () =>
+      import('./features/marketing/services.component').then((m) => m.ServicesComponent),
+    data: {
+      seo: {
+        title: 'Code Optimization Services | React, Angular, Vue, Node.js Experts',
+        description:
+          'Comprehensive code optimization services for React, Angular, Vue, Node.js, and Python. Enterprise modernization, technical debt resolution, and performance optimization.',
+        keywords: [
+          'code optimization services',
+          'React optimization',
+          'Angular performance',
+          'Vue.js consulting',
+          'Node.js scaling',
+          'Python modernization',
+        ],
+      },
+    },
+  },
+  {
+    path: 'about',
+    loadComponent: () =>
+      import('./features/marketing/about.component').then((m) => m.AboutComponent),
+    data: {
+      seo: {
+        title: 'About GitPlumbers - Expert Network of Senior Developers',
+        description:
+          'Meet the expert network behind GitPlumbers. Senior developers specializing in enterprise code optimization, modernization, and AI-generated code cleanup.',
+        keywords: [
+          'senior developers',
+          'technical experts',
+          'code optimization team',
+          'enterprise consultants',
+        ],
+      },
+    },
   },
   {
     path: 'login',
@@ -40,6 +107,21 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'ai-analytics',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/dashboard/ai-analytics-dashboard.component').then(
+        (m) => m.AiAnalyticsDashboardComponent
+      ),
+    data: {
+      seo: {
+        title: 'AI Analytics Dashboard - GitPlumbers',
+        description: 'Track AI-driven traffic, citations, and content performance analytics.',
+        keywords: ['AI analytics', 'traffic tracking', 'content performance', 'dashboard'],
+      },
+    },
+  },
+  {
     path: 'support-requests',
     canActivate: [adminGuard],
     loadComponent: () =>
@@ -47,6 +129,8 @@ export const routes: Routes = [
         './features/support-requests/support-requests-list/support-requests-list.component'
       ).then((m) => m.SupportRequestsListComponent),
   },
+  // Import blog routes
+  ...blogRoutes,
   {
     path: '**',
     redirectTo: '',

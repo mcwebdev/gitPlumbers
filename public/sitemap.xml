@@ -7,41 +7,117 @@
   <!-- Homepage - Highest priority -->
   <url>
     <loc>https://gitplumbers-35d92.firebaseapp.com/</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  
+  <!-- Services Page - High priority for SEO -->
+  <url>
+    <loc>https://gitplumbers-35d92.firebaseapp.com/services</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- About Page - Important for E-E-A-T -->
+  <url>
+    <loc>https://gitplumbers-35d92.firebaseapp.com/about</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   
   <!-- Contact Page - Important for business -->
   <url>
     <loc>https://gitplumbers-35d92.firebaseapp.com/contact</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  
+  <!-- Blog Main Page - Content marketing hub -->
+  <url>
+    <loc>https://gitplumbers-35d92.firebaseapp.com/blog</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Case Studies - High value for AI citation -->
+  <url>
+    <loc>https://gitplumbers-35d92.firebaseapp.com/blog/case-studies</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Technical Guides - AI-optimized content -->
+  <url>
+    <loc>https://gitplumbers-35d92.firebaseapp.com/blog/guides</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Sample high-value content pages for AI optimization -->
+  <url>
+    <loc>https://gitplumbers-35d92.firebaseapp.com/blog/ai-code-optimization-best-practices</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://gitplumbers-35d92.firebaseapp.com/blog/react-performance-optimization-guide</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://gitplumbers-35d92.firebaseapp.com/blog/enterprise-angular-modernization</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://gitplumbers-35d92.firebaseapp.com/blog/case-studies/fintech-react-optimization</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://gitplumbers-35d92.firebaseapp.com/blog/case-studies/healthcare-angular-migration</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
   </url>
   
   <!-- Login Page - For user access -->
   <url>
     <loc>https://gitplumbers-35d92.firebaseapp.com/login</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.4</priority>
   </url>
   
   <!-- Signup Page - For user registration -->
   <url>
     <loc>https://gitplumbers-35d92.firebaseapp.com/signup</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.5</priority>
   </url>
   
   <!-- Forgot Password Page -->
   <url>
     <loc>https://gitplumbers-35d92.firebaseapp.com/forgot-password</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
+    <priority>0.2</priority>
   </url>
   
 </urlset>

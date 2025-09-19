@@ -2,30 +2,35 @@
 import { CommonModule, DatePipe, NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BlogContentService } from '../blog-content.service';
+import { BlogStore } from '../blog.store';
 import { BlogCategory, BlogPost, CaseStudy, GuideSummary } from '../blog-content';
 import { SeoService } from '../../../shared/services/seo.service';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-blog-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgFor, DatePipe],
+  imports: [CommonModule, RouterLink, NgFor, DatePipe, LoadingSpinnerComponent],
   templateUrl: './blog-list.component.html',
   styleUrl: './blog-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BlogListComponent implements OnInit {
   private readonly _content = inject(BlogContentService);
+  private readonly _blogStore = inject(BlogStore);
   private readonly _seo = inject(SeoService);
 
   protected readonly categories: ReadonlyArray<BlogCategory> = this._content.categories;
-  protected readonly featuredPosts: ReadonlyArray<BlogPost> = this._content.featuredPosts;
-  protected readonly recentPosts: ReadonlyArray<BlogPost> = this._content.recentPosts;
+  protected readonly featuredPosts = this._blogStore.featuredPosts;
+  protected readonly recentPosts = this._blogStore.recentPosts;
   protected readonly caseStudiesPreview: ReadonlyArray<CaseStudy> = this._content
     .getCaseStudies()
     .slice(0, 2);
   protected readonly guideHighlights: ReadonlyArray<GuideSummary> = this._content
     .getGuides()
     .slice(0, 2);
+
+  protected readonly isLoading = this._blogStore.loading;
 
   ngOnInit(): void {
     this._seo.updateMetadata(
@@ -54,7 +59,7 @@ export class BlogListComponent implements OnInit {
         '@type': 'Organization',
         name: 'GitPlumbers',
       },
-      hasPart: this.featuredPosts.map((post) => ({
+      hasPart: this.featuredPosts().map((post) => ({
         '@type': 'BlogPosting',
         headline: post.title,
         url: `https://gitplumbers-35d92.firebaseapp.com/blog/${post.slug}`,

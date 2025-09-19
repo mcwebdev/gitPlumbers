@@ -1,0 +1,164 @@
+.blog-admin {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  &__header {
+    margin-bottom: 2rem;
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  &__drafts,
+  &__published {
+    margin-bottom: 2rem;
+    
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 0.5rem;
+    }
+  }
+
+  &__empty {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+    font-size: 1.1rem;
+  }
+}
+
+.stat-card {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #666;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+  }
+}
+
+.post-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.post-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &--draft {
+    border-left: 4px solid #ffc107;
+  }
+
+  &--published {
+    border-left: 4px solid #28a745;
+  }
+
+  header {
+    margin-bottom: 1rem;
+
+    h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.2rem;
+      color: #333;
+    }
+
+    .post-meta {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+
+  .post-summary {
+    margin: 0 0 1rem 0;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  .post-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: inline-block;
+  text-align: center;
+
+  &--primary {
+    background: #007bff;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: #0056b3;
+    }
+  }
+
+  &--secondary {
+    background: #6c757d;
+    color: white;
+
+    &:hover {
+      background: #545b62;
+    }
+  }
+
+  &--warning {
+    background: #ffc107;
+    color: #212529;
+
+    &:hover:not(:disabled) {
+      background: #e0a800;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}

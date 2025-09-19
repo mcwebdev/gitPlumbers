@@ -129,6 +129,12 @@ export const routes: Routes = [
         './features/support-requests/support-requests-list/support-requests-list.component'
       ).then((m) => m.SupportRequestsListComponent),
   },
+  {
+    path: 'blog-admin',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/blog/blog-admin/blog-admin.component').then((m) => m.BlogAdminComponent),
+  },
   // Import blog routes
   ...blogRoutes,
   {

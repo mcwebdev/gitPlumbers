@@ -1,40 +1,41 @@
-﻿<article class="blog-post" aria-labelledby="blogPostTitle">
+﻿@if (post(); as currentPost) {
+<article class="blog-post" aria-labelledby="blogPostTitle">
   <header class="blog-post__hero">
     <p class="blog-post__meta">
-      {{ post().categorySlug | titlecase }} &middot; {{ post().publishedOn | date: 'MMM d, y' }} &middot;
-      {{ post().readTime }}
+      {{ currentPost.categorySlug | titlecase }} &middot; {{ currentPost.publishedOn | date: 'MMM d, y' }} &middot;
+      {{ currentPost.readTime }}
     </p>
-    <h1 id="blogPostTitle">{{ post().title }}</h1>
-    <p class="blog-post__deck">{{ post().deck }}</p>
+    <h1 id="blogPostTitle">{{ currentPost.title }}</h1>
+    <p class="blog-post__deck">{{ currentPost.deck }}</p>
     <p *ngIf="unknownPost()" class="blog-post__alert">
       The post you were looking for is unavailable. We picked a related briefing instead.
     </p>
-    <blockquote *ngIf="post().heroQuote" class="blog-post__quote">{{ post().heroQuote }}</blockquote>
+    <blockquote *ngIf="currentPost.heroQuote" class="blog-post__quote">{{ currentPost.heroQuote }}</blockquote>
     <a routerLink="/blog" class="blog-post__back">Back to all posts</a>
   </header>
 
   <section class="blog-post__body" aria-label="Article body">
-    <p *ngFor="let paragraph of post().body">{{ paragraph }}</p>
+    <p *ngFor="let paragraph of currentPost.body">{{ paragraph }}</p>
   </section>
 
   <section class="blog-post__takeaways" aria-label="Key takeaways">
     <h2>Key takeaways</h2>
     <ul>
-      <li *ngFor="let item of post().keyTakeaways">{{ item }}</li>
+      <li *ngFor="let item of currentPost.keyTakeaways">{{ item }}</li>
     </ul>
   </section>
 
   <section class="blog-post__checklist" aria-label="Implementation checklist">
     <h2>Implementation checklist</h2>
     <ul>
-      <li *ngFor="let item of post().checklist">{{ item }}</li>
+      <li *ngFor="let item of currentPost.checklist">{{ item }}</li>
     </ul>
   </section>
 
-  <section class="blog-post__faq" *ngIf="post().faq?.length" aria-label="Frequently asked questions">
+  <section class="blog-post__faq" *ngIf="currentPost.faq?.length" aria-label="Frequently asked questions">
     <h2>Questions we hear from teams</h2>
     <dl>
-      <div *ngFor="let item of post().faq">
+      <div *ngFor="let item of currentPost.faq">
         <dt>{{ item.question }}</dt>
         <dd>{{ item.answer }}</dd>
       </div>
@@ -53,3 +54,6 @@
     </ul>
   </section>
 </article>
+} @else {
+  <app-loading-spinner [active]="isLoading()" message="Loading post..."></app-loading-spinner>
+}

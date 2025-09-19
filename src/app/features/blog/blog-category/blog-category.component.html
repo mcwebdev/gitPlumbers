@@ -1,4 +1,7 @@
-﻿<section class="blog-category" aria-labelledby="categoryHeading">
+﻿@if (isLoading()) {
+  <app-loading-spinner [active]="true" message="Loading category posts..."></app-loading-spinner>
+} @else {
+<section class="blog-category" aria-labelledby="categoryHeading">
   <header class="blog-category__hero">
     <p class="blog-category__eyebrow">Category</p>
     <h1 id="categoryHeading">{{ category().title }}</h1>
@@ -42,3 +45,4 @@
     </article>
   </section>
 </section>
+}

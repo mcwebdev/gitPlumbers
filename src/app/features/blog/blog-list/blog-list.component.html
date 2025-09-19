@@ -1,4 +1,7 @@
-﻿<section class="blog-list">
+﻿@if (isLoading()) {
+  <app-loading-spinner [active]="true" message="Loading blog posts..."></app-loading-spinner>
+} @else {
+<section class="blog-list">
   <header class="blog-list__hero" aria-label="GitPlumbers Insights overview">
     <p class="blog-list__eyebrow">Insights from the field</p>
     <h1>GitPlumbers Insights</h1>
@@ -14,7 +17,7 @@
       <h2>Featured briefings</h2>
       <p>High-impact reads that engineering and product leaders share with their teams.</p>
     </header>
-    <article *ngFor="let post of featuredPosts" class="blog-card">
+    <article *ngFor="let post of featuredPosts()" class="blog-card">
       <header>
         <p class="blog-card__category">{{ post.categorySlug | titlecase }}</p>
         <h3>
@@ -44,7 +47,7 @@
       <p>Weekly perspectives on stabilising AI-assisted codebases with measurable outcomes.</p>
     </header>
     <ul>
-      <li *ngFor="let post of recentPosts">
+      <li *ngFor="let post of recentPosts()">
         <a [routerLink]="['/blog', post.slug]">
           <span class="blog-list__latest-title">{{ post.title }}</span>
           <span class="blog-list__latest-summary">{{ post.summary }}</span>
@@ -120,3 +123,4 @@
     </article>
   </section>
 </section>
+}

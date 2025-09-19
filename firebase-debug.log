@@ -1,0 +1,29 @@
+[debug] [2025-09-19T15:36:53.481Z] ----------------------------------------------------------------------
+[debug] [2025-09-19T15:36:53.483Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\d33psp33d\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
+[debug] [2025-09-19T15:36:53.484Z] CLI Version:   14.11.0
+[debug] [2025-09-19T15:36:53.484Z] Platform:      win32
+[debug] [2025-09-19T15:36:53.484Z] Node Version:  v22.17.1
+[debug] [2025-09-19T15:36:53.484Z] Time:          Fri Sep 19 2025 08:36:53 GMT-0700 (Pacific Daylight Time)
+[debug] [2025-09-19T15:36:53.484Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-09-19T15:36:53.677Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-09-19T15:36:53.678Z] > authorizing via signed-in user (mattcharlton33@gmail.com)
+[debug] [2025-09-19T15:36:53.678Z] [iam] checking project gitplumbers-35d92 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-09-19T15:36:53.679Z] Checked if tokens are valid: true, expires at: 1758298207782
+[debug] [2025-09-19T15:36:53.679Z] Checked if tokens are valid: true, expires at: 1758298207782
+[debug] [2025-09-19T15:36:53.680Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/gitplumbers-35d92:testIamPermissions [none]
+[debug] [2025-09-19T15:36:53.680Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/gitplumbers-35d92:testIamPermissions x-goog-quota-user=projects/gitplumbers-35d92
+[debug] [2025-09-19T15:36:53.680Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/gitplumbers-35d92:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-09-19T15:36:53.860Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/gitplumbers-35d92:testIamPermissions 200
+[debug] [2025-09-19T15:36:53.860Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/gitplumbers-35d92:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-09-19T15:36:53.860Z] Checked if tokens are valid: true, expires at: 1758298207782
+[debug] [2025-09-19T15:36:53.860Z] Checked if tokens are valid: true, expires at: 1758298207782
+[debug] [2025-09-19T15:36:53.860Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/gitplumbers-35d92/serviceAccounts/gitplumbers-35d92@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-09-19T15:36:53.860Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/gitplumbers-35d92/serviceAccounts/gitplumbers-35d92@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-09-19T15:36:54.222Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/gitplumbers-35d92/serviceAccounts/gitplumbers-35d92@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-09-19T15:36:54.223Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/gitplumbers-35d92/serviceAccounts/gitplumbers-35d92@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'gitplumbers-35d92'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run lint

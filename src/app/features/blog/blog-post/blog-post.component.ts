@@ -11,13 +11,15 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BlogContentService } from '../blog-content.service';
+import { BlogStore } from '../blog.store';
 import { BlogPost } from '../blog-content';
 import { SeoService } from '../../../shared/services/seo.service';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-blog-post',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgFor, NgIf],
+  imports: [CommonModule, RouterLink, NgFor, NgIf, LoadingSpinnerComponent],
   templateUrl: './blog-post.component.html',
   styleUrl: './blog-post.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +27,7 @@ import { SeoService } from '../../../shared/services/seo.service';
 export class BlogPostComponent implements OnDestroy {
   private readonly _route = inject(ActivatedRoute);
   private readonly _content = inject(BlogContentService);
+  private readonly _blogStore = inject(BlogStore);
   private readonly _seo = inject(SeoService);
 
   private readonly _slug = toSignal(
@@ -34,23 +37,24 @@ export class BlogPostComponent implements OnDestroy {
 
   protected readonly slug = computed(() => this._slug());
 
-  private readonly _requestedPost = computed<BlogPost | undefined>(() =>
-    this._content.getPostBySlug(this.slug())
-  );
+  protected readonly post = computed(() => {
+    const slug = this.slug();
+    return this._blogStore.getPostBySlug(slug);
+  });
 
-  protected readonly post = computed<BlogPost>(() =>
-    this._requestedPost() ?? this._content.recentPosts[0]
-  );
+  protected readonly unknownPost = computed(() => !this.post());
 
-  protected readonly unknownPost = computed(() => !this._requestedPost());
+  protected readonly relatedPosts = computed(() => {
+    const currentPost = this.post();
+    if (!currentPost) return [];
+    return this._blogStore.getRelatedPosts(currentPost.slug, currentPost.categorySlug);
+  });
 
-  protected readonly relatedPosts = computed(() =>
-    this._content.getRelatedPosts(this.post().slug, this.post().categorySlug)
-  );
+  protected readonly isLoading = computed(() => this._blogStore.loading());
 
   private readonly _seoEffect = effect(() => {
     const slug = this.slug();
-    const post = this._requestedPost();
+    const post = this.post();
 
     if (!post) {
       this._seo.updateMetadata({

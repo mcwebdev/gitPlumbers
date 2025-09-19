@@ -11,13 +11,15 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BlogContentService } from '../blog-content.service';
+import { BlogStore } from '../blog.store';
 import { BlogCategory, BlogPost } from '../blog-content';
 import { SeoService } from '../../../shared/services/seo.service';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-blog-category',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgIf, NgFor, DatePipe],
+  imports: [CommonModule, RouterLink, NgIf, NgFor, DatePipe, LoadingSpinnerComponent],
   templateUrl: './blog-category.component.html',
   styleUrl: './blog-category.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +27,7 @@ import { SeoService } from '../../../shared/services/seo.service';
 export class BlogCategoryComponent implements OnDestroy {
   private readonly _route = inject(ActivatedRoute);
   private readonly _content = inject(BlogContentService);
+  private readonly _blogStore = inject(BlogStore);
   private readonly _seo = inject(SeoService);
 
   private readonly _slug = toSignal(
@@ -45,8 +48,10 @@ export class BlogCategoryComponent implements OnDestroy {
   protected readonly unknownCategory = computed(() => !this._requestedCategory());
 
   protected readonly posts = computed<ReadonlyArray<BlogPost>>(() =>
-    this._content.getPostsByCategory(this.category().slug)
+    this._blogStore.getPostsByCategory(this.category().slug)
   );
+
+  protected readonly isLoading = computed(() => this._blogStore.loading());
 
   private readonly _seoEffect = effect(() => {
     const slug = this.requestedSlug();

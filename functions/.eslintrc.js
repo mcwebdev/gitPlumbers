@@ -33,5 +33,6 @@ module.exports = {
     'max-len': ['error', { code: 200 }],
     'linebreak-style': 'off',
     'require-jsdoc': 'off',
+    'operator-linebreak': ['error', 'after', { overrides: { '?': 'after', ':': 'after' } }],
   },
 };

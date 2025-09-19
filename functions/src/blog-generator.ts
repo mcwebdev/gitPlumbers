@@ -15,9 +15,108 @@ const BASELINE_POST_TITLES: ReadonlyArray<string> = [
   'What We Look For During Technical Debt Audits',
   'Angular Modernization: From Zones to Signals in 30 Days',
   'Reducing Incident Volume With Observability Playbooks',
+  'The Hidden Interest on Your Tech Debt: How to Calculate It (and Stop Paying)',
+  'From Firefighting to Flow: A Practical Playbook for Operational Calm',
+  'Shipping With Confidence: Release Practices That Don’t Break Fridays',
+  'The Tech-Debt Triage Guide: What to Fix Now vs. Later',
+  'Sustainable Velocity: Guardrails That Let Teams Move Fast Safely',
+  'Legacy Systems, Modern Outcomes: A Stepwise Modernization Blueprint',
+  'How to Make Incident Reviews Actually Reduce Incidents',
+  'Refactors That Pay for Themselves: Finding ROI in the Codebase',
+  'Stop the Bleed: Stabilization Sprints That Stick',
+  'The Architecture Debt Snowball: Unwinding Years in Weeks',
+  'Observability First: Dashboards That Change Behavior, Not Just Charts',
+  'Developer Experience as a Reliability Strategy',
+  'Risk-Scoped Roadmaps: De-Risk Quarter by Quarter',
+  'The Minimal-Change Modernization Pattern',
+  'Code Smells vs. Systemic Risk: Knowing the Difference',
+  'Automated Regression Barriers: Your Safety Net for Bold Changes',
+  'Release Health North Stars: What to Measure, What to Ignore',
+  'Feature Flags Without Chaos: Governance for Controlled Rollouts',
+  'When to Delete Code: The Courageous Clean-Up Manual',
+  'The Cost of Vibe Coding: Real Metrics From Real Teams',
+  'Scaling Without a Rewrite: Strangler-Fig Tactics That Work',
+  'Dependency Heatmaps: See Risk Like a CTO',
+  'Operational Runbooks That Don’t Rot',
+  'SLIs, SLOs, and SLA Reality: Aligning Reliability With Business',
+  'De-Clog Your CI/CD: Pipeline Latency and Flake Reduction',
+  'Monolith, Modular, or Microservices: Choosing for Throughput',
+  'How to Kill Flaky Tests for Good',
+  'The 90-Day Stability Program for Product Teams',
+  'Backlogs That Reduce Risk: Prioritization for Flow',
+  'The Incident Zero Illusion: Aim for Fast Recovery Instead',
+  'The Tech Debt Ledger: Make Invisible Work Visible',
+  'Refactoring With Feature Parity: A Step-by-Step Approach',
+  'Operational Calm for AI-Assisted Codebases',
+  'Guardrails for AI-Generated PRs: Quality Without Slowing Down',
+  'Modernization Without Downtime: Patterns for High-Uptime Teams',
+  'What ‘Done’ Means in Modernization Projects',
+  'The First 10 Days in a Messy Codebase',
+  'From Tribal Knowledge to Shared Wisdom: Documentation That Lives',
+  'The Postmortem You’ll Actually Read Next Quarter',
+  'SLAs That Don’t Handcuff Innovation',
+  'Tech Debt Budgeting: A CFO-Friendly Framework',
+  'Flow Mapping: Unblocking Your Delivery Value Stream',
+  'Service Ownership Without Overload',
+  'Runtime Errors as Product Risk: Aligning Engineering and PM',
+  'Refactor Readiness: Signals Your Codebase Is Safe to Change',
+  'The Stability-First Roadmap for Startups',
+  'Reducing MTTR With Better On-Call Ergonomics',
+  'Modern Testing Pyramids for Fast-Moving Teams',
+  'Platform Thinking for Small Teams: Just Enough Platform',
+  'Risk-Driven Code Reviews: What to Look For, What to Skip',
+  'The Business Case for Paying Down Tech Debt Now',
+  'Release Checklists That Scale With Your Team',
+  'How to Introduce Observability Without a Big Bang',
+  'From Chaos PRs to Clean Merges: PR Hygiene That Works',
+  'Architectures That Forgive: Designing for Failure',
+  'Telemetry-Driven Refactors: Let Data Pick the Next Move',
+  'Your AI-Built App Works… Until It Doesn’t: Stabilization Tactics',
+  'Operational KPIs That Predict Incidents',
+  'The Senior Engineer’s Guide to Unblocking Junior Velocity',
+  'Stakeholder Trust in 30 Days: Communication That Calms',
+  'De-Risking Migrations: Shadow Traffic and Progressive Cutovers',
+  'The Maintenance Sprint: How to Keep the Lights Bright',
+  'Security-First Delivery Without Slowing Down',
+  'Accessibility Debt: Ship Faster by Fixing It Early',
+  'When to Centralize vs. Federate Architecture Decisions',
+  'Code Reviews at Scale: Patterns for High-Throughput Teams',
+  'The Anatomy of a Great Runbook',
+  'Incident Simulations: Fire Drills That Prevent Real Fires',
+  'Modernizing Data Flows Without Breaking Analytics',
+  'Choosing the Right Observability Stack for Your Stage',
+  'How to Keep Uptime at 99.98% During Big Changes',
+  'Refactor vs. Rewrite: A Decision Tree for Leaders',
+  'Killing the ‘Works on My Machine’ Anti-Pattern',
+  'Five Stabilization Wins You Can Ship This Week',
+  'Making Dashboards Actionable: From Pretty to Practical',
+  'API Evolution Without Customer Pain',
+  'From Heroics to Habits: Institutionalizing Reliability',
+  'How to Audit a Codebase in 48 Hours',
+  'The “Thin Slice” Method for Safer Modernization',
+  'Release Notes Your Customers Actually Trust',
+  'Tech Debt and Team Morale: Fix One, Help the Other',
+  'Roadmap Risk Reviews: Keep Surprises Out of Q4',
+  'Operational Readiness for Product Launches',
+  'Turn On-Call Into a Source of Insight, Not Burnout',
+  'The First Principles of Clean, Scalable Apps',
+  'Guardrailed Releases: Shipping Bold Changes Safely',
+  'The Playbook for Parallelized Remediation Sprints',
+  'Preventing Drift: Keeping Architecture Diagrams True',
+  'Why Your Test Suite Is Slow—and How to Fix It',
+  'Codifying Institutional Knowledge With ADRs',
+  'The Metrics That Matter for Delivery Velocity',
+  'CI/CD for Humans: Pipelines That Don’t Punish',
+  'How to De-Risk Third-Party Dependencies',
+  'Operational Calm for Peak Season Traffic',
+  'The Executive’s Guide to Modernization Without Drama',
+  'From Proof-of-Concept to Production: Hardening the Path',
+  'Taming Complexity: Simplification as a Strategy',
+  'Resilience by Design: Building Systems That Heal Themselves',
+  'The gitPlumbers Method: Diagnose, Stabilize, Accelerate',
 ];
 
-type CategorySlug = 'culture' | 'ai-delivery' | 'guides' | 'case-studies';
+type CategorySlug = 'culture' | 'ai-delivery' | 'guides' | 'case-studies' | 'reliability-observability' | 'security-compliance' | 'release-engineering' | 'platform-productivity';
 
 interface CategoryTheme {
   slug: CategorySlug;
@@ -40,40 +139,43 @@ interface GeneratedArticlePayload {
   readTimeMinutes: number;
 }
 
-const CATEGORY_THEMES: CategoryTheme[] = [
+export const CATEGORY_THEMES: CategoryTheme[] = [
   {
     slug: 'ai-delivery',
     label: 'AI in Production',
     angles: [
       'Design an evaluation harness that keeps generative features accountable before, during, and after release.',
-      'Codify rollback guardrails for AI-assisted applications handling regulated data.',
-      'Quantify the business impact of AI augmentations with instrumentation and experimentation.',
+      'Codify rollback and kill-switch guardrails for AI-assisted applications handling regulated data.',
+      'Quantify the business impact of AI augmentations with instrumentation and controlled experiments.',
+      'Stabilize prompt/feature drift with versioning, datasets, and automatic regression barriers.',
     ],
     emphasis: [
-      'Stress instrumentation, observability, and safety guardrails for AI-enabled flows.',
-      'Reference real-world failure modes and how to mitigate them.',
+      'Stress instrumentation, observability, and safety guardrails across AI-enabled flows.',
+      'Reference real-world failure modes (hallucination, drift, latency spikes) and how to mitigate them.',
     ],
   },
   {
     slug: 'culture',
     label: 'Culture & Process',
     angles: [
-      'Create decision-making cadences that keep modernization aligned with product delivery.',
-      'Coach engineering leadership teams on balancing roadmap and remediation work.',
-      'Build feedback loops that convert incident reviews into modernization backlogs.',
+      'Create decision cadences that keep modernization aligned with product delivery.',
+      'Coach engineering leadership on balancing roadmap work with remediation/guardrail investments.',
+      'Build feedback loops that convert incident reviews into prioritized modernization backlogs.',
+      'Establish “definition of ready/done” that encodes reliability and accessibility requirements.',
     ],
     emphasis: [
       'Highlight communication rituals, leadership behaviors, and measurable outcomes.',
-      'Keep recommendations concrete and grounded in enterprise realities.',
+      'Keep recommendations concrete and grounded in enterprise realities and constraints.',
     ],
   },
   {
     slug: 'guides',
     label: 'Technical Guide',
     angles: [
-      'Walk through hardening a legacy service with progressive observability adoption.',
-      'Sequence a modernization project using reversible slices and safety nets.',
-      'Deliver a hands-on checklist for migrating a critical workload without downtime.',
+      'Harden a legacy service via progressive observability adoption and SLOs.',
+      'Sequence a modernization using reversible thin slices with safety nets and shadow traffic.',
+      'Deliver a hands-on checklist for migrating a critical workload with zero downtime.',
+      'Reduce flaky tests and pipeline latency to unlock faster, safer releases.',
     ],
     emphasis: [
       'Provide step-by-step guidance with checkpoints, metrics, and tooling suggestions.',
@@ -84,21 +186,82 @@ const CATEGORY_THEMES: CategoryTheme[] = [
     slug: 'case-studies',
     label: 'Case Study',
     angles: [
-      'Outline an anonymised engagement where modernization unblocked a critical launch.',
-      'Show how GitPlumbers stabilized an AI-assisted application under real load.',
-      'Demonstrate the ROI of pairing modernization guardrails with delivery coaching.',
+      'Outline an anonymized engagement where modernization unblocked a critical launch.',
+      'Show how GitPlumbers stabilized an AI-assisted application under real customer load.',
+      'Demonstrate ROI from pairing reliability guardrails with delivery coaching.',
+      'Trace “before/after” metrics (MTTR, change failure rate, velocity) to business outcomes.',
     ],
     emphasis: [
       'Include industry context, constraints, and measurable outcomes or metrics.',
       'Frame the narrative around challenges, interventions, and specific results.',
     ],
   },
+  {
+    slug: 'reliability-observability',
+    label: 'Reliability & Observability',
+    angles: [
+      'Define SLIs/SLOs that change on-call behavior and reduce incident volume.',
+      'Implement runbooks and game days that actually shrink MTTR.',
+      'Make dashboards actionable: fewer charts, clearer thresholds, faster decisions.',
+      'Instrument release health to spot regressions before customers do.',
+    ],
+    emphasis: [
+      'Focus on leading indicators that predict incidents, not vanity metrics.',
+      'Show how to tie telemetry to triage and rollout automation.',
+    ],
+  },
+  {
+    slug: 'security-compliance',
+    label: 'Security & Compliance',
+    angles: [
+      'Bake threat modeling into modernization sprints without slowing delivery.',
+      'Codify least-privilege, secret rotation, and dependency risk controls as code.',
+      'Operationalize WCAG 2.2 AA and ARIA support as non-negotiable acceptance criteria.',
+    ],
+    emphasis: [
+      'Translate policies into guardrails, checks, and automated proofs.',
+      'Balance regulated-data constraints with delivery speed.',
+    ],
+  },
+  {
+    slug: 'release-engineering',
+    label: 'Release Engineering',
+    angles: [
+      'Stand up progressive delivery (feature flags, canaries, blue/green) with governance.',
+      'Reduce CI flake and cut pipeline time to accelerate feedback loops.',
+      'Design rollback strategies that make Friday deploys boring.',
+    ],
+    emphasis: [
+      'Prioritize change failure rate, lead time, and recovery time as north-star metrics.',
+      'Document repeatable checklists that scale with team size.',
+    ],
+  },
+  {
+    slug: 'platform-productivity',
+    label: 'Platform & Developer Productivity',
+    angles: [
+      'Adopt “just-enough platform” patterns to unblock product teams without over-centralizing.',
+      'Use ADRs and paved roads to prevent drift and support safe refactors.',
+      'Measure developer friction and eliminate the top sources of wait/hand-off time.',
+    ],
+    emphasis: [
+      'Favor simplification and paved-road defaults over bespoke tooling.',
+      'Show cost/benefit trade-offs with concrete before/after examples.',
+    ],
+  },
 ];
 
-const SYSTEM_PROMPT = [
-  'You are the editorial AI for GitPlumbers, a consultancy that fixes AI-assisted software so teams can ship safely.',
-  'Write for pragmatic senior engineering leaders who expect specifics, proof, and operational maturity.',
-  'Tone: candid, data-backed, and implementation-focused. Avoid fluff or generic platitudes.',
+// A crisp, opinionated system prompt aligned to your brand voice.
+// Keeps outputs specific, scannable, and implementation-focused.
+
+export const SYSTEM_PROMPT = [
+  'You are the editorial AI for GitPlumbers, a consultancy that fixes AI-assisted and legacy software so teams can ship safely.',
+  'Audience: pragmatic senior engineering leaders (VP Eng, Directors, Staff/Principal) who expect specifics, proof, and operational maturity.',
+  'Tone: candid, data-backed, and implementation-focused. Avoid fluff and generic platitudes.',
+  'Always: lead with the problem, state the stakes, then give step-by-step actions. Include realistic metrics (e.g., MTTR, lead time, change failure rate), decision checklists, and risk trade-offs.',
+  'Back guidance with examples from real-world failure modes. Prefer guardrails, automation, and reversible patterns over heroics.',
+  'Be framework-agnostic; emphasize reliability, observability, security, and accessibility as first-class delivery concerns.',
+  'Write concisely with verb-first headings, bullets over paragraphs, and concrete numbers where possible.',
 ].join(' ');
 
 export const generateBlogArticleHourly = onSchedule(
@@ -107,11 +270,6 @@ export const generateBlogArticleHourly = onSchedule(
     timeZone: 'Etc/UTC',
     region: 'us-central1',
     secrets: [OPENAI_API_KEY],
-    retryConfig: {
-      retryCount: 2,
-      minBackoffSeconds: 120,
-      maxBackoffSeconds: 600,
-    },
     timeoutSeconds: 540,
   },
   async () => {
@@ -138,13 +296,15 @@ export const generateBlogArticleHourly = onSchedule(
           content: prompt,
         },
       ],
-      response_format: {
-        type: 'json_schema',
-        strict: true,
-        name: 'GitPlumbersBlogArticle',
-        schema: buildArticleSchema(theme.slug),
-        description:
-          'Structured blog article data for GitPlumbers including summary, body paragraphs, checklist, and FAQs.',
+      text: {
+        format: {
+          type: 'json_schema',
+          name: 'GitPlumbersBlogArticle',
+          strict: true,
+          schema: buildArticleSchema(theme.slug),
+          description:
+            'Structured blog article data for GitPlumbers including summary, body paragraphs, checklist, and FAQs.',
+        },
       },
       temperature: 0.6,
       max_output_tokens: 1500,
@@ -156,9 +316,9 @@ export const generateBlogArticleHourly = onSchedule(
 
     const slug = await ensureUniqueSlug(firestore, toSlug(payload.title));
     const publishedOn = new Date().toISOString().split('T')[0];
-    const readTimeMinutes = Number.isFinite(payload.readTimeMinutes)
-      ? Math.min(10, Math.max(5, Math.round(payload.readTimeMinutes)))
-      : 7;
+    const readTimeMinutes = Number.isFinite(payload.readTimeMinutes) ?
+      Math.min(10, Math.max(5, Math.round(payload.readTimeMinutes))) :
+      7;
     const readTime = `${readTimeMinutes} minute read`;
 
     const document = {
@@ -203,7 +363,9 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
 
   const avoided = [...new Set([...BASELINE_POST_TITLES, ...recent])];
   if (avoided.length > 0) {
-    sections.push(`Avoid overlapping topics or phrasing with these existing posts: ${avoided.join(' | ')}`);
+    sections.push(
+      `Avoid overlapping topics or phrasing with these existing posts: ${avoided.join(' | ')}`
+    );
   }
 
   sections.push(
@@ -326,12 +488,12 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         },
       },
       heroQuote: {
-        type: 'string',
+        type: ['string', 'null'],
         minLength: 25,
         maxLength: 160,
       },
       faq: {
-        type: 'array',
+        type: ['array', 'null'],
         minItems: 2,
         maxItems: 3,
         items: {
@@ -339,16 +501,8 @@ function buildArticleSchema(categorySlug: CategorySlug) {
           required: ['question', 'answer'],
           additionalProperties: false,
           properties: {
-            question: {
-              type: 'string',
-              minLength: 12,
-              maxLength: 120,
-            },
-            answer: {
-              type: 'string',
-              minLength: 60,
-              maxLength: 260,
-            },
+            question: { type: 'string', minLength: 12, maxLength: 120 },
+            answer: { type: 'string', minLength: 60, maxLength: 260 },
           },
         },
       },
@@ -362,27 +516,10 @@ function buildArticleSchema(categorySlug: CategorySlug) {
 }
 
 function extractPayload(response: OpenAI.Responses.Response): GeneratedArticlePayload {
-  const output = response.output_text ?? collectJsonString(response);
-  if (!output) {
+  if (!response.output_text) {
     throw new Error('OpenAI response did not include any output text');
   }
-  return JSON.parse(output) as GeneratedArticlePayload;
-}
-
-function collectJsonString(response: OpenAI.Responses.Response): string | undefined {
-  for (const item of response.output ?? []) {
-    for (const content of item.content ?? []) {
-      if (content.type === 'output_text' && content.text) {
-        return content.text;
-      }
-      // @ts-expect-error - json_schema content is not yet in the published types.
-      if (content.type === 'json_schema' && content.json_schema?.output) {
-        // @ts-expect-error - json_schema.output is included at runtime.
-        return content.json_schema.output as string;
-      }
-    }
-  }
-  return undefined;
+  return JSON.parse(response.output_text) as GeneratedArticlePayload;
 }
 
 async function ensureUniqueSlug(firestore: Firestore, slug: string): Promise<string> {

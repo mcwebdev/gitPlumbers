@@ -285,7 +285,7 @@ export const generateBlogArticleHourly = onSchedule(
     });
 
     const response = await client.responses.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       input: [
         {
           role: 'system',
@@ -329,7 +329,7 @@ export const generateBlogArticleHourly = onSchedule(
       publishedOn,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      status: 'draft',
+      status: 'published',
       sourceModel: 'gpt-4.1-mini',
     };
 
@@ -426,6 +426,8 @@ function buildArticleSchema(categorySlug: CategorySlug) {
       'checklist',
       'body',
       'readTimeMinutes',
+      'heroQuote',
+      'faq',
     ],
     properties: {
       title: {

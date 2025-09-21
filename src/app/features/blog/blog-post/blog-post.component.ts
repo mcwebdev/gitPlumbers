@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
@@ -61,7 +61,11 @@ export class BlogPostComponent implements OnDestroy {
     return [
       { label: 'Home', url: '/' },
       { label: 'Blog', url: '/blog' },
-      { label: currentPost.categorySlug.replace('-', ' '), url: `/blog?category=${currentPost.categorySlug}` },
+      {
+        label: currentPost.categorySlug.replace('-', ' '),
+        url: '/blog',
+        queryParams: { category: currentPost.categorySlug },
+      },
       { label: currentPost.title, isActive: true },
     ];
   });
@@ -139,6 +143,7 @@ export class BlogPostComponent implements OnDestroy {
     const slug = this.slug();
     return this._content.renderCTA(cta, slug);
   }
+
 
   ngOnDestroy(): void {
     this._seoEffect.destroy();

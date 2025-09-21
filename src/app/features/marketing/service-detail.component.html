@@ -1,0 +1,52 @@
+@if (detail(); as service) {
+  <article class="service-detail" aria-labelledby="serviceDetailTitle">
+    <header class="service-detail__hero">
+      <p class="service-detail__eyebrow">Services</p>
+      <h1 id="serviceDetailTitle">{{ service.title }}</h1>
+      <p class="service-detail__subtitle">{{ service.subtitle }}</p>
+      <a routerLink="/services" class="service-detail__back">Back to all services</a>
+    </header>
+
+    <section class="service-detail__summary" aria-label="Service summary">
+      <p>{{ service.summary }}</p>
+    </section>
+
+    <section class="service-detail__focus" aria-label="Where we focus">
+      <h2>Where we focus</h2>
+      <ul>
+        <li *ngFor="let item of service.focusAreas">{{ item }}</li>
+      </ul>
+    </section>
+
+    <section class="service-detail__outcomes" aria-label="Outcomes you can expect">
+      <h2>Outcomes you can expect</h2>
+      <ul>
+        <li *ngFor="let item of service.outcomes">{{ item }}</li>
+      </ul>
+    </section>
+
+    <section class="service-detail__playbook" aria-label="Engagement playbook">
+      <h2>Engagement playbook</h2>
+      <ol>
+        <li *ngFor="let step of service.playbook">{{ step }}</li>
+      </ol>
+    </section>
+
+    <section class="service-detail__cta" aria-label="Ready to talk?">
+      <div class="service-detail__cta-grid">
+        <a
+          *ngFor="let cta of service.ctas"
+          [routerLink]="cta.routerLink"
+          class="service-detail__cta-link"
+          [attr.aria-label]="cta.ariaLabel"
+        >
+          {{ cta.label }}
+        </a>
+      </div>
+    </section>
+  </article>
+} @else {
+  <section class="service-detail__loading" aria-label="Loading service details">
+    <p>Loading service details...</p>
+  </section>
+}

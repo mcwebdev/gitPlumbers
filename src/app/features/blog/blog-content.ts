@@ -50,6 +50,11 @@ export interface BlogPost {
   readonly secondaryCTA?: CTA;
   readonly author?: Author;
   readonly schemaHints?: SchemaHints;
+  readonly createdAt?: string | Date;
+  readonly updatedAt?: string | Date;
+  readonly publishedOnMs?: number;
+  readonly createdAtMs?: number;
+  readonly updatedAtMs?: number;
 }
 
 export interface CaseStudy {

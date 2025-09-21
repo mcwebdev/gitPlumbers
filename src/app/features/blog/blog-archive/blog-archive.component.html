@@ -1,0 +1,83 @@
+@if (isLoading()) {
+  <app-loading-spinner [active]="true" message="Loading articles..."></app-loading-spinner>
+} @else if (hasError()) {
+  <div class="blog-archive__error">
+    <h2>Unable to load articles</h2>
+    <p>We're having trouble loading the blog articles. Please try refreshing the page.</p>
+    <button type="button" (click)="refreshPage()">Refresh Page</button>
+  </div>
+} @else {
+<section class="blog-archive" aria-label="All GitPlumbers Articles">
+  <header class="blog-archive__hero">
+    <p class="blog-archive__eyebrow">Archive</p>
+    <h1>All GitPlumbers articles</h1>
+    <p>
+      Browse every modernisation insight, remediation playbook, and engineering field report we have published.
+      Filter by topic, search by keyword, and sort the list to surface what your team needs next.
+    </p>
+  </header>
+
+  <section class="blog-archive__controls" aria-label="Filter, search, and sort articles">
+    <div class="blog-archive__control blog-archive__control--search">
+      <label for="archive-search">Search</label>
+      <input
+        id="archive-search"
+        type="search"
+        inputmode="search"
+        [value]="searchTerm()"
+        (input)="onSearchChange($any($event.target).value)"
+        placeholder="Search titles, summaries, or keywords"
+      />
+    </div>
+
+    <div class="blog-archive__control">
+      <label for="category-filter">Topic</label>
+      <select
+        id="category-filter"
+        [value]="selectedCategory()"
+        (change)="onCategoryChange($any($event.target).value)"
+      >
+        <option *ngFor="let option of categoryOptions" [value]="option.slug">{{ option.label }}</option>
+      </select>
+    </div>
+
+    <div class="blog-archive__control">
+      <label for="sort-filter">Sort by</label>
+      <select
+        id="sort-filter"
+        [value]="sortOption()"
+        (change)="onSortChange($any($event.target).value)"
+      >
+        <option *ngFor="let option of sortOptions" [value]="option.id">{{ option.label }}</option>
+      </select>
+    </div>
+
+    <p class="blog-archive__count" aria-live="polite">{{ totalVisiblePosts() }} articles</p>
+  </section>
+
+  @if (totalVisiblePosts() === 0) {
+    <div class="blog-archive__empty">
+      <p>No articles match that combination yet. Try another topic or reset the filters.</p>
+      @if (hasActiveSearch()) {
+        <button type="button" class="blog-archive__reset" (click)="clearSearch()">Clear search</button>
+      }
+    </div>
+  } @else {
+    <ul class="blog-archive__list">
+      <li *ngFor="let post of filteredPosts()" class="blog-archive__item">
+        <article>
+          <p class="blog-archive__category">{{ post.categorySlug | titlecase }}</p>
+          <h2>
+            <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+          </h2>
+          <p class="blog-archive__summary">{{ post.summary }}</p>
+          <p class="blog-archive__meta">
+            {{ post.publishedOn | date: 'MMM d, y' }} | {{ post.readTime }}
+          </p>
+          <a [routerLink]="['/blog', post.slug]" class="blog-archive__read">Read article</a>
+        </article>
+      </li>
+    </ul>
+  }
+</section>
+}

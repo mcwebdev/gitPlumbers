@@ -1,14 +1,20 @@
 :host {
   display: block;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .app-shell {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 .app-content {
   flex: 1 1 auto;
   display: block;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0; /* Important for flex child to be scrollable */
+  position: relative;
 }

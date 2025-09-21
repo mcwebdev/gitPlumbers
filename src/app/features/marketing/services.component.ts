@@ -3,6 +3,28 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../shared/services/seo.service';
 
+type ServiceSlug =
+  | 'modernization'
+  | 'observability'
+  | 'ai-delivery'
+  | 'reliability'
+  | 'platform';
+
+interface ServiceSummary {
+  title: string;
+  slug: ServiceSlug;
+  description: string;
+  features: string[];
+  frameworks: string[];
+  linkLabel: string;
+}
+
+interface ProcessStep {
+  step: string;
+  title: string;
+  description: string;
+}
+
 @Component({
   selector: 'app-services',
   standalone: true,
@@ -14,54 +36,75 @@ import { SeoService } from '../../shared/services/seo.service';
 export class ServicesComponent implements OnInit {
   private readonly _seoService = inject(SeoService);
 
-  ngOnInit(): void {
-    this._seoService.updateMetadata({
-      title: 'Code Optimization Services | React, Angular, Vue, Node.js Experts',
-      description:
-        'Comprehensive code optimization services for React, Angular, Vue, Node.js, and Python. Enterprise modernization, technical debt resolution, and performance optimization.',
-      keywords:
-        'code optimization services, React optimization, Angular performance, Vue.js consulting, Node.js scaling, Python modernization',
-      ogUrl: 'https://gitplumbers-35d92.firebaseapp.com/services',
-    });
-  }
-
-  protected readonly services = [
+  protected readonly services: ReadonlyArray<ServiceSummary> = [
     {
-      title: 'AI Code Optimization',
-      description: 'Transform AI-generated codebases into production-ready applications',
+      slug: 'modernization',
+      title: 'Modernization Assessments',
+      description: 'Modernize legacy applications without slowing roadmap delivery.',
       features: [
-        'Performance optimization',
-        'Security hardening',
-        'Architecture refactoring',
-        'Test implementation',
+        'Codebase assessments grounded in production telemetry',
+        'Modernization roadmaps that respect product commitments',
+        'Architecture coaching for safe framework upgrades',
+        'Knowledge transfer plans that stick',
       ],
-      frameworks: ['React', 'Angular', 'Vue', 'Node.js', 'Python'],
+      frameworks: ['Angular', 'React', 'Vue', 'Node.js', 'Python'],
+      linkLabel: 'Explore modernization services',
     },
     {
-      title: 'Enterprise Modernization',
-      description: 'Modernize legacy applications with latest frameworks and best practices',
+      slug: 'observability',
+      title: 'Observability and Release Health',
+      description: 'Keep every release accountable with SLIs, dashboards, and guardrails.',
       features: [
-        'Legacy system migration',
-        'Technology stack upgrades',
-        'Scalability improvements',
-        'Performance monitoring',
+        'Golden signals mapped to customer journeys',
+        'Automated release health dashboards and alerting',
+        'SLO design with error budget policy coaching',
+        'Rollback and kill-switch runbooks',
       ],
-      frameworks: ['React', 'Angular', 'Vue', 'Node.js'],
+      frameworks: ['OpenTelemetry', 'Grafana', 'Prometheus', 'Datadog', 'New Relic'],
+      linkLabel: 'Explore observability services',
     },
     {
-      title: 'Technical Debt Resolution',
-      description: 'Systematic approach to reducing technical debt and improving code quality',
+      slug: 'ai-delivery',
+      title: 'AI Delivery Guardrails',
+      description: 'Ship AI-assisted code with policy-aware pipelines and runtime checks.',
       features: [
-        'Code quality assessment',
-        'Refactoring strategies',
-        'Documentation improvement',
-        'Team training',
+        'Policy-aware CI/CD workflows for AI-generated code',
+        'Shadow deploys and staged rollouts with health gates',
+        'Automated regression, drift, and compliance checks',
+        'Kill-switch and rollback tooling wired to telemetry',
       ],
-      frameworks: ['JavaScript', 'TypeScript', 'React', 'Angular', 'Vue'],
+      frameworks: ['GitHub Actions', 'Azure DevOps', 'LaunchDarkly', 'Cloudflare', 'Kubernetes'],
+      linkLabel: 'Explore AI delivery services',
+    },
+    {
+      slug: 'reliability',
+      title: 'Reliability Engineering',
+      description: 'Evolve incident response, error budgets, and on-call health.',
+      features: [
+        'Reliability assessments across architecture and operations',
+        'Error budget policy definition and rollout',
+        'Incident response coaching with runbook upgrades',
+        'Capacity, chaos, and performance testing',
+      ],
+      frameworks: ['PagerDuty', 'Grafana', 'Honeycomb', 'SLO tooling', 'Kubernetes'],
+      linkLabel: 'Explore reliability services',
+    },
+    {
+      slug: 'platform',
+      title: 'Platform Engineering',
+      description: 'Build paved roads that unblock every product team.',
+      features: [
+        'Developer platform assessments and friction audits',
+        'Golden path design for deployments and observability',
+        'Self-service environment automation',
+        'Adoption metrics and enablement programs',
+      ],
+      frameworks: ['Backstage', 'Terraform', 'Helm', 'Pulumi', 'AWS | GCP | Azure'],
+      linkLabel: 'Explore platform services',
     },
   ];
 
-  protected readonly processSteps = [
+  protected readonly processSteps: ReadonlyArray<ProcessStep> = [
     {
       step: '01',
       title: 'Code Assessment',
@@ -83,4 +126,15 @@ export class ServicesComponent implements OnInit {
       description: 'Complete documentation and team training to maintain improvements',
     },
   ];
+
+  ngOnInit(): void {
+    this._seoService.updateMetadata({
+      title: 'Code Optimization Services | React, Angular, Vue, Node.js Experts',
+      description:
+        'Comprehensive code optimization services for React, Angular, Vue, Node.js, and Python. Enterprise modernization, technical debt resolution, and performance optimization.',
+      keywords:
+        'code optimization services, React optimization, Angular performance, Vue.js consulting, Node.js scaling, Python modernization',
+      ogUrl: 'https://gitplumbers-35d92.firebaseapp.com/services',
+    });
+  }
 }

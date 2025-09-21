@@ -10,7 +10,10 @@ import {
   effect,
   inject,
   signal,
+  Inject,
+  PLATFORM_ID,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -25,6 +28,7 @@ export class ReadingProgressComponent implements OnInit, OnDestroy {
   @ViewChild('progressBar', { static: true }) progressBar!: ElementRef<HTMLDivElement>;
 
   private readonly _elementRef = inject(ElementRef);
+  private readonly _platformId = inject(PLATFORM_ID);
 
   private readonly _scrollProgress = signal(0);
   private readonly _isVisible = signal(false);
@@ -35,23 +39,40 @@ export class ReadingProgressComponent implements OnInit, OnDestroy {
   private _scrollListener?: () => void;
 
   ngOnInit(): void {
+    // Only run on browser platform
+    if (!isPlatformBrowser(this._platformId)) return;
+    
     this._scrollListener = this.updateProgress.bind(this);
-    window.addEventListener('scroll', this._scrollListener, { passive: true });
+    this.setupScrollListener();
     this.updateProgress();
   }
 
+  private setupScrollListener(): void {
+    if (!this._scrollListener || !isPlatformBrowser(this._platformId)) return;
+    
+    // Listen to window scroll
+    window.addEventListener('scroll', this._scrollListener, { passive: true });
+  }
+
   ngOnDestroy(): void {
-    if (this._scrollListener) {
+    if (this._scrollListener && isPlatformBrowser(this._platformId)) {
       window.removeEventListener('scroll', this._scrollListener);
     }
   }
 
   @HostListener('window:resize')
   onResize(): void {
-    this.updateProgress();
+    // Only run on browser platform
+    if (!isPlatformBrowser(this._platformId)) return;
+    
+    // Use setTimeout to ensure DOM has updated after resize
+    setTimeout(() => this.updateProgress(), 0);
   }
 
   private updateProgress(): void {
+    // Only run on browser platform
+    if (!isPlatformBrowser(this._platformId)) return;
+    
     const article = this.findArticleElement();
     if (!article) {
       this._isVisible.set(false);
@@ -63,29 +84,33 @@ export class ReadingProgressComponent implements OnInit, OnDestroy {
     const articleHeight = articleRect.height;
     const windowHeight = window.innerHeight;
     const scrollTop = window.scrollY;
+    const footerHeight = 252; // Footer height in pixels
 
-    // Show progress bar when article is in view
-    const shouldShow = scrollTop > articleTop - windowHeight * 0.5;
+    // Show progress bar when article starts to come into view
+    const shouldShow = scrollTop > articleTop - windowHeight;
     this._isVisible.set(shouldShow);
 
     if (!shouldShow) return;
 
-    // Calculate progress based on how much of the article has been scrolled past
+    // Calculate progress based on how much of the article has been scrolled through
+    // Account for footer height in the calculation
     const articleBottom = articleTop + articleHeight;
     const viewportTop = scrollTop;
     const viewportBottom = scrollTop + windowHeight;
 
-    // Progress is based on how much of the article content has been "read"
-    const readStart = Math.max(viewportTop, articleTop);
-    const readEnd = Math.min(viewportBottom, articleBottom);
-    const readHeight = Math.max(0, readEnd - readStart);
-    const totalReadableHeight = articleHeight;
-
-    const progress = totalReadableHeight > 0 ? (readHeight / totalReadableHeight) * 100 : 0;
+    // Progress calculation: how much of the article has been scrolled past
+    // Subtract footer height from total scrollable area
+    const scrolledPastStart = Math.max(0, viewportTop - articleTop);
+    const totalScrollableHeight = articleHeight + windowHeight - footerHeight; // Article height + viewport height - footer height
+    const progress = totalScrollableHeight > 0 ? (scrolledPastStart / totalScrollableHeight) * 100 : 0;
+    
     this._scrollProgress.set(Math.min(100, Math.max(0, progress)));
   }
 
   private findArticleElement(): HTMLElement | null {
+    // Only run on browser platform
+    if (!isPlatformBrowser(this._platformId)) return null;
+    
     // Look for the article element in the DOM
     const article = document.querySelector('article.blog-post') as HTMLElement;
     if (article) return article;

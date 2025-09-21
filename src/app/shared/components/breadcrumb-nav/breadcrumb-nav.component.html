@@ -7,7 +7,7 @@
         class="breadcrumb-nav__item"
         [class.breadcrumb-nav__item--active]="item.isActive">
       @if (item.url && !item.isActive) {
-        <a [routerLink]="item.url" class="breadcrumb-nav__link">
+        <a [routerLink]="item.url" [queryParams]="item.queryParams ?? null" class="breadcrumb-nav__link">
           {{ item.label }}
         </a>
       } @else {

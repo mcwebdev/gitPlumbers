@@ -37,18 +37,114 @@ export const BlogStore = signalStore(
         map(() => {
           patchState(store, { loading: true, error: null });
         }),
-        switchMap(() => 
-          getDocs(query(
-            collection(store._firestore, 'blog_posts'), 
-            where('status', '==', 'published')
-          ))
+        switchMap(() =>
+          getDocs(
+            query(
+              collection(store._firestore, 'blog_posts'),
+              where('status', '==', 'published')
+            )
+          )
         ),
-        map(snapshot => {
-          const posts = snapshot.docs.map(doc => doc.data() as BlogPost);
-          const sortedPosts = posts.sort((a, b) => 
-            new Date(b.publishedOn).getTime() - new Date(a.publishedOn).getTime()
-          );
-          
+        map((snapshot) => {
+
+          const toMillis = (value: unknown): number | null => {
+            if (!value) {
+              return null;
+            }
+
+            if (value instanceof Date) {
+              return value.getTime();
+            }
+
+            if (typeof value === 'number') {
+              if (value > 1_000_000_000_000) {
+                return value;
+              }
+
+              if (value > 1_000_000_000) {
+                return value * 1_000;
+              }
+            }
+
+            if (typeof value === 'string') {
+              const parsed = Date.parse(value);
+              return Number.isNaN(parsed) ? null : parsed;
+            }
+
+            if (typeof value === 'object') {
+              const candidate = value as {
+                toDate?: () => Date;
+                toMillis?: () => number;
+                seconds?: number;
+                nanoseconds?: number;
+              };
+
+              if (typeof candidate.toMillis === 'function') {
+                return candidate.toMillis();
+              }
+
+              if (typeof candidate.toDate === 'function') {
+                const result = candidate.toDate();
+                return result instanceof Date ? result.getTime() : null;
+              }
+
+              if (typeof candidate.seconds === 'number') {
+                const base = candidate.seconds * 1_000;
+                if (typeof candidate.nanoseconds === 'number') {
+                  return base + Math.floor(candidate.nanoseconds / 1_000_000);
+                }
+
+                return base;
+              }
+            }
+
+            return null;
+          };
+
+          const posts = snapshot.docs.map((doc) => {
+            const raw = doc.data() as BlogPost & {
+              createdAt?: unknown;
+              updatedAt?: unknown;
+              publishedOnMs?: number;
+              createdAtMs?: number;
+              updatedAtMs?: number;
+            };
+
+            const publishedOnMs = raw.publishedOnMs ?? toMillis(raw.publishedOn);
+            const createdAtMs = raw.createdAtMs ?? toMillis(raw.createdAt);
+            const updatedAtMs = raw.updatedAtMs ?? toMillis(raw.updatedAt);
+            const docCreatedMs = toMillis((doc as unknown as { createTime?: unknown }).createTime);
+            const docUpdatedMs = toMillis((doc as unknown as { updateTime?: unknown }).updateTime);
+
+            const normalisedCreatedMs = createdAtMs ?? docCreatedMs ?? updatedAtMs ?? docUpdatedMs ?? publishedOnMs ?? Date.now();
+            const normalisedUpdatedMs = updatedAtMs ?? docUpdatedMs ?? normalisedCreatedMs;
+            const normalisedPublishedOnMs = publishedOnMs ?? normalisedCreatedMs;
+
+            const normalisedPublishedOn =
+              typeof raw.publishedOn === 'string' && raw.publishedOn.length > 0
+                ? raw.publishedOn
+                : new Date(normalisedPublishedOnMs).toISOString().slice(0, 10);
+
+            return {
+              ...raw,
+              publishedOn: normalisedPublishedOn,
+              createdAt: raw.createdAt ?? new Date(normalisedCreatedMs).toISOString(),
+              updatedAt: raw.updatedAt ?? new Date(normalisedUpdatedMs).toISOString(),
+              publishedOnMs: normalisedPublishedOnMs,
+              createdAtMs: normalisedCreatedMs,
+              updatedAtMs: normalisedUpdatedMs,
+            };
+          });
+
+          const sortedPosts = posts.sort((a, b) => {
+            const publishedDiff = (b.publishedOnMs ?? 0) - (a.publishedOnMs ?? 0);
+            if (publishedDiff !== 0) {
+              return publishedDiff;
+            }
+
+            return (b.createdAtMs ?? 0) - (a.createdAtMs ?? 0);
+          });
+
           patchState(store, {
             posts: sortedPosts,
             featuredPosts: sortedPosts.slice(0, 3),
@@ -58,9 +154,13 @@ export const BlogStore = signalStore(
           });
         }),
         catchError((error) => {
+          console.error('BlogStore loadPosts error:', error);
           patchState(store, {
             loading: false,
             error: error.message || 'Failed to load blog posts',
+            posts: [],
+            featuredPosts: [],
+            recentPosts: [],
           });
           return of(null);
         })

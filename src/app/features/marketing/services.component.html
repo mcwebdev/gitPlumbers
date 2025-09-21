@@ -11,7 +11,7 @@
   <div class="container">
     <h2>Our Services</h2>
 
-    @for (service of services; track service.title) {
+    @for (service of services; track service.slug) {
     <div class="service-card">
       <h3>{{ service.title }}</h3>
       <p>{{ service.description }}</p>
@@ -33,6 +33,14 @@
           }
         </div>
       </div>
+
+      <a
+        [routerLink]="['/services', service.slug]"
+        class="service-card__link"
+        [attr.aria-label]="service.linkLabel"
+      >
+        {{ service.linkLabel }}
+      </a>
     </div>
     }
   </div>

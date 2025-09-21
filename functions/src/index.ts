@@ -1,20 +1,20 @@
-import { onRequest } from 'firebase-functions/v2/https';
-import { resolve } from 'path';
+// import { onRequest } from 'firebase-functions/v2/https';
+// import { resolve } from 'path';
 import * as admin from 'firebase-admin';
 
 admin.initializeApp();
 
-let server: (req: any, res: any) => void;
+// let server: (req: any, res: any) => void;
 
-export const ssr = onRequest(async (request, response) => {
-  if (!server) {
-    const serverModule = await import(
-      resolve(process.cwd(), '../dist/gitplumbers-35d92/server/server.mjs')
-    );
-    server = serverModule.reqHandler;
-  }
-  return server(request, response);
-});
+// export const ssr = onRequest(async (request, response) => {
+//   if (!server) {
+//     const serverModule = await import(
+//       resolve(process.cwd(), '../dist/gitplumbers-35d92/server/server.mjs')
+//     );
+//     server = serverModule.reqHandler;
+//   }
+//   return server(request, response);
+// });
 
 export * from './contact';
 export * from './ai-analytics';

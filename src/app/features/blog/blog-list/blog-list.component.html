@@ -1,4 +1,4 @@
-﻿@if (isLoading()) {
+@if (isLoading()) {
   <app-loading-spinner [active]="true" message="Loading blog posts..."></app-loading-spinner>
 } @else {
 <section class="blog-list">
@@ -57,6 +57,9 @@
         </a>
       </li>
     </ul>
+    <div class="blog-list__latest-footer">
+      <a routerLink="/blog/articles">Browse all articles</a>
+    </div>
   </section>
 
   <section class="blog-list__categories" aria-label="Browse by topic">

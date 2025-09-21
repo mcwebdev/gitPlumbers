@@ -159,6 +159,7 @@ interface GeneratedArticlePayload {
   keyTakeaways: string[];
   checklist: string[];
   body: string[];
+  structuredSections: StructuredSection[];
   heroQuote: string;
   faq: Array<{ question: string; answer: string }>;
   readTimeMinutes: number;
@@ -167,6 +168,12 @@ interface GeneratedArticlePayload {
   secondaryCTA: CTA;
   author: Author;
   schemaHints: SchemaHints;
+}
+
+interface StructuredSection {
+  header: string;
+  content: string[];
+  type: 'hook' | 'why-matters' | 'implementation' | 'example' | 'takeaways' | 'questions';
 }
 
 export const CATEGORY_THEMES: CategoryTheme[] = [
@@ -288,10 +295,33 @@ export const SYSTEM_PROMPT = [
   'You are the editorial AI for GitPlumbers, a consultancy that fixes AI-assisted and legacy software so teams can ship safely.',
   'Audience: pragmatic senior engineering leaders (VP Eng, Directors, Staff/Principal) who expect specifics, proof, and operational maturity.',
   'Tone: candid, data-backed, and implementation-focused. Avoid fluff and generic platitudes.',
-  'Always: lead with the problem, state the stakes, then give step-by-step actions. Include realistic metrics (e.g., MTTR, lead time, change failure rate), decision checklists, and risk trade-offs.',
-  'Back guidance with examples from real-world failure modes. Prefer guardrails, automation, and reversible patterns over heroics.',
-  'Be framework-agnostic; emphasize reliability, observability, security, and accessibility as first-class delivery concerns.',
-  'Write concisely with verb-first headings, bullets over paragraphs, and concrete numbers where possible.',
+  '',
+  'ENGAGEMENT & HOOK REQUIREMENTS:',
+  '- Open with a bold, high-stakes claim or scenario (downtime, compliance risk, revenue loss) to hook the reader immediately.',
+  '- Make the writing feel like an expert guiding the reader through a critical concept, not just summarizing facts.',
+  '- Use concrete scenarios and real-world failure modes to create urgency and relevance.',
+  '- Write with authority and confidence - you\'re the expert they need to listen to.',
+  '',
+  'STRUCTURE & FORMATTING:',
+  '- Create structuredSections with clear markdown headers (##) for major sections.',
+  '- MANDATORY sections: "hook" (high-stakes opening), "implementation" (how-to steps), "takeaways" (key insights).',
+  '- Optional sections: "why-matters", "example", "questions".',
+  '- Use bullet points and checklists wherever possible for skimmability.',
+  '- Keep paragraphs under 4 lines for easy scanning.',
+  '- Each structured section should have 2-4 content paragraphs that are concise and actionable.',
+  '',
+  'CONTENT GUIDELINES:',
+  '- Always: lead with the problem, state the stakes, then give step-by-step actions.',
+  '- Include realistic metrics (e.g., MTTR, lead time, change failure rate), decision checklists, and risk trade-offs.',
+  '- Back guidance with examples from real-world failure modes.',
+  '- Prefer guardrails, automation, and reversible patterns over heroics.',
+  '- Be framework-agnostic; emphasize reliability, observability, security, and accessibility as first-class delivery concerns.',
+  '- Write concisely with verb-first headings, bullets over paragraphs, and concrete numbers where possible.',
+  '',
+  'CTA & STICKINESS:',
+  '- End with compelling calls to action that link to related resources or encourage deeper exploration.',
+  '- Make CTAs feel like natural next steps, not sales pitches.',
+  '- Example CTA style: "Want a full blueprint for implementing safe model deployment? Read: Designing an Evaluation Harness for Generative AI →"',
   '',
   'Brand & SEO requirements:',
   '- Naturally mention "GitPlumbers" once in the deck or conclusion, not repeatedly.',
@@ -345,12 +375,24 @@ export const generateBlogArticleHourly = onSchedule(
         },
       },
       temperature: 0.6,
-      max_output_tokens: 1500,
+      max_output_tokens: 20000,
     });
 
     const payload = extractPayload(response);
 
-    validatePayload(payload, theme.slug);
+    try {
+      validatePayload(payload, theme.slug);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Article validation failed', {
+        error: errorMessage,
+        theme: theme.slug,
+        payloadKeys: Object.keys(payload),
+        structuredSectionsCount: payload.structuredSections?.length || 0,
+        structuredSectionsTypes: payload.structuredSections?.map((s) => s.type) || [],
+      });
+      throw error;
+    }
 
     const slug = await ensureUniqueSlug(firestore, toSlug(payload.title));
     const publishedOn = new Date().toISOString().split('T')[0];
@@ -391,6 +433,38 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
   );
   sections.push(`Primary angle: ${pick(theme.angles)}`);
   sections.push(`Editorial priorities: ${theme.emphasis.join(' ')}`);
+
+  // Enhanced engagement requirements
+  sections.push(
+    'HOOK REQUIREMENT: Start with a bold, high-stakes opening that immediately grabs attention. ' +
+    'Use scenarios like: "Your AI model just hallucinated in production, costing $50K in customer refunds" ' +
+    'or "A single line of legacy code brought down your entire payment system during Black Friday." ' +
+    'Make the stakes clear and urgent from paragraph one.'
+  );
+
+  sections.push(
+    'STRUCTURED SECTIONS: Create 4-6 structuredSections. You MUST include these core types: ' +
+    '1) "hook" - The high-stakes opening scenario (REQUIRED), ' +
+    '2) "implementation" - Step-by-step how-to guidance (REQUIRED), ' +
+    '3) "takeaways" - Key insights and action items (REQUIRED). ' +
+    'Additionally, choose 1-3 from: "why-matters" (why this problem is critical), ' +
+    '"example" (real-world case study), "questions" (common questions teams ask). ' +
+    'Each section must have a clear header and 2-4 content paragraphs.'
+  );
+
+  sections.push(
+    'FORMATTING: Use clear markdown headers (##) for each section. Keep paragraphs under 4 lines. ' +
+    'Use bullet points and numbered lists for skimmability. Make content scannable and actionable.'
+  );
+
+  sections.push(
+    'EXAMPLE STRUCTURE: Your structuredSections should look like: ' +
+    '[{"header": "The $50K Hallucination", "type": "hook", "content": ["Your AI model just..."]}, ' +
+    '{"header": "Why This Matters", "type": "why-matters", "content": ["For engineering leaders..."]}, ' +
+    '{"header": "How to Implement It", "type": "implementation", "content": ["Step 1: Set up evaluation..."]}, ' +
+    '{"header": "Key Takeaways", "type": "takeaways", "content": ["Always validate AI outputs..."]}]'
+  );
+
   sections.push(
     'Deliver concrete modernization tactics, instrumentation ideas, and measurable outcomes. Blend strategic framing with hands-on steps.'
   );
@@ -410,6 +484,13 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
 
   sections.push(
     'Assume the reader is evaluating whether GitPlumbers can help them stabilize or accelerate delivery. Provide enough detail to earn trust.'
+  );
+
+  // Enhanced CTA requirements
+  sections.push(
+    'CTA REQUIREMENTS: Create compelling, natural-sounding CTAs that feel like logical next steps, not sales pitches. ' +
+    'Examples: "Want a full blueprint for implementing safe model deployment? Read: Designing an Evaluation Harness for Generative AI →" ' +
+    'or "Need help auditing your current observability setup? Download our Infrastructure Health Checklist →"'
   );
 
   // SEO and internal linking requirements
@@ -435,7 +516,12 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
     'and faqIsFAQPage to true if FAQ is present, false otherwise. All schemaHints fields are required.'
   );
 
-  sections.push('Return only the JSON payload that matches the provided schema.');
+  sections.push(
+    'JSON FORMATTING: Return only valid JSON that matches the provided schema. ' +
+    'CRITICAL: Escape all quotes in strings using \\" and avoid newlines in string values. ' +
+    'Example: "content": ["This is a paragraph with \\"quotes\\" that are properly escaped."] ' +
+    'Do not include any text before or after the JSON object.'
+  );
 
   return sections.join('\n\n');
 }
@@ -489,6 +575,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
       'keyTakeaways',
       'checklist',
       'body',
+      'structuredSections',
       'readTimeMinutes',
       'heroQuote',
       'faq',
@@ -556,6 +643,33 @@ function buildArticleSchema(categorySlug: CategorySlug) {
           type: 'string',
           minLength: 120,
           maxLength: 320,
+        },
+      },
+      structuredSections: {
+        type: 'array',
+        minItems: 4,
+        maxItems: 6,
+        items: {
+          type: 'object',
+          required: ['header', 'content', 'type'],
+          additionalProperties: false,
+          properties: {
+            header: { type: 'string', minLength: 10, maxLength: 80 },
+            content: {
+              type: 'array',
+              minItems: 2,
+              maxItems: 4,
+              items: {
+                type: 'string',
+                minLength: 80,
+                maxLength: 280,
+              },
+            },
+            type: {
+              type: 'string',
+              enum: ['hook', 'why-matters', 'implementation', 'example', 'takeaways', 'questions'],
+            },
+          },
         },
       },
       heroQuote: {
@@ -645,7 +759,31 @@ function extractPayload(response: OpenAI.Responses.Response): GeneratedArticlePa
   if (!response.output_text) {
     throw new Error('OpenAI response did not include any output text');
   }
-  return JSON.parse(response.output_text) as GeneratedArticlePayload;
+
+  let cleanedJson = response.output_text.trim();
+
+  // Remove any text before the first { or after the last }
+  const firstBrace = cleanedJson.indexOf('{');
+  const lastBrace = cleanedJson.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleanedJson = cleanedJson.substring(firstBrace, lastBrace + 1);
+  }
+
+  try {
+    return JSON.parse(cleanedJson) as GeneratedArticlePayload;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error('Failed to parse OpenAI response as JSON', {
+      error: errorMessage,
+      originalLength: response.output_text.length,
+      cleanedLength: cleanedJson.length,
+      originalPreview: response.output_text.substring(0, 500),
+      cleanedPreview: cleanedJson.substring(0, 500),
+      originalEnd: response.output_text.substring(Math.max(0, response.output_text.length - 500)),
+      cleanedEnd: cleanedJson.substring(Math.max(0, cleanedJson.length - 500)),
+    });
+    throw new Error(`Invalid JSON response from OpenAI: ${errorMessage}`);
+  }
 }
 
 async function ensureUniqueSlug(firestore: Firestore, slug: string): Promise<string> {
@@ -681,6 +819,22 @@ function randomSuffix(): string {
 function validatePayload(payload: GeneratedArticlePayload, expectedCategory: CategorySlug): void {
   if (!Array.isArray(payload.body) || payload.body.length < 5) {
     throw new Error('Generated article body is too short');
+  }
+  if (!Array.isArray(payload.structuredSections) || payload.structuredSections.length < 4) {
+    throw new Error('Generated article missing structured sections');
+  }
+  // Validate structured sections have at least the core required types
+  const coreRequiredTypes = ['hook', 'implementation', 'takeaways'];
+  const sectionTypes = payload.structuredSections.map((s) => s.type);
+  const missingCoreTypes = coreRequiredTypes.filter((type) => !sectionTypes.includes(type as any));
+  if (missingCoreTypes.length > 0) {
+    throw new Error(`Generated article missing core required section types: ${missingCoreTypes.join(', ')}`);
+  }
+
+  // Validate that we have a good variety of section types
+  const uniqueTypes = [...new Set(sectionTypes)];
+  if (uniqueTypes.length < 4) {
+    throw new Error(`Generated article has insufficient section variety. Found: ${uniqueTypes.join(', ')}`);
   }
   if (!payload.title || !payload.deck || !payload.summary) {
     throw new Error('Generated article missing critical fields');

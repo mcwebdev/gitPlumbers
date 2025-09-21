@@ -8,7 +8,7 @@ import { filter } from 'rxjs/operators';
 export interface SeoMetadata {
   title: string;
   description: string;
-  keywords?: string;
+  keywords?: string | string[];
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
@@ -77,7 +77,10 @@ export class SeoService {
     // Update basic meta tags
     this.updateTag('description', finalMetadata.description);
     if (finalMetadata.keywords) {
-      this.updateTag('keywords', finalMetadata.keywords);
+      const keywordContent = Array.isArray(finalMetadata.keywords)
+        ? finalMetadata.keywords.join(', ')
+        : finalMetadata.keywords;
+      this.updateTag('keywords', keywordContent);
     }
 
     // Update Open Graph meta tags

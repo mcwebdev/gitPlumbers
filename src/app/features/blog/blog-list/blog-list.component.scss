@@ -1,4 +1,4 @@
-﻿.blog-list {
+.blog-list {
   max-width: 72rem;
   margin: 0 auto;
   display: grid;
@@ -159,6 +159,21 @@
 .blog-list__latest-meta {
   font-size: 0.85rem;
   color: #6b7280;
+}
+
+.blog-list__latest-footer {
+  margin-top: 0.5rem;
+}
+
+.blog-list__latest-footer a {
+  font-weight: 600;
+  text-decoration: none;
+  color: #0c1424;
+}
+
+.blog-list__latest-footer a:hover,
+.blog-list__latest-footer a:focus {
+  text-decoration: underline;
 }
 
 .blog-list__categories ul {

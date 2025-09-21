@@ -138,7 +138,12 @@ export const routes: Routes = [
   // Import blog routes
   ...blogRoutes,
   {
+    path: 'services/:slug',
+    loadComponent: () =>
+      import('./features/marketing/service-detail.component').then((m) => m.ServiceDetailComponent),
+  },
+  {
     path: '**',
-    redirectTo: '',
+    redirectTo: '/',
   },
 ];

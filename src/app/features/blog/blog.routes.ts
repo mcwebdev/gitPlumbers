@@ -1,4 +1,4 @@
-﻿import { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 export const blogRoutes: Routes = [
   {
@@ -6,9 +6,8 @@ export const blogRoutes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () =>
-          import('./blog-list/blog-list.component').then((m) => m.BlogListComponent),
         data: {
+          prerender: false,
           seo: {
             title: 'Technical Insights & Code Optimization Blog | GitPlumbers',
             description:
@@ -23,6 +22,8 @@ export const blogRoutes: Routes = [
             ],
           },
         },
+        loadComponent: () =>
+          import('./blog-list/blog-list.component').then((m) => m.BlogListComponent),
       },
       {
         path: 'category/:slug',
@@ -88,6 +89,24 @@ export const blogRoutes: Routes = [
         },
         loadComponent: () =>
           import('./technical-guides/guide-detail.component').then((m) => m.GuideDetailComponent),
+      },
+      {
+        path: 'articles',
+        data: {
+          seo: {
+            title: 'All Modernisation Articles | GitPlumbers Insights',
+            description:
+              'Browse every GitPlumbers blog post, filter by topic, and sort to find modernization advice tailored to your roadmap.',
+            keywords: [
+              'software modernization articles',
+              'engineering blog archive',
+              'tech debt resolution insights',
+              'AI delivery guidance',
+            ],
+          },
+        },
+        loadComponent: () =>
+          import('./blog-archive/blog-archive.component').then((m) => m.BlogArchiveComponent),
       },
       {
         path: ':slug',

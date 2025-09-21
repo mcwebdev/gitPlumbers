@@ -1,10 +1,11 @@
 import { signalStore, withProps, withState, withComputed, withMethods, withHooks } from '@ngrx/signals';
 import { patchState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { inject } from '@angular/core';
+import { inject, computed } from '@angular/core';
 import { Firestore, collection, getDocs, query, where } from '@angular/fire/firestore';
 import { pipe, map, catchError, of, switchMap } from 'rxjs';
 import { BlogPost, BlogCategory } from './blog-content';
+import { PaginationState, PaginationResult, PaginationControls, BLOG_PAGINATION_CONFIG } from '../../shared/models/pagination.model';
 
 interface BlogState {
   posts: BlogPost[];
@@ -12,6 +13,8 @@ interface BlogState {
   recentPosts: BlogPost[];
   loading: boolean;
   error: string | null;
+  currentPage: number;
+  pageSize: number;
 }
 
 export const BlogStore = signalStore(
@@ -25,11 +28,84 @@ export const BlogStore = signalStore(
     recentPosts: [],
     loading: false,
     error: null,
+    currentPage: 1,
+    pageSize: BLOG_PAGINATION_CONFIG.pageSize,
   }),
   withComputed((store) => ({
     hasPosts: () => store.posts().length > 0,
     hasFeaturedPosts: () => store.featuredPosts().length > 0,
     hasRecentPosts: () => store.recentPosts().length > 0,
+    paginationState: computed((): PaginationState => {
+      const totalItems = store.posts().length;
+      const pageSize = store.pageSize();
+      const totalPages = Math.ceil(totalItems / pageSize);
+      const currentPage = Math.min(store.currentPage(), Math.max(1, totalPages));
+      
+      return {
+        currentPage,
+        pageSize,
+        totalItems,
+        totalPages: Math.max(1, totalPages),
+      };
+    }),
+    paginatedPosts: computed((): PaginationResult<BlogPost> => {
+      const posts = store.posts();
+      const totalItems = posts.length;
+      const pageSize = store.pageSize();
+      const totalPages = Math.ceil(totalItems / pageSize);
+      const currentPage = Math.min(store.currentPage(), Math.max(1, totalPages));
+      
+      const pagination: PaginationState = {
+        currentPage,
+        pageSize,
+        totalItems,
+        totalPages: Math.max(1, totalPages),
+      };
+      
+      const startIndex = (pagination.currentPage - 1) * pagination.pageSize;
+      const endIndex = startIndex + pagination.pageSize;
+      const items = posts.slice(startIndex, endIndex);
+      
+      return {
+        items,
+        pagination,
+      };
+    }),
+    paginationControls: computed((): PaginationControls => {
+      const totalItems = store.posts().length;
+      const pageSize = store.pageSize();
+      const totalPages = Math.ceil(totalItems / pageSize);
+      const currentPage = Math.min(store.currentPage(), Math.max(1, totalPages));
+      const maxVisible = BLOG_PAGINATION_CONFIG.maxVisiblePages || 5;
+      
+      const hasPrevious = currentPage > 1;
+      const hasNext = currentPage < totalPages;
+      const canGoToFirst = currentPage > 1;
+      const canGoToLast = currentPage < totalPages;
+      
+      // Calculate visible page numbers
+      const visiblePages: number[] = [];
+      const halfVisible = Math.floor(maxVisible / 2);
+      let startPage = Math.max(1, currentPage - halfVisible);
+      let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+      
+      // Adjust start if we're near the end
+      if (endPage - startPage + 1 < maxVisible) {
+        startPage = Math.max(1, endPage - maxVisible + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        visiblePages.push(i);
+      }
+      
+      return {
+        hasPrevious,
+        hasNext,
+        canGoToFirst,
+        canGoToLast,
+        visiblePages,
+      };
+    }),
   })),
   withMethods((store) => ({
     loadPosts: rxMethod<void>(
@@ -176,6 +252,41 @@ export const BlogStore = signalStore(
       return store.posts()
         .filter(post => post.slug !== currentSlug && post.categorySlug === categorySlug)
         .slice(0, 2);
+    },
+    setCurrentPage: (page: number) => {
+      const totalItems = store.posts().length;
+      const pageSize = store.pageSize();
+      const totalPages = Math.ceil(totalItems / pageSize);
+      const validPage = Math.max(1, Math.min(page, Math.max(1, totalPages)));
+      patchState(store, { currentPage: validPage });
+    },
+    setPageSize: (size: number) => {
+      const validSize = Math.max(1, size);
+      patchState(store, { pageSize: validSize, currentPage: 1 });
+    },
+    goToNextPage: () => {
+      const totalItems = store.posts().length;
+      const pageSize = store.pageSize();
+      const totalPages = Math.ceil(totalItems / pageSize);
+      const currentPage = store.currentPage();
+      if (currentPage < totalPages) {
+        patchState(store, { currentPage: currentPage + 1 });
+      }
+    },
+    goToPreviousPage: () => {
+      const currentPage = store.currentPage();
+      if (currentPage > 1) {
+        patchState(store, { currentPage: currentPage - 1 });
+      }
+    },
+    goToFirstPage: () => {
+      patchState(store, { currentPage: 1 });
+    },
+    goToLastPage: () => {
+      const totalItems = store.posts().length;
+      const pageSize = store.pageSize();
+      const totalPages = Math.ceil(totalItems / pageSize);
+      patchState(store, { currentPage: Math.max(1, totalPages) });
     },
   })),
   withHooks({

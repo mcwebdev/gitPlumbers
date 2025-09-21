@@ -1,0 +1,74 @@
+@if (hasMultiplePages()) {
+  <nav class="pagination" aria-label="Pagination Navigation">
+    @if (showInfo()) {
+      <div class="pagination__info" aria-live="polite">
+        Showing {{ pageInfo().startItem }}-{{ pageInfo().endItem }} of {{ pageInfo().totalItems }} items
+      </div>
+    }
+
+    <div class="pagination__controls">
+      @if (showFirstLast() && controls().canGoToFirst) {
+        <button
+          type="button"
+          class="pagination__button pagination__button--first"
+          (click)="onFirstClick()"
+          aria-label="Go to first page"
+        >
+          <span aria-hidden="true">««</span>
+          <span class="sr-only">First</span>
+        </button>
+      }
+
+      @if (showPrevNext() && controls().hasPrevious) {
+        <button
+          type="button"
+          class="pagination__button pagination__button--previous"
+          (click)="onPreviousClick()"
+          aria-label="Go to previous page"
+        >
+          <span aria-hidden="true">‹</span>
+          <span class="sr-only">Previous</span>
+        </button>
+      }
+
+      <div class="pagination__pages">
+        @for (page of controls().visiblePages; track page) {
+          <button
+            type="button"
+            class="pagination__button pagination__button--page"
+            [class.pagination__button--current]="isCurrentPage(page)"
+            (click)="onPageClick(page)"
+            [attr.aria-label]="'Go to page ' + page"
+            [attr.aria-current]="isCurrentPage(page) ? 'page' : null"
+          >
+            {{ page }}
+          </button>
+        }
+      </div>
+
+      @if (showPrevNext() && controls().hasNext) {
+        <button
+          type="button"
+          class="pagination__button pagination__button--next"
+          (click)="onNextClick()"
+          aria-label="Go to next page"
+        >
+          <span aria-hidden="true">›</span>
+          <span class="sr-only">Next</span>
+        </button>
+      }
+
+      @if (showFirstLast() && controls().canGoToLast) {
+        <button
+          type="button"
+          class="pagination__button pagination__button--last"
+          (click)="onLastClick()"
+          aria-label="Go to last page"
+        >
+          <span aria-hidden="true">»»</span>
+          <span class="sr-only">Last</span>
+        </button>
+      }
+    </div>
+  </nav>
+}

@@ -9,12 +9,13 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule, DatePipe, NgFor } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { BlogStore } from '../blog.store';
 import { BlogContentService } from '../blog-content.service';
 import { BlogCategory, BlogPost } from '../blog-content';
 import { SeoService } from '../../../shared/services/seo.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
 type SortOptionId = 'newest' | 'oldest' | 'title';
 
@@ -31,7 +32,7 @@ interface CategoryOption {
 @Component({
   selector: 'app-blog-archive',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgFor, DatePipe, LoadingSpinnerComponent],
+  imports: [CommonModule, RouterLink, NgFor, DatePipe, LoadingSpinnerComponent, PaginationComponent],
   templateUrl: './blog-archive.component.html',
   styleUrl: './blog-archive.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +41,8 @@ export class BlogArchiveComponent implements OnInit, OnDestroy {
   private readonly _blogStore = inject(BlogStore);
   private readonly _content = inject(BlogContentService);
   private readonly _seo = inject(SeoService);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
   private readonly _titleCollator = new Intl.Collator('en', { sensitivity: 'base' });
 
   protected readonly categories: ReadonlyArray<BlogCategory> = this._content.categories;
@@ -91,6 +94,11 @@ export class BlogArchiveComponent implements OnInit, OnDestroy {
       .map(({ post }) => post);
   });
 
+  // Pagination computed properties
+  protected readonly paginationState = computed(() => this._blogStore.paginationState());
+  protected readonly paginationControls = computed(() => this._blogStore.paginationControls());
+  protected readonly paginatedPosts = computed(() => this._blogStore.paginatedPosts());
+
   private readonly _seoEffect = effect(() => {
     const posts = this._blogStore.posts();
 
@@ -126,11 +134,16 @@ export class BlogArchiveComponent implements OnInit, OnDestroy {
     if (typeof window !== 'undefined' && this._blogStore.posts().length === 0) {
       this._blogStore.loadPosts();
     }
+
+    // Initialize pagination from URL query parameters
+    this._initializeFromQueryParams();
   }
 
   protected onCategoryChange(value: string): void {
     const next = this.categoryOptions.some((option) => option.slug === value) ? value : 'all';
     this.selectedCategory.set(next);
+    this._updateUrlQueryParams({ category: next === 'all' ? '' : next, page: '1' });
+    this._blogStore.setCurrentPage(1); // Reset to first page when filtering
   }
 
   protected onSortChange(value: string): void {
@@ -138,15 +151,21 @@ export class BlogArchiveComponent implements OnInit, OnDestroy {
       ? (value as SortOptionId)
       : 'newest';
     this.sortOption.set(next);
+    this._updateUrlQueryParams({ sort: next === 'newest' ? '' : next, page: '1' });
+    this._blogStore.setCurrentPage(1); // Reset to first page when sorting
   }
 
   protected onSearchChange(value: string): void {
     this.searchTerm.set(value);
+    this._updateUrlQueryParams({ search: value.trim() || '', page: '1' });
+    this._blogStore.setCurrentPage(1); // Reset to first page when searching
   }
 
   protected clearSearch(): void {
     if (this.hasActiveSearch()) {
       this.searchTerm.set('');
+      this._updateUrlQueryParams({ search: '', page: '1' });
+      this._blogStore.setCurrentPage(1);
     }
   }
 
@@ -154,6 +173,35 @@ export class BlogArchiveComponent implements OnInit, OnDestroy {
     if (typeof window !== 'undefined') {
       window.location.reload();
     }
+  }
+
+  // Pagination event handlers
+  protected onPageChange(page: number): void {
+    this._blogStore.setCurrentPage(page);
+    this._updateUrlQueryParams({ page: page.toString() });
+  }
+
+  protected onFirstPage(): void {
+    this._blogStore.goToFirstPage();
+    this._updateUrlQueryParams({ page: '1' });
+  }
+
+  protected onPreviousPage(): void {
+    this._blogStore.goToPreviousPage();
+    const currentPage = this._blogStore.paginationState().currentPage;
+    this._updateUrlQueryParams({ page: currentPage.toString() });
+  }
+
+  protected onNextPage(): void {
+    this._blogStore.goToNextPage();
+    const currentPage = this._blogStore.paginationState().currentPage;
+    this._updateUrlQueryParams({ page: currentPage.toString() });
+  }
+
+  protected onLastPage(): void {
+    this._blogStore.goToLastPage();
+    const currentPage = this._blogStore.paginationState().currentPage;
+    this._updateUrlQueryParams({ page: currentPage.toString() });
   }
 
   private _matchesQuery(post: BlogPost, query: string): boolean {
@@ -287,6 +335,49 @@ export class BlogArchiveComponent implements OnInit, OnDestroy {
     }
 
     return Math.abs(hash);
+  }
+
+  private _initializeFromQueryParams(): void {
+    const queryParams = this._route.snapshot.queryParams;
+    
+    // Initialize page from URL
+    if (queryParams['page']) {
+      const page = parseInt(queryParams['page'], 10);
+      if (!isNaN(page) && page > 0) {
+        this._blogStore.setCurrentPage(page);
+      }
+    }
+
+    // Initialize filters from URL
+    if (queryParams['category']) {
+      this.selectedCategory.set(queryParams['category']);
+    }
+
+    if (queryParams['sort']) {
+      this.sortOption.set(queryParams['sort'] as SortOptionId);
+    }
+
+    if (queryParams['search']) {
+      this.searchTerm.set(queryParams['search']);
+    }
+  }
+
+  private _updateUrlQueryParams(params: Record<string, string>): void {
+    const currentParams = this._route.snapshot.queryParams;
+    const newParams = { ...currentParams, ...params };
+
+    // Remove empty values
+    Object.keys(newParams).forEach(key => {
+      if (!newParams[key] || newParams[key] === '') {
+        delete newParams[key];
+      }
+    });
+
+    this._router.navigate([], {
+      relativeTo: this._route,
+      queryParams: newParams,
+      queryParamsHandling: 'merge',
+    });
   }
 
   ngOnDestroy(): void {

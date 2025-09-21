@@ -52,7 +52,7 @@
       </select>
     </div>
 
-    <p class="blog-archive__count" aria-live="polite">{{ totalVisiblePosts() }} articles</p>
+    <p class="blog-archive__count" aria-live="polite">{{ paginationState().totalItems }} articles</p>
   </section>
 
   @if (totalVisiblePosts() === 0) {
@@ -64,7 +64,7 @@
     </div>
   } @else {
     <ul class="blog-archive__list">
-      <li *ngFor="let post of filteredPosts()" class="blog-archive__item">
+      <li *ngFor="let post of paginatedPosts().items" class="blog-archive__item">
         <article>
           <p class="blog-archive__category">{{ post.categorySlug | titlecase }}</p>
           <h2>
@@ -78,6 +78,19 @@
         </article>
       </li>
     </ul>
+
+    <app-pagination
+      [pagination]="paginationState()"
+      [controls]="paginationControls()"
+      [showInfo]="true"
+      [showFirstLast]="true"
+      [showPrevNext]="true"
+      (pageChange)="onPageChange($event)"
+      (firstPage)="onFirstPage()"
+      (previousPage)="onPreviousPage()"
+      (nextPage)="onNextPage()"
+      (lastPage)="onLastPage()"
+    ></app-pagination>
   }
 </section>
 }

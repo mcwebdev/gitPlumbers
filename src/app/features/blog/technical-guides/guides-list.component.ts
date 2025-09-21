@@ -31,7 +31,7 @@ export class GuidesListComponent implements OnInit {
           'Angular signals migration guide',
           'Node reliability checklist',
         ],
-        url: 'https://gitplumbers-35d92.firebaseapp.com/blog/guides',
+        url: 'https://gitplumbers.com/blog/guides',
       })
     );
 
@@ -43,7 +43,7 @@ export class GuidesListComponent implements OnInit {
         '@type': 'ListItem',
         position: index + 1,
         name: guide.title,
-        url: `https://gitplumbers-35d92.firebaseapp.com/blog/guides/${guide.slug}`,
+        url: `https://gitplumbers.com/blog/guides/${guide.slug}`,
       })),
     });
   }

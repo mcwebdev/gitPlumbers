@@ -40,13 +40,13 @@ export class SeoService {
     ogTitle: 'GitPlumbers - AI Code Optimization & Enterprise Modernization',
     ogDescription:
       'Expert network transforming AI-generated codebases into scalable, production-ready applications. Specialized in React, Vue, Angular, Node.js, and Python optimization.',
-    ogImage: 'https://gitplumbers-35d92.firebaseapp.com/logo.png',
-    ogUrl: 'https://gitplumbers-35d92.firebaseapp.com',
+    ogImage: 'https://gitplumbers.com/logo.png',
+    ogUrl: 'https://gitplumbers.com',
     twitterCard: 'summary_large_image',
     twitterTitle: 'GitPlumbers - Transform AI Code Chaos into Clean Applications',
     twitterDescription:
       'Stop shipping fragile AI-generated code. Our expert network optimizes React, Angular, Vue, Node.js & Python applications for enterprise scale.',
-    twitterImage: 'https://gitplumbers-35d92.firebaseapp.com/logo.png',
+    twitterImage: 'https://gitplumbers.com/logo.png',
     robotsIndex: true,
     robotsFollow: true,
   };
@@ -139,7 +139,7 @@ export class SeoService {
   private updateCanonicalUrl(url: string): void {
     if (!this._isBrowser) return;
 
-    const baseUrl = 'https://gitplumbers-35d92.firebaseapp.com';
+    const baseUrl = 'https://gitplumbers.com';
     const canonicalUrl = `${baseUrl}${url}`;
 
     let linkElement = this._document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
@@ -159,7 +159,7 @@ export class SeoService {
         'Access vetted specialists across React, Vue, Angular, Node.js, Python & more. Scalable technical teams for enterprise modernization. 70% faster delivery, zero hiring overhead.',
       keywords:
         'technical consultancy, React specialists, Vue experts, Angular consultants, Node.js developers, Python experts, full stack teams, enterprise modernization, code optimization',
-      ogUrl: 'https://gitplumbers-35d92.firebaseapp.com/',
+      ogUrl: 'https://gitplumbers.com/',
     };
   }
 
@@ -170,7 +170,7 @@ export class SeoService {
         'Ready to scale your development? Get matched with our curated network of React, Vue, Angular, Node.js, and Python specialists for your next project.',
       keywords:
         'contact gitplumbers, technical team assembly, React consultants, Vue specialists, Angular experts, Node.js developers, Python consultants',
-      ogUrl: 'https://gitplumbers-35d92.firebaseapp.com/contact',
+      ogUrl: 'https://gitplumbers.com/contact',
     };
   }
 
@@ -180,7 +180,7 @@ export class SeoService {
       description:
         'Access your GitPlumbers client dashboard to track project progress, review reports, and manage your code optimization projects.',
       keywords: 'gitplumbers login, client portal, project dashboard',
-      ogUrl: 'https://gitplumbers-35d92.firebaseapp.com/login',
+      ogUrl: 'https://gitplumbers.com/login',
       robotsIndex: false, // Don't index login pages
     };
   }
@@ -191,7 +191,7 @@ export class SeoService {
       description:
         'Join GitPlumbers and start transforming your codebase today. Get access to expert code reviews, modernization services, and enterprise development.',
       keywords: 'gitplumbers signup, code transformation, software consulting registration',
-      ogUrl: 'https://gitplumbers-35d92.firebaseapp.com/signup',
+      ogUrl: 'https://gitplumbers.com/signup',
     };
   }
 
@@ -220,7 +220,7 @@ export class SeoService {
       ogTitle: aiOptimizedTitle,
       ogDescription: aiOptimizedDescription,
       ogUrl: content.url,
-      ogImage: 'https://gitplumbers-35d92.firebaseapp.com/logo.png',
+      ogImage: 'https://gitplumbers.com/logo.png',
       twitterCard: 'summary_large_image',
       twitterTitle: aiOptimizedTitle,
       twitterDescription: aiOptimizedDescription,

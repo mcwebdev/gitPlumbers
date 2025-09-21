@@ -105,7 +105,7 @@ export class BlogArchiveComponent implements OnInit, OnDestroy {
         'AI code stabilisation insights',
         'modernisation blog search',
       ],
-      url: 'https://gitplumbers-35d92.firebaseapp.com/blog/articles',
+      url: 'https://gitplumbers.com/blog/articles',
     });
 
     this._seo.updateMetadata(metadata);
@@ -115,7 +115,7 @@ export class BlogArchiveComponent implements OnInit, OnDestroy {
       name: 'GitPlumbers Insights Archive',
       description:
         'Complete archive of GitPlumbers case studies, playbooks, and engineering field notes.',
-      url: 'https://gitplumbers-35d92.firebaseapp.com/blog/articles',
+      url: 'https://gitplumbers.com/blog/articles',
       numberOfItems: posts.length,
     });
   });

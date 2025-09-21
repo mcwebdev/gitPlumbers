@@ -88,7 +88,7 @@ export class BlogPostComponent implements OnDestroy {
       title: `${post.title} | GitPlumbers Insights`,
       description: post.summary,
       keywords: [...post.keywords],
-      url: `https://gitplumbers-35d92.firebaseapp.com/blog/${slug}`,
+      url: `https://gitplumbers.com/blog/${slug}`,
     });
 
     this._seo.updateMetadata(metadata);
@@ -108,7 +108,7 @@ export class BlogPostComponent implements OnDestroy {
         '@type': 'Organization',
         name: 'GitPlumbers',
       },
-      url: `https://gitplumbers-35d92.firebaseapp.com/blog/${slug}`,
+      url: `https://gitplumbers.com/blog/${slug}`,
     };
 
     if (post.faq && post.faq.length) {

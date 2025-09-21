@@ -31,7 +31,7 @@ export class CaseStudiesListComponent implements OnInit {
           'AI code stabilisation results',
           'GitPlumbers client outcomes',
         ],
-        url: 'https://gitplumbers-35d92.firebaseapp.com/blog/case-studies',
+        url: 'https://gitplumbers.com/blog/case-studies',
       })
     );
 
@@ -43,7 +43,7 @@ export class CaseStudiesListComponent implements OnInit {
         '@type': 'ListItem',
         position: index + 1,
         name: study.title,
-        url: `https://gitplumbers-35d92.firebaseapp.com/blog/case-studies/${study.slug}`,
+        url: `https://gitplumbers.com/blog/case-studies/${study.slug}`,
       })),
     });
   }

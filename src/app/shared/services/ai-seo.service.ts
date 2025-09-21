@@ -197,7 +197,7 @@ export class AiSeoService {
       publisher: {
         '@type': 'Organization',
         name: 'GitPlumbers',
-        url: 'https://gitplumbers-35d92.firebaseapp.com',
+        url: 'https://gitplumbers.com',
       },
       datePublished: article.publishedAt.toISOString(),
       programmingLanguage: article.technologies,

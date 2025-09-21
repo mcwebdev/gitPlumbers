@@ -134,7 +134,7 @@ export class ServicesComponent implements OnInit {
         'Comprehensive code optimization services for React, Angular, Vue, Node.js, and Python. Enterprise modernization, technical debt resolution, and performance optimization.',
       keywords:
         'code optimization services, React optimization, Angular performance, Vue.js consulting, Node.js scaling, Python modernization',
-      ogUrl: 'https://gitplumbers-35d92.firebaseapp.com/services',
+      ogUrl: 'https://gitplumbers.com/services',
     });
   }
 }

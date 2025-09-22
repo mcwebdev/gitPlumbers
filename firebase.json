@@ -19,6 +19,7 @@
   "hosting": {
     "public": "dist/gitplumbers-35d92/browser",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "predeploy": ["ng build"],
     "headers": [
       {
         "source": "**/*.@(js|css)",

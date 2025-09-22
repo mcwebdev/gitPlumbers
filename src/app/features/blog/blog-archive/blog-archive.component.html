@@ -25,7 +25,7 @@
         id="archive-search"
         type="search"
         inputmode="search"
-        [value]="searchTerm()"
+        [value]="_blogStore.searchTerm()"
         (input)="onSearchChange($any($event.target).value)"
         placeholder="Search titles, summaries, or keywords"
       />
@@ -35,7 +35,7 @@
       <label for="category-filter">Topic</label>
       <select
         id="category-filter"
-        [value]="selectedCategory()"
+        [value]="_blogStore.selectedCategory()"
         (change)="onCategoryChange($any($event.target).value)"
       >
         <option *ngFor="let option of categoryOptions" [value]="option.slug">{{ option.label }}</option>
@@ -46,7 +46,7 @@
       <label for="sort-filter">Sort by</label>
       <select
         id="sort-filter"
-        [value]="sortOption()"
+        [value]="_blogStore.sortOption()"
         (change)="onSortChange($any($event.target).value)"
       >
         <option *ngFor="let option of sortOptions" [value]="option.id">{{ option.label }}</option>

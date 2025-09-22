@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
@@ -73,7 +73,7 @@ export class BlogCategoryComponent implements OnDestroy {
       title: `${category.title} | GitPlumbers Insights`,
       description: category.seoDescription,
       keywords: [...category.keywords],
-      url: `https://gitplumbers.com/blog/category/${slug}`,
+      url: `https://gitplumbers.com/blog/category/${slug}/`,
     });
 
     this._seo.updateMetadata(metadata);
@@ -85,13 +85,13 @@ export class BlogCategoryComponent implements OnDestroy {
           '@type': 'ListItem',
           position: 1,
           name: 'Blog',
-          item: 'https://gitplumbers.com/blog',
+          item: 'https://gitplumbers.com/blog/',
         },
         {
           '@type': 'ListItem',
           position: 2,
           name: category.title,
-          item: `https://gitplumbers.com/blog/category/${slug}`,
+          item: `https://gitplumbers.com/blog/category/${slug}/`,
         },
       ],
     });
@@ -101,3 +101,4 @@ export class BlogCategoryComponent implements OnDestroy {
     this._seoEffect.destroy();
   }
 }
+

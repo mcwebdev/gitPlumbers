@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BlogContentService } from '../blog-content.service';
@@ -31,7 +31,7 @@ export class CaseStudiesListComponent implements OnInit {
           'AI code stabilisation results',
           'GitPlumbers client outcomes',
         ],
-        url: 'https://gitplumbers.com/blog/case-studies',
+        url: 'https://gitplumbers.com/blog/case-studies/',
       })
     );
 
@@ -43,8 +43,9 @@ export class CaseStudiesListComponent implements OnInit {
         '@type': 'ListItem',
         position: index + 1,
         name: study.title,
-        url: `https://gitplumbers.com/blog/case-studies/${study.slug}`,
+        url: `https://gitplumbers.com/blog/case-studies/${study.slug}/`,
       })),
     });
   }
 }
+

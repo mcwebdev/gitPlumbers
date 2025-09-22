@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe, NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BlogContentService } from '../blog-content.service';
@@ -44,7 +44,7 @@ export class BlogListComponent implements OnInit {
           'AI delivery guide',
           'technical debt remediation tips',
         ],
-        url: 'https://gitplumbers.com/blog',
+        url: 'https://gitplumbers.com/blog/',
       })
     );
 
@@ -54,7 +54,7 @@ export class BlogListComponent implements OnInit {
       name: 'GitPlumbers Insights',
       description:
         'Articles, case studies, and guides covering software modernization, AI-assisted delivery, and high-performing engineering teams.',
-      url: 'https://gitplumbers.com/blog',
+      url: 'https://gitplumbers.com/blog/',
       publisher: {
         '@type': 'Organization',
         name: 'GitPlumbers',
@@ -62,7 +62,7 @@ export class BlogListComponent implements OnInit {
       hasPart: this.featuredPosts().map((post) => ({
         '@type': 'BlogPosting',
         headline: post.title,
-        url: `https://gitplumbers.com/blog/${post.slug}`,
+        url: `https://gitplumbers.com/blog/${post.slug}/`,
         datePublished: post.publishedOn,
         articleSection: post.categorySlug,
       })),
@@ -71,3 +71,4 @@ export class BlogListComponent implements OnInit {
     this._seo.addStructuredData(schema);
   }
 }
+

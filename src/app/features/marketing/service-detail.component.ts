@@ -306,7 +306,7 @@ export class ServiceDetailComponent {
         title: detail.seo.title,
         description: detail.seo.description,
         keywords: detail.seo.keywords,
-        ogUrl: `https://gitplumbers.com/services/${slug}`,
+        ogUrl: `https://gitplumbers.com/services/${slug}/`,
       });
     });
   }

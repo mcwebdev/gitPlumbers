@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
@@ -69,7 +69,7 @@ export class GuideDetailComponent implements OnDestroy {
       title: `${guide.title} | GitPlumbers Guide`,
       description: guide.summary,
       keywords: [...guide.keywords],
-      url: `https://gitplumbers.com/blog/guides/${slug}`,
+      url: `https://gitplumbers.com/blog/guides/${slug}/`,
     });
 
     this._seo.updateMetadata(metadata);
@@ -85,7 +85,7 @@ export class GuideDetailComponent implements OnDestroy {
         name: takeaway,
       })),
       supply: guide.checkpoints,
-      url: `https://gitplumbers.com/blog/guides/${slug}`,
+      url: `https://gitplumbers.com/blog/guides/${slug}/`,
     });
   });
 
@@ -93,3 +93,4 @@ export class GuideDetailComponent implements OnDestroy {
     this._seoEffect.destroy();
   }
 }
+

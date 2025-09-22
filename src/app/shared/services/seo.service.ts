@@ -30,6 +30,10 @@ export class SeoService {
   private readonly _document = inject(DOCUMENT) as Document;
   private readonly _platformId = inject(PLATFORM_ID);
   private readonly _isBrowser = isPlatformBrowser(this._platformId);
+  private readonly _baseUrl = 'https://gitplumbers.com';
+  private readonly _defaultCanonical = 'https://gitplumbers.com/';
+  private _currentCanonical = 'https://gitplumbers.com/';
+
 
   private readonly defaultMetadata: SeoMetadata = {
     title: 'GitPlumbers - AI Code Optimization & Enterprise Modernization Experts',
@@ -41,7 +45,7 @@ export class SeoService {
     ogDescription:
       'Expert network transforming AI-generated codebases into scalable, production-ready applications. Specialized in React, Vue, Angular, Node.js, and Python optimization.',
     ogImage: 'https://gitplumbers.com/logo.png',
-    ogUrl: 'https://gitplumbers.com',
+    ogUrl: 'https://gitplumbers.com/',
     twitterCard: 'summary_large_image',
     twitterTitle: 'GitPlumbers - Transform AI Code Chaos into Clean Applications',
     twitterDescription:
@@ -83,6 +87,9 @@ export class SeoService {
       this.updateTag('keywords', keywordContent);
     }
 
+    const canonicalUrl = this.resolveCanonical(finalMetadata.canonical ?? finalMetadata.ogUrl);
+    this.applyCanonicalLink(canonicalUrl);
+
     // Update Open Graph meta tags
     this.updateTag('og:title', finalMetadata.ogTitle || finalMetadata.title, 'property');
     this.updateTag(
@@ -91,7 +98,7 @@ export class SeoService {
       'property'
     );
     this.updateTag('og:image', finalMetadata.ogImage!, 'property');
-    this.updateTag('og:url', finalMetadata.ogUrl!, 'property');
+    this.updateTag('og:url', canonicalUrl, 'property');
     this.updateTag('og:type', 'website', 'property');
     this.updateTag('og:site_name', 'GitPlumbers', 'property');
 
@@ -137,18 +144,86 @@ export class SeoService {
   }
 
   private updateCanonicalUrl(url: string): void {
-    if (!this._isBrowser) return;
+    const canonicalUrl = this.resolveCanonical(url);
+    this.applyCanonicalLink(canonicalUrl);
+  }
 
-    const baseUrl = 'https://gitplumbers.com';
-    const canonicalUrl = `${baseUrl}${url}`;
-
-    let linkElement = this._document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-    if (!linkElement) {
-      linkElement = this._document.createElement('link');
-      linkElement.setAttribute('rel', 'canonical');
-      this._document.head.appendChild(linkElement);
+  private resolveCanonical(target?: string): string {
+    const trimmed = (target ?? '').trim();
+    if (!trimmed) {
+      return this._defaultCanonical;
     }
-    linkElement.setAttribute('href', canonicalUrl);
+
+    if (/^https?:\/\//i.test(trimmed)) {
+      return this.normalizeCanonical(trimmed);
+    }
+
+    const relativePath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    return this.normalizeCanonical(`${this._baseUrl}${relativePath}`);
+  }
+
+  private normalizeCanonical(url: string): string {
+    try {
+      const parsed = new URL(url);
+      if (!parsed.pathname || parsed.pathname === '') {
+        parsed.pathname = '/';
+      }
+
+      if (this.shouldAppendTrailingSlash(parsed.pathname)) {
+        parsed.pathname = parsed.pathname.endsWith('/')
+          ? parsed.pathname
+          : `${parsed.pathname}/`;
+      }
+
+      return parsed.toString();
+    } catch {
+      if (!url) {
+        return this._defaultCanonical;
+      }
+
+      const lastSegment = url.split('/').pop() ?? '';
+      if (url.endsWith('/') || url.includes('?') || url.includes('#') || lastSegment.includes('.')) {
+        return url;
+      }
+
+      return `${url}/`;
+    }
+  }
+
+  private shouldAppendTrailingSlash(pathname: string): boolean {
+    if (!pathname || pathname === '/' || pathname.endsWith('/')) {
+      return false;
+    }
+
+    const segments = pathname.split('/').filter((segment) => segment.length > 0);
+    const lastSegment = segments.length ? segments[segments.length - 1] : '';
+    return lastSegment.length > 0 && !lastSegment.includes('.');
+  }
+
+  private applyCanonicalLink(url: string): void {
+    const headElement =
+      this._document.head ??
+      (this._document.getElementsByTagName('head').item(0) as HTMLHeadElement | null);
+
+    if (!headElement) {
+      return;
+    }
+
+    let linkElement = headElement.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!linkElement) {
+      linkElement = this._document.createElement('link') as HTMLLinkElement;
+      linkElement.setAttribute('rel', 'canonical');
+      headElement.appendChild(linkElement);
+    } else if (!linkElement.parentNode) {
+      headElement.appendChild(linkElement);
+    }
+
+    if (linkElement.getAttribute('href') === url && this._currentCanonical === url) {
+      return;
+    }
+
+    linkElement.setAttribute('href', url);
+    this._currentCanonical = url;
   }
 
   // Predefined metadata for different pages
@@ -170,7 +245,7 @@ export class SeoService {
         'Ready to scale your development? Get matched with our curated network of React, Vue, Angular, Node.js, and Python specialists for your next project.',
       keywords:
         'contact gitplumbers, technical team assembly, React consultants, Vue specialists, Angular experts, Node.js developers, Python consultants',
-      ogUrl: 'https://gitplumbers.com/contact',
+      ogUrl: 'https://gitplumbers.com/contact/',
     };
   }
 
@@ -180,7 +255,7 @@ export class SeoService {
       description:
         'Access your GitPlumbers client dashboard to track project progress, review reports, and manage your code optimization projects.',
       keywords: 'gitplumbers login, client portal, project dashboard',
-      ogUrl: 'https://gitplumbers.com/login',
+      ogUrl: 'https://gitplumbers.com/login/',
       robotsIndex: false, // Don't index login pages
     };
   }
@@ -191,7 +266,7 @@ export class SeoService {
       description:
         'Join GitPlumbers and start transforming your codebase today. Get access to expert code reviews, modernization services, and enterprise development.',
       keywords: 'gitplumbers signup, code transformation, software consulting registration',
-      ogUrl: 'https://gitplumbers.com/signup',
+      ogUrl: 'https://gitplumbers.com/signup/',
     };
   }
 
@@ -212,6 +287,7 @@ export class SeoService {
       content.description,
       content.keywords
     );
+    const canonicalUrl = this.resolveCanonical(content.url);
 
     return {
       title: aiOptimizedTitle,
@@ -219,11 +295,12 @@ export class SeoService {
       keywords: content.keywords.join(', '),
       ogTitle: aiOptimizedTitle,
       ogDescription: aiOptimizedDescription,
-      ogUrl: content.url,
+      ogUrl: canonicalUrl,
       ogImage: 'https://gitplumbers.com/logo.png',
       twitterCard: 'summary_large_image',
       twitterTitle: aiOptimizedTitle,
       twitterDescription: aiOptimizedDescription,
+      canonical: canonicalUrl,
       robotsIndex: true,
       robotsFollow: true,
     };
@@ -307,3 +384,4 @@ export class SeoService {
     this._document.head.appendChild(script);
   }
 }
+

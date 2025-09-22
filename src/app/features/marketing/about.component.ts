@@ -21,7 +21,7 @@ export class AboutComponent implements OnInit {
         'Meet the expert network behind GitPlumbers. Senior developers specializing in enterprise code optimization, modernization, and AI-generated code cleanup.',
       keywords:
         'senior developers, technical experts, code optimization team, enterprise consultants',
-      ogUrl: 'https://gitplumbers.com/about',
+      ogUrl: 'https://gitplumbers.com/about/',
     });
   }
 
@@ -381,3 +381,4 @@ export class AboutComponent implements OnInit {
     },
   ];
 }
+

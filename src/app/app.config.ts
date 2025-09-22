@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { provideRouter, UrlSerializer } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
@@ -10,6 +10,7 @@ import { providePrimeNG } from 'primeng/config';
 import { MessageService } from 'primeng/api';
 import Aura from '@primeuix/themes/aura';
 import { routes } from './app.routes';
+import { TrailingSlashUrlSerializer } from './shared/routing/trailing-slash-url-serializer';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { environment } from '../environments/environment';
 
@@ -21,6 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideAnimations(),
     provideRouter(routes),
+    { provide: UrlSerializer, useClass: TrailingSlashUrlSerializer },
     provideClientHydration(withEventReplay()),
     provideHttpClient(withFetch()),
     MessageService,
@@ -37,3 +39,5 @@ export const appConfig: ApplicationConfig = {
     }),
   ],
 };
+
+

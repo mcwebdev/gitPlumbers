@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   BLOG_CATEGORIES,
   CASE_STUDIES,
@@ -48,7 +48,7 @@ export class BlogContentService {
       '@context': 'https://schema.org',
       '@type': 'Organization',
       name: 'GitPlumbers',
-      url: 'https://gitplumbers.com',
+      url: 'https://gitplumbers.com/',
       logo: 'https://gitplumbers.com/logo.png',
       sameAs: [
         'https://www.linkedin.com/company/gitplumbers/',
@@ -57,7 +57,7 @@ export class BlogContentService {
       contactPoint: {
         '@type': 'ContactPoint',
         contactType: 'Customer Service',
-        url: 'https://gitplumbers.com/contact'
+        url: 'https://gitplumbers.com/contact/'
       }
     };
   }
@@ -71,10 +71,10 @@ export class BlogContentService {
       publisher: {
         '@type': 'Organization',
         name: 'GitPlumbers',
-        url: 'https://gitplumbers.com',
+        url: 'https://gitplumbers.com/',
         logo: 'https://gitplumbers.com/logo.png'
       },
-      mainEntityOfPage: `https://gitplumbers.com/blog/${post.slug}`,
+      mainEntityOfPage: `https://gitplumbers.com/blog/${post.slug}/`,
       datePublished: post.publishedOn,
       dateModified: post.publishedOn
     };

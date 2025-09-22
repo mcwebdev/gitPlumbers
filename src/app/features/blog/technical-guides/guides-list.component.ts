@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BlogContentService } from '../blog-content.service';
@@ -31,7 +31,7 @@ export class GuidesListComponent implements OnInit {
           'Angular signals migration guide',
           'Node reliability checklist',
         ],
-        url: 'https://gitplumbers.com/blog/guides',
+        url: 'https://gitplumbers.com/blog/guides/',
       })
     );
 
@@ -43,8 +43,9 @@ export class GuidesListComponent implements OnInit {
         '@type': 'ListItem',
         position: index + 1,
         name: guide.title,
-        url: `https://gitplumbers.com/blog/guides/${guide.slug}`,
+        url: `https://gitplumbers.com/blog/guides/${guide.slug}/`,
       })),
     });
   }
 }
+

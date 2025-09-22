@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
@@ -69,7 +69,7 @@ export class CaseStudyDetailComponent implements OnDestroy {
       title: `${study.title} | GitPlumbers Case Study`,
       description: study.summary,
       keywords: [...study.keywords],
-      url: `https://gitplumbers.com/blog/case-studies/${slug}`,
+      url: `https://gitplumbers.com/blog/case-studies/${slug}/`,
     });
 
     this._seo.updateMetadata(metadata);
@@ -78,7 +78,7 @@ export class CaseStudyDetailComponent implements OnDestroy {
       '@type': 'CaseStudy',
       name: study.title,
       description: study.summary,
-      url: `https://gitplumbers.com/blog/case-studies/${slug}`,
+      url: `https://gitplumbers.com/blog/case-studies/${slug}/`,
       audience: 'Engineering leaders modernising software platforms',
       about: study.challenge,
       provider: {
@@ -99,3 +99,4 @@ export class CaseStudyDetailComponent implements OnDestroy {
     this._seoEffect.destroy();
   }
 }
+

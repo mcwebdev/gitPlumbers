@@ -39,6 +39,7 @@ a {
 img {
   max-width: 100%;
   display: block;
+  height: auto; // Maintain aspect ratio
 }
 
 button,
@@ -50,4 +51,22 @@ select {
 
 ::selection {
   background: rgba(0, 76, 137, 0.2);
+}
+
+// Targeted CLS optimizations without excessive space
+// Prevent layout shifts from font loading
+h1, h2, h3, h4, h5, h6 {
+  font-display: swap;
+}
+
+// Prevent layout shifts from images without dimensions
+img:not([width]):not([height]) {
+  aspect-ratio: 16/9; // Default aspect ratio
+}
+
+// Optimize font rendering to prevent shifts
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

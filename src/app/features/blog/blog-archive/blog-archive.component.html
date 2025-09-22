@@ -1,6 +1,4 @@
-@if (isLoading()) {
-  <app-loading-spinner [active]="true" message="Loading articles..."></app-loading-spinner>
-} @else if (hasError()) {
+@if (hasError()) {
   <div class="blog-archive__error">
     <h2>Unable to load articles</h2>
     <p>We're having trouble loading the blog articles. Please try refreshing the page.</p>
@@ -8,6 +6,9 @@
   </div>
 } @else {
 <section class="blog-archive" aria-label="All GitPlumbers Articles">
+  @if (isLoading()) {
+    <app-loading-spinner [active]="true" message="Loading articles..."></app-loading-spinner>
+  }
   <header class="blog-archive__hero">
     <p class="blog-archive__eyebrow">Archive</p>
     <h1>All GitPlumbers articles</h1>
@@ -55,7 +56,19 @@
     <p class="blog-archive__count" aria-live="polite">{{ paginationState().totalItems }} articles</p>
   </section>
 
-  @if (totalVisiblePosts() === 0) {
+  @if (isLoading()) {
+    <div class="blog-archive__skeleton" aria-label="Loading articles">
+      <div *ngFor="let item of skeletonItems()" class="blog-archive__skeleton-item">
+        <p-skeleton width="60%" height="0.75rem" class="blog-archive__skeleton-line--short" />
+        <p-skeleton width="80%" height="1.25rem" class="blog-archive__skeleton-line--medium" />
+        <p-skeleton width="100%" height="1rem" class="blog-archive__skeleton-line--long" />
+        <p-skeleton width="100%" height="1rem" class="blog-archive__skeleton-line--long" />
+        <p-skeleton width="100%" height="1rem" class="blog-archive__skeleton-line--long" />
+        <p-skeleton width="40%" height="0.85rem" class="blog-archive__skeleton-line--meta" />
+        <p-skeleton width="25%" height="1rem" />
+      </div>
+    </div>
+  } @else if (totalVisiblePosts() === 0) {
     <div class="blog-archive__empty">
       <p>No articles match that combination yet. Try another topic or reset the filters.</p>
       @if (hasActiveSearch()) {

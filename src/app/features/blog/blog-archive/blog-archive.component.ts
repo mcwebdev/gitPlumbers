@@ -16,6 +16,7 @@ import { BlogCategory, BlogPost } from '../blog-content';
 import { SeoService } from '../../../shared/services/seo.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { SkeletonModule } from 'primeng/skeleton';
 
 type SortOptionId = 'newest' | 'oldest' | 'title';
 
@@ -32,7 +33,7 @@ interface CategoryOption {
 @Component({
   selector: 'app-blog-archive',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgFor, DatePipe, LoadingSpinnerComponent, PaginationComponent],
+  imports: [CommonModule, RouterLink, NgFor, DatePipe, LoadingSpinnerComponent, PaginationComponent, SkeletonModule],
   templateUrl: './blog-archive.component.html',
   styleUrl: './blog-archive.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,6 +69,15 @@ export class BlogArchiveComponent implements OnInit, OnDestroy {
 
   protected readonly isLoading = computed(() => this._blogStore.loading());
   protected readonly hasError = computed(() => !!this._blogStore.error());
+  
+  // Skeleton loading state - show 12 skeleton items when loading
+  protected readonly skeletonItems = computed(() => {
+    const items = [];
+    for (let i = 0; i < 12; i++) {
+      items.push({ id: i });
+    }
+    return items;
+  });
 
   protected readonly totalVisiblePosts = computed(() => this.filteredPosts().length);
 

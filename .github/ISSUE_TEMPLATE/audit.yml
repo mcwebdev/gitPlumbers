@@ -1,0 +1,53 @@
+﻿name: "gitPlumbers: Request Help"
+description: "Create a structured ticket for gitPlumbers to diagnose and fix."
+title: "[gitPlumbers] <short summary>"
+labels: ["gitplumbers", "triage"]
+assignees: []
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Build/CI failing
+        - Production incident
+        - Performance regression
+        - Security concern
+        - Modernization request
+    validations:
+      required: true
+  - type: input
+    id: service
+    attributes:
+      label: Affected service / path
+      placeholder: e.g., services/payments, apps/web
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to Reproduce / Expected vs Actual
+      render: bash
+  - type: input
+    id: sha
+    attributes:
+      label: Commit SHA or PR #
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or links (paste redacted logs, build URL)
+  - type: dropdown
+    id: access
+    attributes:
+      label: Access level granted to gitPlumbers
+      options:
+        - Issue/PR only (no code read)
+        - Read code (preferred)
+        - Read + trigger workflows
+    validations:
+      required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Confirm
+      options:
+        - label: I have removed secrets/PII from logs.
+          required: true

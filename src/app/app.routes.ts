@@ -99,6 +99,11 @@ export const routes: Routes = [
       import('./features/dashboard/user-dashboard.component').then((m) => m.UserDashboardComponent),
   },
   {
+    path: 'dashboard/contact',
+    redirectTo: '/contact',
+    pathMatch: 'full',
+  },
+  {
     path: 'admin',
     canActivate: [adminGuard],
     loadComponent: () =>

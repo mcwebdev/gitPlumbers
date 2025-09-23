@@ -1,4 +1,4 @@
-export const environment = {
+﻿export const environment = {
   production: false,
   firebase: {
     apiKey: 'AIzaSyBumq3U2ClPwPJcEIIk1Sktki_qD9irkeE',
@@ -9,5 +9,10 @@ export const environment = {
     messagingSenderId: '26354659373',
     appId: '1:26354659373:web:41a73fb6c95a3098f5c8a4',
     measurementId: 'G-QL89VJ3CC3',
+  },
+  github: {
+    appInstallUrl: 'https://github.com/apps/gitplumbers/installations/new',
+    appListingUrl: 'https://github.com/apps/gitplumbers',
+    apiBaseUrl: 'http://localhost:3000/api',
   },
 };

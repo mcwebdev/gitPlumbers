@@ -1,0 +1,88 @@
+﻿name: gitPlumbers: PR Scaffold
+on:
+  repository_dispatch:
+    types: [gp_scaffold_pr]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue to scaffold
+        required: true
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+jobs:
+  scaffold:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve metadata
+        id: meta
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = context.eventName === 'repository_dispatch'
+              ? context.payload.client_payload.issue?.number
+              : parseInt(core.getInput('issue_number'), 10);
+            if (!issueNumber) {
+              core.setFailed('Missing issue number in payload.');
+              return;
+            }
+            const issueTitle = context.eventName === 'repository_dispatch'
+              ? context.payload.client_payload.issue?.title || ''
+              : '';
+            const slug = issueTitle
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '') || `issue-${issueNumber}`;
+            const branch = `gp/fix/${issueNumber}-${slug}`.substring(0, 80);
+            core.setOutput('issue_number', issueNumber.toString());
+            core.setOutput('branch', branch);
+            core.setOutput('title', issueTitle);
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create scaffolding
+        run: |
+          issue="${{ steps.meta.outputs.issue_number }}"
+          mkdir -p docs/gitplumbers
+          cat <<'EOF' > docs/gitplumbers/issue-${issue}-plan.md
+          # Stabilization Plan
+
+          - Owner: <!-- assign engineer -->
+          - Issue: #${issue}
+          - Summary: <!-- short synopsis -->
+
+          ## Repro / Guard Rails
+          - [ ] Add failing test or reproduction case.
+          - [ ] Capture baseline metrics/logs.
+
+          ## Fix Strategy
+          - [ ] Outline remediation approach.
+          - [ ] Link related incidents or docs.
+
+          ## Validation
+          - [ ] Tests passing locally.
+          - [ ] Observability checks updated.
+          - [ ] Rollback documented.
+          EOF
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.meta.outputs.branch }}
+          base: ${{ github.event.repository.default_branch }}
+          commit-message: "chore: scaffold gitplumbers repair plan for #${{ steps.meta.outputs.issue_number }}"
+          title: "gitPlumbers: Repair plan for #${{ steps.meta.outputs.issue_number }}"
+          body: |
+            ## Context
+            - Issue: #${{ steps.meta.outputs.issue_number }}
+            - Source: gitPlumbers automation
+
+            ## Next Steps
+            - [ ] Replace placeholder plan with real reproduction and failing test.
+            - [ ] Push fix commits following gitPlumbers conventions.
+            - [ ] Update status in the intake issue.
+          labels: gitplumbers, triage
+          reviewers: gitplumbers-team
+          team-reviewers: gitplumbers
+          draft: true

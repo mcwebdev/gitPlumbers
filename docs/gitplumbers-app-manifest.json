@@ -1,0 +1,30 @@
+﻿{
+  "name": "gitPlumbers Assistant",
+  "url": "https://gitplumbers.example",
+  "hook_attributes": {
+    "url": "https://console.gitplumbers.example/webhooks/github",
+    "active": true
+  },
+  "redirect_url": "https://console.gitplumbers.example/install/complete",
+  "public": true,
+  "default_permissions": {
+    "issues": "write",
+    "metadata": "read",
+    "pull_requests": "write",
+    "checks": "write",
+    "contents": "read",
+    "statuses": "read",
+    "actions": "read"
+  },
+  "default_events": [
+    "issues",
+    "issue_comment",
+    "pull_request",
+    "check_suite",
+    "repository_dispatch",
+    "project_v2_item"
+  ],
+  "default_repository_selection": "selected",
+  "setup_url": "https://console.gitplumbers.example/install/wizard",
+  "description": "Structured intake, diagnostics, and remediation workflows for gitPlumbers customers."
+}

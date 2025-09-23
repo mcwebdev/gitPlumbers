@@ -1,0 +1,26 @@
+{
+    "name":  "gitplumbers-assistant",
+    "version":  "0.1.0",
+    "private":  true,
+    "type":  "module",
+    "scripts":  {
+                    "dev":  "tsx watch src/index.ts",
+                    "start":  "node --env-file=.env dist/index.js",
+                    "build":  "tsc -p ."
+                },
+    "dependencies":  {
+                         "@octokit/app":  "^13.1.4",
+                         "@octokit/auth-app":  "^7.0.1",
+                         "@octokit/request":  "^9.2.0",
+                         "@octokit/webhooks":  "^12.0.4",
+                         "pino":  "^9.4.0",
+                         "probot":  "^13.0.1"
+                     },
+    "devDependencies":  {
+                            "@octokit/webhooks-types":  "^7.5.2",
+                            "@types/node":  "^20.12.7",
+                            "tsx":  "^4.17.0",
+                            "typescript":  "^5.5.4"
+                        },
+    "main":  "dist/index.js"
+}

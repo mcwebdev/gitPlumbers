@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
-import { map, take } from 'rxjs';
+import { map, take, filter } from 'rxjs';
 
 import { AuthUserService } from '../services/auth-user.service';
 
@@ -9,6 +9,8 @@ export const userGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   return auth.profile$.pipe(
+    // Wait for auth state to be resolved (skip undefined/loading state)
+    filter((profile) => profile !== undefined),
     take(1),
     map((profile) => (profile ? true : router.createUrlTree(['/login'])))
   );
@@ -19,6 +21,8 @@ export const adminGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   return auth.profile$.pipe(
+    // Wait for auth state to be resolved (skip undefined/loading state)
+    filter((profile) => profile !== undefined),
     take(1),
     map((profile) => {
       if (!profile) {

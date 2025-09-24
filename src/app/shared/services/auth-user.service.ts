@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, computed, inject, signal, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth, User, authState, signOut, updateProfile } from '@angular/fire/auth';
 import {
@@ -10,7 +10,7 @@ import {
   setDoc,
   updateDoc,
 } from '@angular/fire/firestore';
-import { from, map, of, shareReplay, switchMap } from 'rxjs';
+import { from, map, of, shareReplay, switchMap, startWith, tap } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 export type UserRole = 'user' | 'admin';
@@ -40,6 +40,11 @@ export class AuthUserService {
   private readonly firestore = inject(Firestore);
   private readonly router = inject(Router);
 
+  private readonly STORAGE_KEY = 'gitplumbers_auth_profile';
+  
+  // Initialize with cached profile from localStorage if available
+  private readonly cachedProfile = this.getCachedProfile();
+  
   private readonly authState$ = authState(this.auth).pipe(
     shareReplay({ bufferSize: 1, refCount: true })
   );
@@ -47,20 +52,40 @@ export class AuthUserService {
   readonly profile$ = this.authState$.pipe(
     switchMap((user) => {
       if (!user) {
+        // Clear cache when user logs out
+        this.clearCachedProfile();
         return of(null);
       }
       const userDocRef = doc(this.firestore, 'users', user.uid);
       return from(getDoc(userDocRef)).pipe(
         map((snapshot) => {
           const docValue = snapshot.exists() ? (snapshot.data() as UserDocument) : undefined;
-          return this.mergeUserAndDoc(user, docValue);
+          const profile = this.mergeUserAndDoc(user, docValue);
+          // Cache the profile to localStorage
+          this.setCachedProfile(profile);
+          return profile;
         })
       );
     }),
+    // Start with cached profile if available, then update with real data
+    startWith(this.cachedProfile),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
-  readonly profile = toSignal(this.profile$, { initialValue: null });
+  // Use cached profile as initial value if available, otherwise undefined
+  readonly profile = toSignal(this.profile$, { initialValue: this.cachedProfile });
+
+  // Add a loading state signal - only loading if no cached data and profile is undefined
+  readonly isAuthLoading = computed(() => {
+    const profile = this.profile();
+    return !this.cachedProfile && profile === undefined;
+  });
+  
+  // Update isLoggedIn to handle loading state
+  readonly isLoggedIn = computed(() => {
+    const profile = this.profile();
+    return profile !== undefined && profile !== null;
+  });
 
   readonly isAdmin = computed(() => this.profile()?.role === 'admin');
 
@@ -204,12 +229,9 @@ export class AuthUserService {
       throw new Error('User must be authenticated to update GitHub installation ID');
     }
 
-    const userDocRef = doc(this.firestore, 'users', user.uid);
     try {
-      await updateDoc(userDocRef, {
-        githubInstallationId: installationId,
-        updatedAt: serverTimestamp(),
-      });
+      // Ensure user document exists first, then update with GitHub installation ID
+      await this.ensureUserDocument(user, { githubInstallationId: installationId });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new Error(`Failed to update GitHub installation ID: ${errorMessage}`);
@@ -222,19 +244,14 @@ export class AuthUserService {
       throw new Error('User must be authenticated to update profile');
     }
 
-    const userDocRef = doc(this.firestore, 'users', user.uid);
-    
     try {
       // Update Firebase Auth profile if displayName is being updated
       if (updates.displayName !== undefined) {
         await updateProfile(user, { displayName: updates.displayName });
       }
 
-      // Update Firestore document
-      await updateDoc(userDocRef, {
-        ...updates,
-        updatedAt: serverTimestamp(),
-      });
+      // Ensure user document exists first, then update with the new data
+      await this.ensureUserDocument(user, updates);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new Error(`Failed to update user profile: ${errorMessage}`);
@@ -242,7 +259,61 @@ export class AuthUserService {
   }
 
   async logout(): Promise<void> {
+    this.clearCachedProfile();
     await signOut(this.auth);
     await this.router.navigate(['/']);
+  }
+
+  private isLocalStorageAvailable(): boolean {
+    try {
+      return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+    } catch {
+      return false;
+    }
+  }
+
+  private getCachedProfile(): UserProfile | undefined {
+    if (!this.isLocalStorageAvailable()) {
+      return undefined;
+    }
+
+    try {
+      const cached = localStorage.getItem(this.STORAGE_KEY);
+      if (cached) {
+        const profile = JSON.parse(cached) as UserProfile;
+        // Validate cached profile has required fields
+        if (profile.uid && profile.email && profile.role) {
+          return profile;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to parse cached auth profile:', error);
+      this.clearCachedProfile();
+    }
+    return undefined;
+  }
+
+  private setCachedProfile(profile: UserProfile): void {
+    if (!this.isLocalStorageAvailable()) {
+      return;
+    }
+
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(profile));
+    } catch (error) {
+      console.warn('Failed to cache auth profile:', error);
+    }
+  }
+
+  private clearCachedProfile(): void {
+    if (!this.isLocalStorageAvailable()) {
+      return;
+    }
+
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+    } catch (error) {
+      console.warn('Failed to clear cached auth profile:', error);
+    }
   }
 }

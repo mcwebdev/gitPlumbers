@@ -28,10 +28,14 @@ export class LoginComponent {
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly profile = this.userService.profile;
-  protected readonly isLoggedIn = computed(() => !!this.profile());
+  protected readonly isAuthLoading = this.userService.isAuthLoading;
+  protected readonly isLoggedIn = this.userService.isLoggedIn;
   protected readonly buttonLabel = computed(() => {
     if (this.submitting()) {
       return 'Logging in...';
+    }
+    if (this.isAuthLoading()) {
+      return 'Loading...';
     }
     return this.isLoggedIn() ? 'Go to Dashboard' : 'Log in';
   });

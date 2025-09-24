@@ -9,6 +9,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { AuthUserService } from '../../shared/services/auth-user.service';
 import { RequestStatus, RequestsService } from '../../shared/services/requests.service';
 import { GitHubIssuesService } from '../../shared/services/github-issues.service';
+import { GitHubIssueStatus } from '../../shared/models/github-issue.model';
 import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
 
 interface Option<T> {
@@ -180,9 +181,50 @@ export class AdminDashboardComponent {
       return;
     }
 
+    // Find the item to determine its type
+    const item = this.allItems().find(item => item.id === id);
+    if (!item) {
+      console.error('Item not found for ID:', id);
+      return;
+    }
+
     this.statusBusyState.update((state) => ({ ...state, [id]: true }));
     try {
-      await this.requestsService.updateStatus(id, status);
+      if (item.type === 'github') {
+        // Use GitHubIssuesService for GitHub issues
+        // Map RequestStatus to GitHubIssueStatus
+        let githubStatus: GitHubIssueStatus;
+        switch (status) {
+          case 'new':
+            githubStatus = 'open';
+            break;
+          case 'in_progress':
+            githubStatus = 'in_progress';
+            break;
+          case 'waiting_on_user':
+            githubStatus = 'waiting_on_user';
+            break;
+          case 'resolved':
+            githubStatus = 'resolved';
+            break;
+          case 'closed':
+            githubStatus = 'closed';
+            break;
+          default:
+            githubStatus = 'open';
+        }
+        
+        const result = await this.githubIssuesService.updateIssueStatus(id, githubStatus).toPromise();
+        if (!result) {
+          throw new Error('Failed to update GitHub issue status');
+        }
+      } else {
+        // Use RequestsService for support requests
+        await this.requestsService.updateStatus(id, status);
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      throw error;
     } finally {
       this.statusBusyState.update((state) => ({ ...state, [id]: false }));
     }
@@ -199,10 +241,37 @@ export class AdminDashboardComponent {
       return;
     }
 
+    // Find the item to determine its type
+    const item = this.allItems().find(item => item.id === id);
+    if (!item) {
+      console.error('Item not found for ID:', id);
+      return;
+    }
+
     this.noteBusyState.update((state) => ({ ...state, [id]: true }));
     try {
-      await this.requestsService.addNote(id, profile, draft);
+      if (item.type === 'github') {
+        // Use GitHubIssuesService for GitHub issues
+        const noteData = {
+          authorName: profile.displayName || profile.email,
+          authorEmail: profile.email,
+          message: draft,
+          role: profile.role === 'admin' ? 'admin' as const : 'customer' as const,
+          isInternal: profile.role === 'admin' // Admin notes are internal by default
+        };
+        
+        const result = await this.githubIssuesService.addIssueNote(id, noteData).toPromise();
+        if (!result) {
+          throw new Error('Failed to add note to GitHub issue');
+        }
+      } else {
+        // Use RequestsService for support requests
+        await this.requestsService.addNote(id, profile, draft);
+      }
       this.updateDraft(id, '');
+    } catch (error) {
+      console.error('Error adding note:', error);
+      throw error;
     } finally {
       this.noteBusyState.update((state) => ({ ...state, [id]: false }));
     }

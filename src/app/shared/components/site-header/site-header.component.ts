@@ -15,7 +15,8 @@ export class SiteHeaderComponent {
   private readonly authUser = inject(AuthUserService);
 
   protected readonly profile = this.authUser.profile;
-  protected readonly isLoggedIn = computed(() => !!this.profile());
+  protected readonly isAuthLoading = this.authUser.isAuthLoading;
+  protected readonly isLoggedIn = this.authUser.isLoggedIn;
   protected readonly dashboardUrl = computed(() => {
     const user = this.profile();
     return user?.role === 'admin' ? '/admin' : '/dashboard';

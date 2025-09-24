@@ -10,11 +10,10 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
-  addDoc,
-  getDocs
+  getDoc
 } from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { Observable, from, map, catchError, of } from 'rxjs';
+import { Observable, from, map, catchError, of, switchMap } from 'rxjs';
 import { 
   GitHubIssue, 
   CreateGitHubIssueRequest, 
@@ -146,6 +145,13 @@ export class GitHubIssuesService {
    * Update issue status
    */
   updateIssueStatus(issueId: string, status: GitHubIssue['status']): Observable<boolean> {
+    if (!issueId?.trim()) {
+      throw new Error('Issue ID is required to update status');
+    }
+    if (!status) {
+      throw new Error('Status is required to update issue');
+    }
+
     const issueRef = doc(this._firestore, 'githubIssues', issueId);
     
     return from(updateDoc(issueRef, {
@@ -225,17 +231,35 @@ export class GitHubIssuesService {
    * Add a note to an issue
    */
   addIssueNote(issueId: string, note: Omit<GitHubIssueNote, 'id' | 'createdAt'>): Observable<boolean> {
+    if (!issueId?.trim()) {
+      throw new Error('Issue ID is required to add a note');
+    }
+    if (!note?.message?.trim()) {
+      throw new Error('Message is required to add a note');
+    }
+
     const issueRef = doc(this._firestore, 'githubIssues', issueId);
-    const noteData = {
+    const noteData: GitHubIssueNote = {
       ...note,
       id: this.generateId(),
-      createdAt: new Date()
+      createdAt: new Date(),
+      message: note.message.trim()
     };
 
-    return from(updateDoc(issueRef, {
-      notes: [...(note as any).notes || [], noteData],
-      updatedAt: serverTimestamp()
-    })).pipe(
+    return from(getDoc(issueRef)).pipe(
+      switchMap((docSnapshot) => {
+        if (!docSnapshot.exists()) {
+          throw new Error(`GitHub issue with ID ${issueId} not found`);
+        }
+        
+        const issueData = docSnapshot.data() as GitHubIssue;
+        const currentNotes = issueData.notes || [];
+        
+        return from(updateDoc(issueRef, {
+          notes: [...currentNotes, noteData],
+          updatedAt: serverTimestamp()
+        }));
+      }),
       map(() => true),
       catchError((error) => {
         console.error('Error adding issue note:', error);

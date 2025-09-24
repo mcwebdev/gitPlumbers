@@ -31,7 +31,7 @@ export const routes: Routes = [
       seo: {
         title: 'Contact GitPlumbers - Get Your Code Audit Today',
         description:
-          'Ready to transform your AI-generated codebase? Contact our expert network for code audits, optimization, and enterprise modernization services.',
+          'Ready to transform your AI-generated codebase, or start something new? Contact our expert network for code audits, optimization,rapid proto-typing, and enterprise modernization services. We can help you get your idea off the ground quickly and efficiently.',
         keywords: [
           'code audit',
           'technical consultation',
@@ -49,7 +49,7 @@ export const routes: Routes = [
       seo: {
         title: 'Code Optimization Services | React, Angular, Vue, Node.js Experts',
         description:
-          'Comprehensive code optimization services for React, Angular, Vue, Node.js, and Python. Enterprise modernization, technical debt resolution, and performance optimization.',
+          'Comprehensive code optimization services for React, Angular, Vue, Node.js, and Python. Enterprise modernization, technical debt resolution, and performance optimization. We can help you get your idea off the ground quickly and efficiently.',
         keywords: [
           'code optimization services',
           'React optimization',
@@ -69,7 +69,7 @@ export const routes: Routes = [
       seo: {
         title: 'About GitPlumbers - Expert Network of Senior Developers',
         description:
-          'Meet the expert network behind GitPlumbers. Senior developers specializing in enterprise code optimization, modernization, and AI-generated code cleanup.',
+          'Meet the expert network behind GitPlumbers. Senior developers specializing in enterprise code optimization, modernization, and AI-generated code cleanup. We can help you get your idea off the ground quickly and efficiently.',
         keywords: [
           'senior developers',
           'technical experts',
@@ -99,6 +99,12 @@ export const routes: Routes = [
       import('./features/dashboard/user-dashboard.component').then((m) => m.UserDashboardComponent),
   },
   {
+    path: 'profile',
+    canActivate: [userGuard],
+    loadComponent: () =>
+      import('./features/profile/profile.component').then((m) => m.ProfileComponent),
+  },
+  {
     path: 'dashboard/contact',
     redirectTo: '/contact',
     pathMatch: 'full',
@@ -121,7 +127,7 @@ export const routes: Routes = [
     data: {
       seo: {
         title: 'AI Analytics Dashboard - GitPlumbers',
-        description: 'Track AI-driven traffic, citations, and content performance analytics.',
+        description: 'Track AI-driven traffic, citations, and content performance analytics. We can help you get your idea off the ground quickly and efficiently.',
         keywords: ['AI analytics', 'traffic tracking', 'content performance', 'dashboard'],
       },
     },

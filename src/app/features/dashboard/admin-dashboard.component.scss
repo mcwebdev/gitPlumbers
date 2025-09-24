@@ -90,6 +90,122 @@
   font-size: 0.9rem;
 }
 
+.request-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.5rem;
+  
+  &.github {
+    background: rgba(9, 105, 218, 0.1);
+    color: #0969da;
+    border: 1px solid rgba(9, 105, 218, 0.2);
+  }
+  
+  &.support {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+}
+
+.filter-section {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(11, 31, 46, 0.08);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.filter-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 250px;
+  
+  label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+.clear-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: fit-content;
+  
+  &:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+  }
+  
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+.filter-summary {
+  color: #6b7280;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+  background: rgba(243, 244, 246, 0.5);
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+// Custom styling for PrimeNG MultiSelect
+:host ::ng-deep .user-filter-multiselect {
+  min-width: 250px;
+  
+  .p-multiselect {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    
+    &:not(.p-disabled):hover {
+      border-color: #9ca3af;
+    }
+    
+    &.p-focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+  }
+  
+  .p-multiselect-label {
+    padding: 0.75rem;
+    color: #374151;
+  }
+  
+  .p-multiselect-panel {
+    border-radius: 6px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+}
+
 .requests-board {
   display: grid;
   gap: 1.5rem;
@@ -156,10 +272,62 @@ select:disabled {
   color: rgba(11, 31, 46, 0.55);
 }
 
+.issue-title {
+  color: #1e293b;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.5rem 0 1rem 0;
+  line-height: 1.4;
+}
+
 .message {
   margin: 0;
   font-size: 1rem;
   color: var(--color-ink);
+  line-height: 1.6;
+}
+
+.markdown-content {
+  h1, h2, h3 {
+    color: #1e293b;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem 0;
+    line-height: 1.3;
+  }
+  
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1.1rem; }
+  
+  strong {
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  em {
+    font-style: italic;
+    color: #6b7280;
+  }
+  
+  hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 1.5rem 0;
+  }
+  
+  p {
+    margin: 0 0 1rem 0;
+    line-height: 1.6;
+  }
+  
+  // Remove extra spacing for first/last elements
+  > :first-child {
+    margin-top: 0;
+  }
+  
+  > :last-child {
+    margin-bottom: 0;
+  }
 }
 
 .meta {

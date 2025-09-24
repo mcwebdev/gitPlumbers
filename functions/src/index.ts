@@ -20,3 +20,4 @@ export * from './contact';
 export * from './ai-analytics';
 export * from './blog-generator';
 export * from './github-api';
+export * from './github-issues';

@@ -1,0 +1,31 @@
+import { Pipe, PipeTransform } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
+@Pipe({
+  name: 'markdown',
+  standalone: true
+})
+export class MarkdownPipe implements PipeTransform {
+  constructor(private sanitizer: DomSanitizer) {}
+
+  transform(value: string): SafeHtml {
+    if (!value) return '';
+
+    // Convert markdown to HTML
+    let html = value
+      // Headers
+      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+      // Bold text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      // Italic text
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      // Horizontal rules
+      .replace(/^---$/gm, '<hr>')
+      // Line breaks
+      .replace(/\n/g, '<br>');
+
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+}

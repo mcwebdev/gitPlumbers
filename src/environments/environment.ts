@@ -13,6 +13,6 @@
   github: {
     appInstallUrl: 'https://github.com/apps/gitplumbers/installations/new',
     appListingUrl: 'https://github.com/apps/gitplumbers',
-    apiBaseUrl: 'http://localhost:3000/api',
+    apiBaseUrl: 'https://us-central1-gitplumbers-35d92.cloudfunctions.net',
   },
 };

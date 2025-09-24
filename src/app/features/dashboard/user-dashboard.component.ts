@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FileUploadComponent,
@@ -15,10 +16,44 @@ import {
   RequestsService,
   SupportRequest,
 } from '../../shared/services/requests.service';
+import { GitHubIssuesService } from '../../shared/services/github-issues.service';
+import { GitHubIssue, GitHubIssueStatus } from '../../shared/models/github-issue.model';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
+import { GitHubAppInstallerComponent, type GitHubAppInstallationData } from '../../shared/components/github-app-installer/github-app-installer.component';
+import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
 interface RequestStatusCopy {
   label: string;
   tone: 'neutral' | 'progress' | 'success' | 'warning';
+}
+
+interface UnifiedNote {
+  id?: string;
+  authorName: string;
+  authorId?: string;
+  authorEmail?: string;
+  message: string;
+  createdAt: Date;
+  role?: string;
+}
+
+// Unified status type that can handle both GitHub and Support request statuses
+type UnifiedStatus = RequestStatus | GitHubIssueStatus;
+
+interface UnifiedRequest {
+  id: string;
+  type: 'github' | 'support';
+  title: string;
+  message: string;
+  status: UnifiedStatus;
+  createdAt: Date;
+  notes: UnifiedNote[];
+  // GitHub-specific properties (only present when type === 'github')
+  githubIssueUrl?: string;
+  repository?: string;
+  // Support-specific properties (only present when type === 'support')
+  githubRepo?: string;
 }
 
 interface UploadUrlResult {
@@ -31,7 +66,8 @@ const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, GitHubAppInstallerComponent, ConfirmDialogModule, MarkdownPipe],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,7 +76,11 @@ export class UserDashboardComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authUser = inject(AuthUserService);
   private readonly requestsService = inject(RequestsService);
+  private readonly githubIssuesService = inject(GitHubIssuesService);
   private readonly http = inject(HttpClient);
+  private readonly messageService = inject(MessageService);
+  private readonly confirmationService = inject(ConfirmationService);
+  private readonly router = inject(Router);
   private selectedFile: File | null = null;
 
   protected readonly fileUploadConfig: FileUploadConfig = {
@@ -92,21 +132,88 @@ export class UserDashboardComponent {
     { initialValue: [] }
   );
 
+  protected readonly githubIssues = toSignal(
+    this.profile$.pipe(
+      switchMap((profile) => {
+        if (!profile) {
+          return of<GitHubIssue[]>([]);
+        }
+
+        return this.githubIssuesService.getUserIssues(profile.uid).pipe(
+          catchError((error) => {
+            console.error('Error fetching GitHub issues:', error);
+            return of([]);
+          })
+        );
+      })
+    ),
+    { initialValue: [] }
+  );
+
+  // Combined items (support requests + GitHub issues)
+  protected readonly allItems = computed(() => {
+    const requests = this.requests() ?? [];
+    const githubIssues = this.githubIssues() ?? [];
+    
+    // Convert GitHub issues to a unified format
+    const githubItems = githubIssues.map(issue => ({
+      id: issue.id,
+      type: 'github' as const,
+      title: issue.title,
+      message: issue.body,
+      status: issue.status,
+      createdAt: issue.createdAt,
+      githubIssueUrl: issue.githubIssueUrl,
+      repository: issue.repository,
+      notes: (issue.notes || []).map(note => ({
+        id: note.id,
+        authorName: note.authorName,
+        authorId: note.authorEmail, // Use email as ID for GitHub notes
+        authorEmail: note.authorEmail,
+        message: note.message,
+        createdAt: note.createdAt,
+        role: note.role
+      } as UnifiedNote))
+    }));
+
+    // Convert support requests to unified format
+    const supportItems = requests.map(request => ({
+      id: request.id,
+      type: 'support' as const,
+      title: `Support Request`,
+      message: request.message,
+      status: request.status,
+      createdAt: request.createdAt,
+      githubRepo: request.githubRepo,
+      notes: (request.notes || []).map(note => ({
+        id: note.id,
+        authorName: note.authorName,
+        authorId: note.authorId,
+        authorEmail: note.authorEmail,
+        message: note.message,
+        createdAt: note.createdAt,
+        role: note.role
+      } as UnifiedNote))
+    }));
+
+    return [...supportItems, ...githubItems];
+  });
+
   // Computed properties for filtering and sorting
   protected readonly filteredAndSortedRequests = computed(() => {
-    const requests = this.requests() ?? [];
+    const allItems = this.allItems();
     const statusFilter = this.statusFilter();
     const sortBy = this.sortBy();
     const sortOrder = this.sortOrder();
 
-    // Filter out any invalid requests and filter by status
-    let filtered = requests.filter((request) => request && request.id);
+    // Filter out any invalid items and filter by status
+    let filtered = allItems.filter((item) => item && item.id);
 
     if (statusFilter !== 'all') {
-      filtered = filtered.filter((request) => request.status === statusFilter);
+      filtered = filtered.filter((item) => item.status === statusFilter);
     }
 
-    // Sort requests
+    // Sort items
     const sorted = [...filtered].sort((a, b) => {
       let comparison = 0;
       if (sortBy === 'date') {
@@ -122,7 +229,7 @@ export class UserDashboardComponent {
     return sorted;
   });
 
-  protected readonly hasRequests = computed(() => (this.requests() ?? []).length > 0);
+  protected readonly hasRequests = computed(() => this.allItems().length > 0);
 
   protected readonly hasFilteredRequests = computed(
     () => this.filteredAndSortedRequests().length > 0
@@ -143,7 +250,7 @@ export class UserDashboardComponent {
     { value: 'status' as const, label: 'Status' },
   ];
 
-  protected statusCopy(status: RequestStatus): RequestStatusCopy {
+  protected statusCopy(status: RequestStatus | GitHubIssue['status']): RequestStatusCopy {
     switch (status) {
       case 'in_progress':
         return { label: 'In progress', tone: 'progress' };
@@ -153,6 +260,8 @@ export class UserDashboardComponent {
         return { label: 'Resolved', tone: 'success' };
       case 'closed':
         return { label: 'Closed', tone: 'neutral' };
+      case 'open':
+        return { label: 'Open', tone: 'neutral' };
       default:
         return { label: 'New', tone: 'neutral' };
     }
@@ -330,5 +439,126 @@ export class UserDashboardComponent {
     }
 
     return '';
+  }
+
+  onGitHubAppInstallationComplete(data: GitHubAppInstallationData): void {
+    console.log('✅ GitHub App installation completed:', data);
+    // Handle installation completion if needed
+  }
+
+  onRepositorySelected(repoFullName: string): void {
+    console.log('✅ Repository selected:', repoFullName);
+    // Handle repository selection if needed
+  }
+
+  /**
+   * Remove GitHub issue from dashboard only (keeps GitHub issue intact)
+   */
+  async removeIssueFromDashboard(issue: UnifiedRequest): Promise<void> {
+    this.confirmationService.confirm({
+      message: `Remove "${issue.title}" from your dashboard?\n\nThis will only remove it from your dashboard view. The issue will remain open on GitHub and can be re-synced later.`,
+      header: 'Remove from Dashboard',
+      icon: 'pi pi-eye-slash',
+      acceptLabel: 'Remove',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        this.performRemoveFromDashboard(issue);
+      }
+    });
+  }
+
+  private async performRemoveFromDashboard(issue: UnifiedRequest): Promise<void> {
+    console.log('🗑️ Removing issue from dashboard:', issue.id);
+    
+    try {
+      const success = await this.githubIssuesService.removeIssueFromDashboard(issue.id).toPromise();
+      
+      if (success) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Issue Removed',
+          detail: 'Issue has been removed from your dashboard. It still exists on GitHub and can be re-synced later.',
+        });
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Failed to Remove',
+          detail: 'Failed to remove issue from dashboard. Please try again.',
+        });
+      }
+    } catch (error) {
+      console.error('Error removing issue from dashboard:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'An error occurred while removing the issue. Please try again.',
+      });
+    }
+  }
+
+  /**
+   * Delete GitHub issue completely (from both dashboard and GitHub)
+   */
+  async deleteIssueCompletely(issue: UnifiedRequest): Promise<void> {
+    this.confirmationService.confirm({
+      message: `Permanently delete "${issue.title}"?\n\nThis will close the issue on GitHub (cannot be undone) and remove it from your dashboard. This action cannot be undone.`,
+      header: '⚠️ Permanent Delete',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Delete Permanently',
+      rejectLabel: 'Cancel',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.performDeleteCompletely(issue);
+      }
+    });
+  }
+
+  private async performDeleteCompletely(issue: UnifiedRequest): Promise<void> {
+    console.log('🗑️ Deleting issue completely:', issue.id);
+    
+    try {
+      // Get the full GitHub issue data from the current issues
+      const fullIssue = this.githubIssues()?.find(gi => gi.id === issue.id);
+      if (!fullIssue) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Issue Not Found',
+          detail: 'Could not find the full issue data. Please refresh and try again.',
+        });
+        return;
+      }
+
+      const result = await this.githubIssuesService.deleteIssueCompletely(
+        fullIssue.id,
+        fullIssue.installationId,
+        fullIssue.repository,
+        fullIssue.githubIssueId
+      ).toPromise();
+      
+      if (result?.success) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Issue Deleted',
+          detail: 'Issue has been permanently closed on GitHub and removed from your dashboard.',
+        });
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Failed to Delete',
+          detail: result?.error || 'Failed to delete issue. Please try again.',
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting issue completely:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'An error occurred while deleting the issue. Please try again.',
+      });
+    }
+  }
+
+  navigateToProfile(): void {
+    this.router.navigate(['/profile']);
   }
 }

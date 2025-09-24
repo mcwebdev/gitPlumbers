@@ -1,0 +1,159 @@
+@if (showForm()) {
+<div class="github-issue-form">
+  <p-card header="Create GitHub Issue" styleClass="github-issue-form__card">
+    <div class="github-issue-form__content">
+      <p class="github-issue-form__description">
+        Fill out the form below to create a new GitHub issue in your repository. 
+        This will help us understand your request and provide better support.
+      </p>
+
+      <form [formGroup]="issueForm" (ngSubmit)="onSubmit()" class="github-issue-form__form">
+        <!-- Category Selection -->
+        <div class="github-issue-form__field">
+          <label for="category" class="github-issue-form__label">
+            Category <span class="github-issue-form__required">*</span>
+          </label>
+          <p-select
+            id="category"
+            formControlName="category"
+            [options]="categoryOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select a category"
+            styleClass="github-issue-form__select"
+            [class.github-issue-form__field--error]="categoryControl.invalid && categoryControl.touched"
+          ></p-select>
+          @if (categoryControl.value) {
+          <small class="github-issue-form__help-text">
+            {{ getCategoryDescription(categoryControl.value) }}
+          </small>
+          }
+        </div>
+
+        <!-- Priority Selection -->
+        <div class="github-issue-form__field">
+          <label for="priority" class="github-issue-form__label">
+            Priority <span class="github-issue-form__required">*</span>
+          </label>
+          <p-select
+            id="priority"
+            formControlName="priority"
+            [options]="priorityOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select priority"
+            styleClass="github-issue-form__select"
+            [class.github-issue-form__field--error]="priorityControl.invalid && priorityControl.touched"
+          ></p-select>
+          @if (priorityControl.value) {
+          <small class="github-issue-form__help-text">
+            {{ getPriorityDescription(priorityControl.value) }}
+          </small>
+          }
+        </div>
+
+        <!-- Title Input -->
+        <div class="github-issue-form__field">
+          <label for="title" class="github-issue-form__label">
+            Title <span class="github-issue-form__required">*</span>
+          </label>
+          <input
+            id="title"
+            type="text"
+            pInputText
+            formControlName="title"
+            placeholder="Brief description of your issue"
+            class="github-issue-form__input"
+            [class.github-issue-form__field--error]="titleControl.invalid && titleControl.touched"
+            maxlength="200"
+          />
+          <div class="github-issue-form__field-info">
+            @if (titleControl.value) {
+            <small class="github-issue-form__help-text">
+              {{ titleControl.value.length }}/200 characters
+            </small>
+            }
+            @if (titleControl.invalid && titleControl.touched) {
+            <small class="github-issue-form__error-text">
+              @if (titleControl.errors?.['required']) {
+              <span>Title is required</span>
+              }
+              @if (titleControl.errors?.['minlength']) {
+              <span>Title must be at least 5 characters</span>
+              }
+              @if (titleControl.errors?.['maxlength']) {
+              <span>Title must be less than 200 characters</span>
+              }
+            </small>
+            }
+          </div>
+        </div>
+
+        <!-- Description Textarea -->
+        <div class="github-issue-form__field">
+          <label for="body" class="github-issue-form__label">
+            Description <span class="github-issue-form__required">*</span>
+          </label>
+          <textarea
+            id="body"
+            pTextarea
+            formControlName="body"
+            placeholder="Please provide a detailed description of your issue, including steps to reproduce (if applicable), expected behavior, and actual behavior."
+            class="github-issue-form__textarea"
+            [class.github-issue-form__field--error]="bodyControl.invalid && bodyControl.touched"
+            rows="6"
+            maxlength="4000"
+          ></textarea>
+          <div class="github-issue-form__field-info">
+            @if (bodyControl.value) {
+            <small class="github-issue-form__help-text">
+              {{ bodyControl.value.length }}/4000 characters
+            </small>
+            }
+            @if (bodyControl.invalid && bodyControl.touched) {
+            <small class="github-issue-form__error-text">
+              @if (bodyControl.errors?.['required']) {
+              <span>Description is required</span>
+              }
+              @if (bodyControl.errors?.['minlength']) {
+              <span>Description must be at least 20 characters</span>
+              }
+              @if (bodyControl.errors?.['maxlength']) {
+              <span>Description must be less than 4000 characters</span>
+              }
+            </small>
+            }
+          </div>
+        </div>
+
+        <!-- Repository Info -->
+        <div class="github-issue-form__field">
+          <label class="github-issue-form__label">Repository</label>
+          <div class="github-issue-form__repository-info">
+            <i class="pi pi-github"></i>
+            <span>{{ repository() }}</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="github-issue-form__actions">
+          <p-button
+            label="Cancel"
+            type="button"
+            styleClass="p-button-secondary"
+            (onClick)="onCancel()"
+            [disabled]="isSubmitting"
+          ></p-button>
+          <p-button
+            label="Create GitHub Issue"
+            type="submit"
+            styleClass="p-button-primary"
+            [loading]="isSubmitting"
+            [disabled]="issueForm.invalid || isSubmitting"
+          ></p-button>
+        </div>
+      </form>
+    </div>
+  </p-card>
+</div>
+}

@@ -1,0 +1,238 @@
+<section class="gp-intake" aria-labelledby="gp-intake-title">
+  <h2 id="gp-intake-title">{{ title() }}</h2>
+  <p class="gp-intake__lead">
+    {{ description() }}
+  </p>
+  <ol class="gp-intake__steps">
+    <li class="gp-intake__step">
+      <span class="gp-intake__badge">1</span>
+      <div>
+        <h3>Install gitPlumbers Assistant</h3>
+        <p>
+          Decide the access level (issues only, read code, or workflows) and authorize the app for the affected repo.
+        </p>
+        <a
+          class="gp-intake__link"
+          [href]="githubAppInstallUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Install GitHub App</a>
+        <a
+          class="gp-intake__secondary"
+          [href]="githubAppListingUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >View permissions</a>
+      </div>
+    </li>
+    <li class="gp-intake__step">
+      <span class="gp-intake__badge">2</span>
+      <div>
+        <h3>Select the repository for your ticket</h3>
+        <p>
+          Load the repositories you granted, and pick the one we
+          should work on.
+        </p>
+        <form class="gp-intake__repo-form" [formGroup]="repoForm" (ngSubmit)="loadInstallationRepos()">
+          <label class="gp-intake__label" for="installationId">
+            Installation ID
+            <span class="gp-intake__tooltip">
+              <i 
+                class="pi pi-question-circle gp-intake__tooltip-icon"
+                aria-label="Help: How to find Installation ID"
+              ></i>
+              <div class="gp-intake__tooltip-text">
+                <strong>How to find your Installation ID:</strong><br><br>
+                <strong>Method 1:</strong> Check the URL after installing the GitHub App - look for <code>installation_id=12345678</code><br><br>
+                <strong>Method 2:</strong> Go to GitHub Settings → Applications → Installed GitHub Apps → Configure → The installation ID will be in the URL
+              </div>
+            </span>
+          </label>
+          <div class="gp-intake__row">
+            <input
+              id="installationId"
+              type="text"
+              formControlName="installationId"
+              placeholder="12345678"
+              inputmode="numeric"
+              autocomplete="off"
+              aria-describedby="installation-hint"
+            />
+            <p-button
+              label="Load repositories"
+              type="submit"
+              styleClass="gp-intake__load-button"
+              [disabled]="repoForm.controls['installationId'].invalid || repoLoading"
+              [loading]="repoLoading"
+            ></p-button>
+          </div>
+          <div id="installation-hint" class="gp-intake__hint">
+            GitHub includes <code>installation_id=...</code> in the URL when it redirects you back here.
+            <div class="gp-intake__button-group">
+              @if (!repoForm.controls['installationId'].value) {
+                <button 
+                  type="button" 
+                  class="gp-intake__load-button"
+                  (click)="loadInstallationIdFromStorage()"
+                >
+                  Load Saved Installation ID
+                </button>
+              }
+              @if (repoForm.controls['installationId'].value) {
+                <button 
+                  type="button" 
+                  class="gp-intake__clear-button"
+                  (click)="clearInstallationData()"
+                >
+                  Clear Installation Data
+                </button>
+              }
+            </div>
+          </div>
+          @if (repoError) {
+            <div class="gp-intake__error">{{ repoError }}</div>
+          }
+          @if (!repoLoading && repoFormSubmitted && !repoError && repositories.length === 0) {
+            <div class="gp-intake__hint">
+              No repositories returned for that installation. Verify access in GitHub → Settings → Applications.
+            </div>
+          }
+          @if (repositories.length > 0) {
+            <label class="gp-intake__label" for="repoFullName">Repository</label>
+            <select id="repoFullName" formControlName="repoFullName" class="gp-intake__select">
+              <option value="" disabled>Select a repository</option>
+              @for (repo of repositories; track repo.id) {
+                <option [value]="repo.fullName">
+                  {{ repo.fullName }}
+                </option>
+              }
+            </select>
+          }
+        </form>
+      </div>
+    </li>
+    <li class="gp-intake__step">
+      <span class="gp-intake__badge">3</span>
+      <div>
+        <h3>Manage GitHub Issues</h3>
+        <p>
+          Create new issues, sync existing ones to your dashboard, or browse the repository directly.
+        </p>
+        <div class="gp-intake__action-buttons">
+          <button
+            type="button"
+            class="gp-intake__link gp-intake__link--primary"
+            [class.gp-intake__link--disabled]="!repoForm.controls['repoFullName'].value"
+            [disabled]="!repoForm.controls['repoFullName'].value"
+            (click)="showCreateIssueForm()"
+          >
+            Create GitHub Issue
+          </button>
+          <button
+            type="button"
+            class="gp-intake__link gp-intake__link--secondary"
+            [class.gp-intake__link--disabled]="!repoForm.controls['repoFullName'].value"
+            [disabled]="!repoForm.controls['repoFullName'].value || githubIssuesStore.loadingAvailableIssues()"
+            (click)="loadAvailableIssues()"
+          >
+            {{ githubIssuesStore.loadingAvailableIssues() ? 'Loading Issues...' : 'Select Issues to Sync' }}
+          </button>
+          <button
+            type="button"
+            class="gp-intake__link gp-intake__link--tertiary"
+            [class.gp-intake__link--disabled]="!repoForm.controls['repoFullName'].value"
+            [disabled]="!repoForm.controls['repoFullName'].value"
+            (click)="syncExternalIssues()"
+          >
+            Sync All External Issues
+          </button>
+          <a
+            class="gp-intake__link gp-intake__quaternary"
+            [class.gp-intake__link--disabled]="!selectedRepoIssueLink"
+            [attr.href]="selectedRepoIssueLink || null"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open GitHub directly
+          </a>
+        </div>
+
+        <!-- GitHub Issue Creation Form - Right after the buttons -->
+        @if (showIssueForm) {
+          <div style="margin-top: 20px;">
+            <app-github-issue-form
+              [repository]="repoForm.controls['repoFullName'].value"
+              [installationId]="repoForm.controls['installationId'].value"
+              [showForm]="showIssueForm"
+              (issueCreated)="onIssueCreated($event)"
+              (formCancelled)="onIssueFormCancelled()"
+            ></app-github-issue-form>
+          </div>
+        }
+
+        <!-- Issue Selection - Right after the form -->
+        @if (githubIssuesStore.hasAvailableIssues()) {
+          <div class="gp-issue-selection" style="margin-top: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h4>Select Issues to Sync ({{ githubIssuesStore.availableIssues().length }} available)</h4>
+            
+            <p-multiSelect
+              [options]="githubIssuesStore.availableIssues()"
+              [ngModel]="githubIssuesStore.selectedIssueIds()"
+              (ngModelChange)="githubIssuesStore.setSelectedIssueIds($event)"
+              optionLabel="title"
+              optionValue="id"
+              placeholder="Select issues to sync..."
+              [showToggleAll]="true"
+              [filter]="true"
+              filterPlaceholder="Search issues..."
+              style="width: 100%; margin-bottom: 15px;"
+            ></p-multiSelect>
+            
+            <div style="display: flex; gap: 10px;">
+              <p-button
+                label="Sync Selected Issues"
+                [disabled]="!githubIssuesStore.hasSelectedIssues()"
+                [loading]="githubIssuesStore.syncingSelectedIssues()"
+                (onClick)="syncSelectedIssues()"
+              ></p-button>
+              
+              <p-button
+                label="Cancel"
+                severity="secondary"
+                (onClick)="cancelIssueSelection()"
+              ></p-button>
+            </div>
+            
+            @if (githubIssuesStore.hasSelectedIssues()) {
+              <p style="margin-top: 10px; color: #666;">{{ githubIssuesStore.selectedIssuesCount() }} issue(s) selected</p>
+            }
+          </div>
+        }
+        
+        <!-- No Issues Available Message -->
+        @if (githubIssuesStore.showIssueSelection() && !githubIssuesStore.hasAvailableIssues() && !githubIssuesStore.loadingAvailableIssues()) {
+          <div class="gp-no-issues-message" style="margin-top: 20px; padding: 20px; border: 1px solid #e0e7ff; border-radius: 8px; background-color: #f8fafc; text-align: center;">
+            <div style="color: #64748b; margin-bottom: 8px;">
+              <i class="pi pi-check-circle" style="font-size: 1.5rem; color: #10b981;"></i>
+            </div>
+            <h4 style="color: #334155; margin: 0 0 8px 0; font-size: 1rem;">All caught up!</h4>
+            <p style="color: #64748b; margin: 0; font-size: 0.9rem;">
+              There are no external issues available to sync from this repository. 
+              All issues may already be synced or there might not be any issues in the repository yet.
+            </p>
+            <p style="color: #64748b; margin: 8px 0 0 0; font-size: 0.85rem;">
+              You can create a new issue or check back later if more issues are added to the repository.
+            </p>
+          </div>
+        }
+      </div>
+    </li>
+  </ol>
+  @if (showFooter()) {
+    <p class="gp-intake__footer">
+      {{ footerText() }}
+    </p>
+  }
+</section>
+
+

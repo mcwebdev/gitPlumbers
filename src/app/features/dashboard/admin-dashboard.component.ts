@@ -4,9 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 import { AuthUserService } from '../../shared/services/auth-user.service';
 import { RequestStatus, RequestsService } from '../../shared/services/requests.service';
+import { GitHubIssuesService } from '../../shared/services/github-issues.service';
+import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
 
 interface Option<T> {
   label: string;
@@ -16,13 +19,14 @@ interface Option<T> {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, MarkdownPipe, MultiSelectModule],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminDashboardComponent {
   private readonly requestsService = inject(RequestsService);
+  private readonly githubIssuesService = inject(GitHubIssuesService);
   private readonly authUser = inject(AuthUserService);
 
   protected readonly profile = this.authUser.profile;
@@ -32,7 +36,116 @@ export class AdminDashboardComponent {
     { initialValue: [] }
   );
 
-  protected readonly hasRequests = computed(() => (this.requests() ?? []).length > 0);
+  protected readonly githubIssues = toSignal(
+    this.githubIssuesService.getAllIssues().pipe(map((items) => items ?? [])),
+    { initialValue: [] }
+  );
+
+  // Combined items (support requests + GitHub issues) for unified display
+  protected readonly allItems = computed(() => {
+    const supportRequests = this.requests() ?? [];
+    const githubItems = this.githubIssues() ?? [];
+    
+    // Convert GitHub issues to unified format
+    const githubUnified = githubItems.map(issue => ({
+      id: issue.id,
+      type: 'github' as const,
+      title: issue.title,
+      message: issue.body,
+      status: issue.status,
+      createdAt: issue.createdAt,
+      userName: issue.userName,
+      userEmail: issue.userEmail,
+      userId: issue.userId, // Include userId for filtering
+      githubIssueUrl: issue.githubIssueUrl,
+      repository: issue.repository,
+      notes: (issue.notes || []).map(note => ({
+        id: note.id,
+        authorName: note.authorName,
+        authorId: note.authorEmail,
+        authorEmail: note.authorEmail,
+        message: note.message,
+        createdAt: note.createdAt,
+        role: note.role
+      }))
+    }));
+
+    // Convert support requests to unified format
+    const supportUnified = supportRequests.map(request => ({
+      id: request.id,
+      type: 'support' as const,
+      title: 'Support Request',
+      message: request.message,
+      status: request.status,
+      createdAt: request.createdAt,
+      userName: request.userName,
+      userEmail: request.userEmail,
+      userId: request.userId, // Include userId for filtering
+      githubRepo: request.githubRepo,
+      notes: (request.notes || []).map(note => ({
+        id: note.id,
+        authorName: note.authorName,
+        authorId: note.authorId,
+        authorEmail: note.authorEmail,
+        message: note.message,
+        createdAt: note.createdAt,
+        role: note.role
+      }))
+    }));
+
+    // Combine and sort by creation date (newest first)
+    const combined = [...supportUnified, ...githubUnified];
+    return combined.sort((a, b) => {
+      const aTime = this.getTimestamp(a.createdAt);
+      const bTime = this.getTimestamp(b.createdAt);
+      return bTime - aTime;
+    });
+  });
+
+  // User filtering state
+  private readonly selectedUserEmails = signal<string[]>([]);
+
+  // Extract unique users from all items
+  protected readonly availableUsers = computed(() => {
+    const allItems = this.allItems();
+    const userMap = new Map<string, { email: string; name: string; uid: string }>();
+    
+    allItems.forEach(item => {
+      if (item.userEmail && item.userId) {
+        userMap.set(item.userEmail, {
+          email: item.userEmail,
+          name: item.userName || item.userEmail,
+          uid: item.userId
+        });
+      }
+    });
+    
+    return Array.from(userMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  });
+
+  // Format user options for display with name and UID
+  protected readonly userOptions = computed(() => {
+    const users = this.availableUsers();
+    return users.map(user => ({
+      email: user.email,
+      label: `${user.name} (${user.uid})`,
+      value: user.email
+    }));
+  });
+
+  // Filtered items based on selected users
+  protected readonly filteredItems = computed(() => {
+    const allItems = this.allItems();
+    const selectedEmails = this.selectedUserEmails();
+    
+    if (selectedEmails.length === 0) {
+      return allItems; // Show all if no filter applied
+    }
+    
+    return allItems.filter(item => selectedEmails.includes(item.userEmail));
+  });
+
+  protected readonly hasRequests = computed(() => (this.filteredItems() ?? []).length > 0);
 
   protected readonly statusOptions: Option<RequestStatus>[] = [
     { label: 'New', value: 'new' },
@@ -116,5 +229,40 @@ export class AdminDashboardComponent {
     }
 
     return '';
+  }
+
+  private getTimestamp(input: unknown): number {
+    if (!input) {
+      return 0;
+    }
+
+    try {
+      if (typeof input === 'number') {
+        return input;
+      }
+      if (typeof input === 'string') {
+        return new Date(input).getTime();
+      }
+      const maybeTimestamp = input as { toDate?: () => Date };
+      if (maybeTimestamp?.toDate) {
+        return maybeTimestamp.toDate().getTime();
+      }
+    } catch {
+      return 0;
+    }
+
+    return 0;
+  }
+
+  protected onUserFilterChange(selectedEmails: string[]): void {
+    this.selectedUserEmails.set(selectedEmails);
+  }
+
+  protected clearUserFilter(): void {
+    this.selectedUserEmails.set([]);
+  }
+
+  protected get selectedUserEmailsValue(): string[] {
+    return this.selectedUserEmails();
   }
 }

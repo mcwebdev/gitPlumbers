@@ -1,0 +1,125 @@
+@if (profile(); as user) {
+<div class="profile-container">
+  <div class="profile-header">
+    <button
+      type="button"
+      class="back-btn"
+      (click)="onCancel()"
+      title="Back to Dashboard"
+    >
+      <i class="pi pi-arrow-left"></i>
+    </button>
+    <h1>Profile Settings</h1>
+  </div>
+
+  <div class="profile-content">
+    <p-card header="Personal Information" styleClass="profile-card">
+      <form [formGroup]="profileForm" (ngSubmit)="onSave()" novalidate>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="displayName">Display Name *</label>
+            <input
+              id="displayName"
+              type="text"
+              pInputText
+              formControlName="displayName"
+              placeholder="Enter your display name"
+              [class.ng-invalid]="displayNameControl.invalid && displayNameControl.touched"
+            />
+            @if (displayNameControl.invalid && displayNameControl.touched) {
+              <small class="error-message">
+                @if (displayNameControl.errors?.['required']) {
+                  Display name is required
+                } @else if (displayNameControl.errors?.['minlength']) {
+                  Display name must be at least 2 characters
+                } @else if (displayNameControl.errors?.['maxlength']) {
+                  Display name must be less than 50 characters
+                }
+              </small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input
+              id="email"
+              type="email"
+              pInputText
+              formControlName="email"
+              readonly
+              class="readonly-field"
+              title="Email cannot be changed"
+            />
+            <small class="field-hint">Email address cannot be changed</small>
+          </div>
+
+          <div class="form-group">
+            <label>User ID</label>
+            <input
+              type="text"
+              pInputText
+              [value]="user.uid"
+              readonly
+              class="readonly-field"
+              title="User ID"
+            />
+            <small class="field-hint">Your unique user identifier</small>
+          </div>
+
+          <div class="form-group">
+            <label>Account Role</label>
+            <input
+              type="text"
+              pInputText
+              [value]="user.role | titlecase"
+              readonly
+              class="readonly-field"
+              title="Account role"
+            />
+            <small class="field-hint">Your account access level</small>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <p-button
+            label="Save Changes"
+            type="submit"
+            [disabled]="profileForm.invalid || isLoading()"
+            [loading]="isLoading()"
+            styleClass="save-btn"
+          ></p-button>
+          <p-button
+            label="Cancel"
+            type="button"
+            severity="secondary"
+            (onClick)="onCancel()"
+            [disabled]="isLoading()"
+          ></p-button>
+        </div>
+      </form>
+    </p-card>
+
+    <p-card header="Account Actions" styleClass="profile-card actions-card">
+      <div class="account-actions">
+        <div class="action-item">
+          <div class="action-info">
+            <h3>Sign Out</h3>
+            <p>Sign out of your gitPlumbers account</p>
+          </div>
+          <p-button
+            label="Sign Out"
+            severity="secondary"
+            (onClick)="onSignOut()"
+            [disabled]="isLoading()"
+          ></p-button>
+        </div>
+      </div>
+    </p-card>
+  </div>
+</div>
+} @else {
+<div class="profile-loading">
+  <i class="pi pi-spin pi-spinner"></i>
+  Loading your profile...
+</div>
+}

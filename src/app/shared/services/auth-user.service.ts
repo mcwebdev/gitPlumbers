@@ -1,6 +1,6 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Auth, User, authState, signOut } from '@angular/fire/auth';
+import { Auth, User, authState, signOut, updateProfile } from '@angular/fire/auth';
 import {
   Firestore,
   doc,
@@ -20,6 +20,7 @@ export interface UserProfile {
   email: string;
   displayName: string;
   role: UserRole;
+  githubInstallationId?: string;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -28,6 +29,7 @@ interface UserDocument {
   email?: string;
   displayName?: string;
   role?: UserRole;
+  githubInstallationId?: string;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -68,6 +70,7 @@ export class AuthUserService {
       email: user.email ?? docValue?.email ?? '',
       displayName: user.displayName ?? docValue?.displayName ?? '',
       role: docValue?.role ?? 'user',
+      githubInstallationId: docValue?.githubInstallationId,
       createdAt: docValue?.createdAt,
       updatedAt: docValue?.updatedAt,
     };
@@ -100,6 +103,7 @@ export class AuthUserService {
         email: user.email ?? overrides?.email ?? '',
         displayName: user.displayName ?? overrides?.displayName ?? '',
         role: overrides?.role ?? 'user',
+        githubInstallationId: overrides?.githubInstallationId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
@@ -121,6 +125,7 @@ export class AuthUserService {
         email: payload.email ?? '',
         displayName: payload.displayName ?? '',
         role: payload.role ?? 'user',
+        githubInstallationId: payload.githubInstallationId,
         createdAt: payload.createdAt,
         updatedAt: payload.updatedAt,
       };
@@ -131,6 +136,7 @@ export class AuthUserService {
       email: overrides?.email ?? currentData.email ?? user.email ?? '',
       displayName: overrides?.displayName ?? currentData.displayName ?? user.displayName ?? '',
       role: overrides?.role ?? currentData.role ?? 'user',
+      githubInstallationId: overrides?.githubInstallationId ?? currentData.githubInstallationId,
       createdAt: currentData.createdAt,
       updatedAt: currentData.updatedAt,
     };
@@ -144,14 +150,17 @@ export class AuthUserService {
       overrides?.email ||
       overrides?.displayName ||
       overrides?.role ||
+      overrides?.githubInstallationId ||
       merged.email !== currentData.email ||
-      merged.displayName !== currentData.displayName
+      merged.displayName !== currentData.displayName ||
+      merged.githubInstallationId !== currentData.githubInstallationId
     ) {
       try {
         await updateDoc(userDocRef, {
           email: merged.email,
           displayName: merged.displayName,
           role: merged.role,
+          githubInstallationId: merged.githubInstallationId,
           updatedAt: serverTimestamp(),
         });
       } catch (error) {
@@ -165,6 +174,7 @@ export class AuthUserService {
       email: merged.email ?? '',
       displayName: merged.displayName ?? '',
       role: merged.role ?? 'user',
+      githubInstallationId: merged.githubInstallationId,
       createdAt: merged.createdAt,
       updatedAt: merged.updatedAt,
     };
@@ -182,9 +192,53 @@ export class AuthUserService {
       email: data.email ?? '',
       displayName: data.displayName ?? '',
       role: data.role ?? 'user',
+      githubInstallationId: data.githubInstallationId,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     };
+  }
+
+  async updateGitHubInstallationId(installationId: string): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) {
+      throw new Error('User must be authenticated to update GitHub installation ID');
+    }
+
+    const userDocRef = doc(this.firestore, 'users', user.uid);
+    try {
+      await updateDoc(userDocRef, {
+        githubInstallationId: installationId,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to update GitHub installation ID: ${errorMessage}`);
+    }
+  }
+
+  async updateUserProfile(updates: Partial<Pick<UserProfile, 'displayName'>>): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) {
+      throw new Error('User must be authenticated to update profile');
+    }
+
+    const userDocRef = doc(this.firestore, 'users', user.uid);
+    
+    try {
+      // Update Firebase Auth profile if displayName is being updated
+      if (updates.displayName !== undefined) {
+        await updateProfile(user, { displayName: updates.displayName });
+      }
+
+      // Update Firestore document
+      await updateDoc(userDocRef, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to update user profile: ${errorMessage}`);
+    }
   }
 
   async logout(): Promise<void> {

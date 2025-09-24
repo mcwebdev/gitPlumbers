@@ -24,22 +24,71 @@
     </div>
   </section>
 
+  <!-- User Filter Section -->
+  @if (userOptions().length > 0) {
+    <section class="filter-section">
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label for="user-filter">Filter by users:</label>
+          <p-multiSelect
+            id="user-filter"
+            [options]="userOptions()"
+            [ngModel]="selectedUserEmailsValue"
+            (ngModelChange)="onUserFilterChange($event)"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="All users (no filter)"
+            [showToggleAll]="true"
+            [filter]="true"
+            filterPlaceholder="Search users..."
+            styleClass="user-filter-multiselect"
+            [maxSelectedLabels]="3"
+            selectedItemsLabel="{0} users selected"
+          ></p-multiSelect>
+        </div>
+        @if (selectedUserEmailsValue.length > 0) {
+          <button
+            type="button"
+            class="clear-filter-btn"
+            (click)="clearUserFilter()"
+            title="Show all users"
+          >
+            <i class="pi pi-times"></i>
+            Clear filter
+          </button>
+        }
+      </div>
+      <div class="filter-summary">
+        @if (selectedUserEmailsValue.length === 0) {
+          <span>Showing all {{ filteredItems().length }} items from {{ userOptions().length }} users</span>
+        } @else {
+          <span>Showing {{ filteredItems().length }} items from {{ selectedUserEmailsValue.length }} selected user(s)</span>
+        }
+      </div>
+    </section>
+  }
+
   @if (hasRequests()) {
   <section class="requests-board">
-    @for (request of requests(); track request.id) {
+    @for (item of filteredItems(); track item.id) {
     <article class="request">
       <header class="request-header">
         <div class="request-owner">
-          <h2>{{ request.userName || request.userEmail }}</h2>
-          <p>{{ request.userEmail }}</p>
+          <h2>{{ item.userName || item.userEmail }}</h2>
+          <p>{{ item.userEmail }}</p>
+          @if (item.type === 'github') {
+            <span class="request-type-badge github">GitHub Issue</span>
+          } @else {
+            <span class="request-type-badge support">Support Request</span>
+          }
         </div>
         <div class="request-status">
           <label>
             <span>Status</span>
             <select
-              [disabled]="isStatusBusy(request.id)"
-              [ngModel]="request.status"
-              (ngModelChange)="changeStatus(request.id, $event)"
+              [disabled]="isStatusBusy(item.id)"
+              [ngModel]="item.status"
+              (ngModelChange)="changeStatus(item.id, $event)"
             >
               @for (option of statusOptions; track option.value) {
               <option [value]="option.value">
@@ -52,17 +101,28 @@
       </header>
 
       <div class="request-body">
-        <p class="timestamp">Opened {{ formatTimestamp(request.createdAt) }}</p>
-        <p class="message">{{ request.message }}</p>
-        @if (request.githubRepo) {
-        <p class="meta">Repo: {{ request.githubRepo }}</p>
+        <p class="timestamp">Opened {{ formatTimestamp(item.createdAt) }}</p>
+        @if (item.type === 'github') {
+          <h3 class="issue-title">{{ item.title }}</h3>
+          <div class="message markdown-content" [innerHTML]="item.message | markdown"></div>
+        } @else {
+          <p class="message">{{ item.message }}</p>
+        }
+        @if (item.type === 'github' && item.githubIssueUrl) {
+          <p class="meta">
+            <a [href]="item.githubIssueUrl" target="_blank" rel="noopener noreferrer">
+              View on GitHub: {{ item.repository }}
+            </a>
+          </p>
+        } @else if (item.type === 'support' && item.githubRepo) {
+          <p class="meta">Repo: {{ item.githubRepo }}</p>
         }
       </div>
 
-      @if (request.notes.length) {
+      @if (item.notes.length) {
       <section class="notes">
         <h3>Notes</h3>
-        @for (note of request.notes; track note.createdAt) {
+        @for (note of item.notes; track note.createdAt) {
         <article class="note">
           <div class="note-meta">
             <strong>{{ note.authorName }}</strong>
@@ -80,17 +140,17 @@
           <span>Add an update</span>
           <textarea
             rows="3"
-            [value]="noteDraft(request.id)"
-            (input)="updateDraft(request.id, $any($event.target).value)"
+            [value]="noteDraft(item.id)"
+            (input)="updateDraft(item.id, $any($event.target).value)"
             placeholder="Share status changes, blockers, or next steps."
           ></textarea>
         </label>
         <button
           type="button"
-          (click)="sendNote(request.id)"
-          [disabled]="isNoteBusy(request.id) || !noteDraft(request.id).trim()"
+          (click)="sendNote(item.id)"
+          [disabled]="isNoteBusy(item.id) || !noteDraft(item.id).trim()"
         >
-          {{ isNoteBusy(request.id) ? 'Sending...' : 'Post update' }}
+          {{ isNoteBusy(item.id) ? 'Sending...' : 'Post update' }}
         </button>
       </section>
     </article>
@@ -98,7 +158,7 @@
   </section>
   } @else {
   <div class="admin-empty">
-    <p>No requests yet. Once customers submit from their dashboard, they'll show up here.</p>
+    <p>No requests or GitHub issues yet. Once customers submit from their dashboard, they'll show up here.</p>
   </div>
   }
 </div>

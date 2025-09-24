@@ -25,9 +25,23 @@ export class LandingComponent implements OnInit {
     variant: 'primary' | 'secondary';
   }> = [{ label: 'Share Your Code and Book an audit', href: '/contact', variant: 'primary' }];
   protected readonly heroAnchors = [
+    { label: 'Integration', href: '#integration' },
     { label: 'Services', href: '#services' },
     { label: 'Proof', href: '#proof' },
     { label: 'Approach', href: '#process' },
+  ];
+
+  protected readonly integrationFeatures = [
+    {
+      title: 'Seamless GitHub Integration',
+      description: 'Logged-in users can effortlessly import their GitHub issues and repositories for instant analysis and recommendations.',
+      icon: 'github',
+    },
+    {
+      title: 'Simple Code Upload',
+      description: 'Upload a zip file of your codebase for comprehensive review and optimization suggestions without any setup required.',
+      icon: 'upload',
+    },
   ];
 
   protected readonly differentiators = [

@@ -1,9 +1,33 @@
 :host {
   display: block;
+  animation: pageEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dashboard-shell {
   min-height: 100vh;
+  animation: contentFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
+}
+
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // Hero Section with Actions
@@ -16,6 +40,18 @@
   margin: 25px auto 0 auto;
   border-radius: 25px;
   padding: clamp(2.4rem, 6vw, 3.8rem) 0;
+  animation: heroSlideIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
+}
+
+@keyframes heroSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .dashboard-hero::after {
@@ -80,6 +116,18 @@
 
 .hero-copy {
   flex: 1;
+  animation: heroContentFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s both;
+}
+
+@keyframes heroContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero-eyebrow {
@@ -88,12 +136,36 @@
   font-size: 0.78rem;
   margin-bottom: 0.8rem;
   color: rgba(255, 255, 255, 0.7);
+  animation: heroEyebrowFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s both;
+}
+
+@keyframes heroEyebrowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .dashboard-hero h1 {
   font-size: clamp(2.1rem, 4vw, 2.8rem);
   margin: 0 0 1rem;
   line-height: 1.1;
+  animation: heroTitleFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s both;
+}
+
+@keyframes heroTitleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero-body {
@@ -101,6 +173,18 @@
   opacity: 0.9;
   font-size: 1.1rem;
   line-height: 1.6;
+  animation: heroBodyFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.2s both;
+}
+
+@keyframes heroBodyFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
 }
 
 .hero-actions {
@@ -110,6 +194,18 @@
   gap: 1rem;
   align-items: center;
   flex-shrink: 0;
+  animation: heroActionsFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.4s both;
+}
+
+@keyframes heroActionsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .new-request-btn {
@@ -337,6 +433,18 @@ textarea {
   margin: 0 auto;
   padding: 2rem;
   min-height: calc(100vh - 200px);
+  animation: requestsSectionFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.6s both;
+}
+
+@keyframes requestsSectionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .requests-header {
@@ -482,12 +590,37 @@ textarea {
   display: grid;
   gap: 0.75rem;
   transition: all 200ms ease;
+  animation: requestItemFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 
   &:hover {
     border-color: rgba(0, 76, 137, 0.2);
     box-shadow: 0 2px 8px rgba(0, 20, 50, 0.08);
+    transform: translateY(-2px);
   }
 }
+
+@keyframes requestItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Staggered animation for multiple request items
+.request:nth-child(1) { animation-delay: 1.8s; }
+.request:nth-child(2) { animation-delay: 1.9s; }
+.request:nth-child(3) { animation-delay: 2.0s; }
+.request:nth-child(4) { animation-delay: 2.1s; }
+.request:nth-child(5) { animation-delay: 2.2s; }
+.request:nth-child(6) { animation-delay: 2.3s; }
+.request:nth-child(7) { animation-delay: 2.4s; }
+.request:nth-child(8) { animation-delay: 2.5s; }
+.request:nth-child(9) { animation-delay: 2.6s; }
+.request:nth-child(10) { animation-delay: 2.7s; }
 
 .request-header {
   display: flex;
@@ -817,9 +950,31 @@ textarea {
   min-height: 50vh;
   color: rgba(11, 31, 46, 0.6);
   font-size: 1.1rem;
+  animation: loadingFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
   i {
     font-size: 1.2rem;
+    animation: loadingSpinner 1.5s linear infinite;
+  }
+}
+
+@keyframes loadingFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes loadingSpinner {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 

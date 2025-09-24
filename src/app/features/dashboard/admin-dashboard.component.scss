@@ -1,5 +1,17 @@
 :host {
   display: block;
+  animation: pageEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .admin-shell {
@@ -8,6 +20,18 @@
   padding: clamp(2rem, 6vw, 4rem);
   display: grid;
   gap: clamp(2rem, 5vw, 3rem);
+  animation: contentFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
+}
+
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .admin-hero {
@@ -20,6 +44,18 @@
   gap: 1.5rem;
   position: relative;
   overflow: hidden;
+  animation: heroSlideIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
+}
+
+@keyframes heroSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .admin-hero::after {
@@ -33,6 +69,18 @@
 .hero-copy {
   position: relative;
   z-index: 1;
+  animation: heroContentFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s both;
+}
+
+@keyframes heroContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero-eyebrow {
@@ -41,6 +89,18 @@
   font-size: 0.76rem;
   margin-bottom: 0.75rem;
   color: rgba(255, 255, 255, 0.65);
+  animation: heroEyebrowFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s both;
+}
+
+@keyframes heroEyebrowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .hero-body {
@@ -48,10 +108,34 @@
   font-size: clamp(1rem, 2vw, 1.2rem);
   color: rgba(255, 255, 255, 0.78);
   max-width: 60ch;
+  animation: heroBodyFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s both;
+}
+
+@keyframes heroBodyFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 0.78;
+    transform: translateY(0);
+  }
 }
 
 .admin-actions {
   margin-top: 1.5rem;
+  animation: heroActionsFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.2s both;
+}
+
+@keyframes heroActionsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .admin-link {
@@ -121,6 +205,18 @@
   padding: 1.5rem;
   border: 1px solid rgba(11, 31, 46, 0.08);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  animation: filterSectionFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.4s both;
+}
+
+@keyframes filterSectionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .filter-controls {
@@ -210,6 +306,18 @@
 .requests-board {
   display: grid;
   gap: 1.5rem;
+  animation: requestsBoardFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.6s both;
+}
+
+@keyframes requestsBoardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .request {
@@ -219,7 +327,37 @@
   box-shadow: 0 30px 65px rgba(0, 20, 50, 0.2);
   display: grid;
   gap: 1.35rem;
+  animation: requestItemFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  transition: all 200ms ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 40px 80px rgba(0, 20, 50, 0.25);
+  }
 }
+
+@keyframes requestItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Staggered animation for multiple request items
+.request:nth-child(1) { animation-delay: 1.8s; }
+.request:nth-child(2) { animation-delay: 1.9s; }
+.request:nth-child(3) { animation-delay: 2.0s; }
+.request:nth-child(4) { animation-delay: 2.1s; }
+.request:nth-child(5) { animation-delay: 2.2s; }
+.request:nth-child(6) { animation-delay: 2.3s; }
+.request:nth-child(7) { animation-delay: 2.4s; }
+.request:nth-child(8) { animation-delay: 2.5s; }
+.request:nth-child(9) { animation-delay: 2.6s; }
+.request:nth-child(10) { animation-delay: 2.7s; }
 
 .request-header {
   display: flex;
@@ -442,6 +580,18 @@ button:not(:disabled):focus-visible {
   padding: 4rem 1rem;
   text-align: center;
   color: rgba(11, 31, 46, 0.7);
+  animation: loadingFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes loadingFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {

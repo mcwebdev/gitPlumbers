@@ -61,13 +61,10 @@ export class ContactComponent implements OnInit {
   selectedFile?: File; // for label/clear UX
 
   ngOnInit(): void {
-    console.log('🚀 ContactComponent: ngOnInit starting...');
     this._seoService.updateMetadata(this._seoService.getContactPageMetadata());
-    console.log('✅ ContactComponent: ngOnInit completed');
   }
 
   constructor(private fb: FormBuilder, private messages: MessageService) {
-    console.log('🏗️ ContactComponent: Constructor starting...');
     
     this.contactForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -78,7 +75,6 @@ export class ContactComponent implements OnInit {
     });
 
     
-    console.log('✅ ContactComponent: Forms initialized');
 
     effect(() => {
       if (this.contactForm.valid) {

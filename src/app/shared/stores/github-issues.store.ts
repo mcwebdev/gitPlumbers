@@ -64,7 +64,6 @@ export const GitHubIssuesStore = signalStore(
 
     const loadAvailableIssues = rxMethod<{ installationId: string; repoFullName: string }>(
       switchMap(({ installationId, repoFullName }) => {
-        console.log('🔍 GitHubIssuesStore.loadAvailableIssues: Starting load for:', { installationId, repoFullName });
         
         // Reset state before loading
         patchState(store, {
@@ -77,11 +76,9 @@ export const GitHubIssuesStore = signalStore(
 
         return _githubIssuesService.fetchAvailableExternalIssues(installationId, repoFullName).pipe(
           tap((result: any) => {
-            console.log('📥 GitHubIssuesStore.loadAvailableIssues: Service result:', result);
             
             if (result?.success) {
               const issues = result.issues ?? [];
-              console.log('✅ GitHubIssuesStore.loadAvailableIssues: Found', issues.length, 'available issues');
               
               patchState(store, {
                 availableIssues: issues,
@@ -103,7 +100,6 @@ export const GitHubIssuesStore = signalStore(
               }
             } else {
               const errorMsg = result?.error || 'Unable to fetch available issues.';
-              console.error('❌ GitHubIssuesStore.loadAvailableIssues: Failed:', errorMsg);
               
               patchState(store, { error: errorMsg });
               _messageService.add({
@@ -115,7 +111,6 @@ export const GitHubIssuesStore = signalStore(
           }),
           catchError((error) => {
             const errorMsg = 'Failed to fetch available GitHub issues. Please try again.';
-            console.error('❌ GitHubIssuesStore.loadAvailableIssues: Exception:', error);
             
             patchState(store, { error: errorMsg });
             _messageService.add({
@@ -127,7 +122,6 @@ export const GitHubIssuesStore = signalStore(
             return of(null);
           }),
           finalize(() => {
-            console.log('🏁 GitHubIssuesStore.loadAvailableIssues: Finished loading');
             patchState(store, { loadingAvailableIssues: false });
           })
         );
@@ -147,13 +141,11 @@ export const GitHubIssuesStore = signalStore(
           return of(null);
         }
 
-        console.log('🔄 GitHubIssuesStore.syncSelectedIssues: Starting sync for', selectedIds.length, 'issues');
         patchState(store, { syncingSelectedIssues: true, error: null });
 
         return _githubIssuesService.syncSelectedExternalIssues(installationId, repoFullName, selectedIds).pipe(
           tap((result: any) => {
             if (result?.success) {
-              console.log('✅ GitHubIssuesStore.syncSelectedIssues: Successfully synced', result.count || selectedIds.length, 'issues');
               
               _messageService.add({
                 severity: 'success',
@@ -169,7 +161,6 @@ export const GitHubIssuesStore = signalStore(
               });
             } else {
               const errorMsg = result?.error || 'Unable to sync selected issues.';
-              console.error('❌ GitHubIssuesStore.syncSelectedIssues: Failed:', errorMsg);
               
               patchState(store, { error: errorMsg });
               _messageService.add({
@@ -181,7 +172,6 @@ export const GitHubIssuesStore = signalStore(
           }),
           catchError((error) => {
             const errorMsg = 'Failed to sync selected GitHub issues. Please try again.';
-            console.error('❌ GitHubIssuesStore.syncSelectedIssues: Exception:', error);
             
             patchState(store, { error: errorMsg });
             _messageService.add({
@@ -200,12 +190,10 @@ export const GitHubIssuesStore = signalStore(
     );
 
     function setSelectedIssueIds(ids: number[]): void {
-      console.log('🔄 GitHubIssuesStore.setSelectedIssueIds: Setting selected IDs:', ids);
       patchState(store, { selectedIssueIds: ids });
     }
 
     function cancelIssueSelection(): void {
-      console.log('❌ GitHubIssuesStore.cancelIssueSelection: Canceling selection');
       patchState(store, {
         showIssueSelection: false,
         selectedIssueIds: [],

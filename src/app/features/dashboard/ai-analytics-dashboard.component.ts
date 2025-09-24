@@ -105,7 +105,6 @@ export class AiAnalyticsDashboardComponent implements OnInit {
         this._loadingState.set(false);
       },
       error: (error) => {
-        console.error('Failed to load AI analytics dashboard:', error);
         this._errorState.set('Failed to load analytics data. Please try again later.');
         this._loadingState.set(false);
       },

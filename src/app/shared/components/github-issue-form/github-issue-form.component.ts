@@ -176,7 +176,6 @@ export class GitHubIssueFormComponent implements OnInit {
         });
       }
     } catch (error) {
-      console.error('Error creating GitHub issue:', error);
       this._messageService.add({
         severity: 'error',
         summary: 'Error',

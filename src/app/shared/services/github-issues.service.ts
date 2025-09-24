@@ -32,9 +32,6 @@ export class GitHubIssuesService {
    * Create a new GitHub issue
    */
   createIssue(request: CreateGitHubIssueRequest): Observable<CreateGitHubIssueResponse> {
-    console.log('🚀 GitHubIssuesService.createIssue: Starting issue creation...');
-    console.log('📤 GitHubIssuesService.createIssue: Request data:', request);
-    
     const createIssueFunction = httpsCallable<CreateGitHubIssueRequest, CreateGitHubIssueResponse>(
       this._functions,
       'createGitHubIssue'
@@ -42,18 +39,9 @@ export class GitHubIssuesService {
 
     return from(createIssueFunction(request)).pipe(
       map((result) => {
-        console.log('📥 GitHubIssuesService.createIssue: Raw Firebase function result:', result);
-        console.log('📥 GitHubIssuesService.createIssue: Processed data:', result.data);
         return result.data;
       }),
       catchError((error) => {
-        console.error('💥 GitHubIssuesService.createIssue: Error occurred:', error);
-        console.error('💥 GitHubIssuesService.createIssue: Error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          stack: error.stack
-        });
         return of({
           success: false,
           error: error.message || 'Failed to create GitHub issue'
@@ -66,7 +54,6 @@ export class GitHubIssuesService {
    * Get all GitHub issues for a specific user
    */
   getUserIssues(userId: string): Observable<GitHubIssue[]> {
-    console.log('🔍 GitHubIssuesService.getUserIssues: Fetching issues for user:', userId);
     
     const issuesRef = collection(this._firestore, 'githubIssues');
     const q = query(
@@ -78,32 +65,18 @@ export class GitHubIssuesService {
     return new Observable(observer => {
       const unsubscribe = onSnapshot(q, 
         (snapshot) => {
-          console.log('📥 GitHubIssuesService.getUserIssues: Received snapshot:', {
-            size: snapshot.size,
-            empty: snapshot.empty,
-            docs: snapshot.docs.length
-          });
           
           const issues = snapshot.docs.map(doc => {
             const data = doc.data();
-            console.log('📄 GitHubIssuesService.getUserIssues: Processing doc:', {
-              id: doc.id,
-              title: data['title'],
-              repository: data['repository'],
-              status: data['status'],
-              userId: data['userId']
-            });
             return {
               id: doc.id,
               ...data
             } as GitHubIssue;
           });
           
-          console.log('✅ GitHubIssuesService.getUserIssues: Returning issues:', issues);
           observer.next(issues);
         },
         (error) => {
-          console.error('💥 GitHubIssuesService.getUserIssues: Error occurred:', error);
           observer.error(error);
         }
       );
@@ -132,7 +105,6 @@ export class GitHubIssuesService {
           observer.next(issues);
         },
         (error) => {
-          console.error('Error fetching all GitHub issues:', error);
           observer.error(error);
         }
       );
@@ -160,7 +132,6 @@ export class GitHubIssuesService {
     })).pipe(
       map(() => true),
       catchError((error) => {
-        console.error('Error updating issue status:', error);
         return of(false);
       })
     );
@@ -170,17 +141,13 @@ export class GitHubIssuesService {
    * Remove issue from dashboard only (keeps GitHub issue intact)
    */
   removeIssueFromDashboard(issueId: string): Observable<boolean> {
-    console.log('🗑️ GitHubIssuesService.removeIssueFromDashboard: Removing issue from dashboard:', issueId);
-    
     const issueRef = doc(this._firestore, 'githubIssues', issueId);
     
     return from(deleteDoc(issueRef)).pipe(
       map(() => {
-        console.log('✅ GitHubIssuesService.removeIssueFromDashboard: Successfully removed from dashboard');
         return true;
       }),
       catchError((error) => {
-        console.error('❌ GitHubIssuesService.removeIssueFromDashboard: Error removing from dashboard:', error);
         return of(false);
       })
     );
@@ -190,12 +157,6 @@ export class GitHubIssuesService {
    * Delete issue completely (from both dashboard and GitHub)
    */
   deleteIssueCompletely(issueId: string, installationId: string, repository: string, githubIssueId: number): Observable<{ success: boolean; error?: string }> {
-    console.log('🗑️ GitHubIssuesService.deleteIssueCompletely: Deleting issue completely:', {
-      issueId,
-      installationId,
-      repository,
-      githubIssueId
-    });
     
     const deleteIssueFunction = httpsCallable<{
       issueId: string;
@@ -214,11 +175,9 @@ export class GitHubIssuesService {
       githubIssueId
     })).pipe(
       map((result) => {
-        console.log('📥 GitHubIssuesService.deleteIssueCompletely: Result:', result.data);
         return result.data;
       }),
       catchError((error) => {
-        console.error('💥 GitHubIssuesService.deleteIssueCompletely: Error occurred:', error);
         return of({
           success: false,
           error: error.message || 'Failed to delete GitHub issue'
@@ -262,7 +221,6 @@ export class GitHubIssuesService {
       }),
       map(() => true),
       catchError((error) => {
-        console.error('Error adding issue note:', error);
         return of(false);
       })
     );
@@ -287,7 +245,6 @@ export class GitHubIssuesService {
           }
         },
         (error) => {
-          console.error('Error fetching issue:', error);
           observer.error(error);
         }
       );
@@ -301,7 +258,6 @@ export class GitHubIssuesService {
    * This method fetches issues that exist on GitHub but are not yet stored in the app
    */
   fetchAvailableExternalIssues(installationId: string, repository: string): Observable<{ success: boolean; issues: any[]; error?: string }> {
-    console.log('🔍 GitHubIssuesService.fetchAvailableExternalIssues: Fetching available issues for:', { installationId, repository });
     
     const fetchFunction = httpsCallable<{ installationId: string; repository: string }, { success: boolean; issues: any[]; error?: string }>(
       this._functions,
@@ -310,11 +266,9 @@ export class GitHubIssuesService {
 
     return from(fetchFunction({ installationId, repository })).pipe(
       map((result) => {
-        console.log('📥 GitHubIssuesService.fetchAvailableExternalIssues: Fetch result:', result.data);
         return result.data;
       }),
       catchError((error) => {
-        console.error('💥 GitHubIssuesService.fetchAvailableExternalIssues: Error occurred:', error);
         return of({
           success: false,
           issues: [],
@@ -329,7 +283,6 @@ export class GitHubIssuesService {
    * This method syncs only the issues that the user has selected
    */
   syncSelectedExternalIssues(installationId: string, repository: string, selectedIssueIds: number[]): Observable<{ success: boolean; count: number; error?: string }> {
-    console.log('🔄 GitHubIssuesService.syncSelectedExternalIssues: Starting sync for selected issues:', { installationId, repository, selectedIssueIds });
     
     const syncFunction = httpsCallable<{ installationId: string; repository: string; selectedIssueIds: number[] }, { success: boolean; count: number; error?: string }>(
       this._functions,
@@ -338,11 +291,9 @@ export class GitHubIssuesService {
 
     return from(syncFunction({ installationId, repository, selectedIssueIds })).pipe(
       map((result) => {
-        console.log('📥 GitHubIssuesService.syncSelectedExternalIssues: Sync result:', result.data);
         return result.data;
       }),
       catchError((error) => {
-        console.error('💥 GitHubIssuesService.syncSelectedExternalIssues: Error occurred:', error);
         return of({
           success: false,
           count: 0,
@@ -357,7 +308,6 @@ export class GitHubIssuesService {
    * This method can be called to import issues that were created outside the app
    */
   syncExternalIssues(installationId: string, repository: string): Observable<{ success: boolean; count: number; error?: string }> {
-    console.log('🔄 GitHubIssuesService.syncExternalIssues: Starting sync for:', { installationId, repository });
     
     const syncFunction = httpsCallable<{ installationId: string; repository: string }, { success: boolean; count: number; error?: string }>(
       this._functions,
@@ -366,11 +316,9 @@ export class GitHubIssuesService {
 
     return from(syncFunction({ installationId, repository })).pipe(
       map((result) => {
-        console.log('📥 GitHubIssuesService.syncExternalIssues: Sync result:', result.data);
         return result.data;
       }),
       catchError((error) => {
-        console.error('💥 GitHubIssuesService.syncExternalIssues: Error occurred:', error);
         return of({
           success: false,
           count: 0,
@@ -407,7 +355,6 @@ export class GitHubIssuesService {
       // Handle string or number
       return new Date(timestamp).toLocaleString();
     } catch (error) {
-      console.error('Error formatting timestamp:', error);
       return '';
     }
   }

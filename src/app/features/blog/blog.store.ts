@@ -343,7 +343,6 @@ export const BlogStore = signalStore(
           });
         }),
         catchError((error) => {
-          console.error('BlogStore loadPosts error:', error);
           patchState(store, {
             loading: false,
             error: error.message || 'Failed to load blog posts',

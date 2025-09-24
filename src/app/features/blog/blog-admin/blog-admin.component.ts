@@ -41,9 +41,7 @@ export class BlogAdminComponent {
     from(getDocs(query(collection(this.firestore, 'blog_posts'), orderBy('publishedOn', 'desc')))).pipe(
       map(snapshot => {
         const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPostDocument));
-        console.log('All posts from Firestore:', posts.map(p => ({ id: p.id, title: p.title, status: p.status })));
         const published = posts.filter(post => post.status === 'published');
-        console.log('Published posts:', published.map(p => ({ id: p.id, title: p.title, status: p.status })));
         return published;
       })
     ),
@@ -55,7 +53,6 @@ export class BlogAdminComponent {
       map(snapshot => {
         const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPostDocument));
         const drafts = posts.filter(post => post.status === 'draft' || !post.status);
-        console.log('Draft posts:', drafts.map(p => ({ id: p.id, title: p.title, status: p.status })));
         return drafts;
       })
     ),
@@ -75,7 +72,6 @@ export class BlogAdminComponent {
     const posts = this.allPosts();
     const postsToFix = posts.filter(post => !post.status);
     
-    console.log('Fixing posts without status:', postsToFix.map(p => p.title));
     
     for (const post of postsToFix) {
       const postRef = doc(this.firestore, 'blog_posts', post.id);

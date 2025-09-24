@@ -184,7 +184,6 @@ export class AdminDashboardComponent {
     // Find the item to determine its type
     const item = this.allItems().find(item => item.id === id);
     if (!item) {
-      console.error('Item not found for ID:', id);
       return;
     }
 
@@ -222,9 +221,6 @@ export class AdminDashboardComponent {
         // Use RequestsService for support requests
         await this.requestsService.updateStatus(id, status);
       }
-    } catch (error) {
-      console.error('Error updating status:', error);
-      throw error;
     } finally {
       this.statusBusyState.update((state) => ({ ...state, [id]: false }));
     }
@@ -244,7 +240,6 @@ export class AdminDashboardComponent {
     // Find the item to determine its type
     const item = this.allItems().find(item => item.id === id);
     if (!item) {
-      console.error('Item not found for ID:', id);
       return;
     }
 
@@ -269,9 +264,6 @@ export class AdminDashboardComponent {
         await this.requestsService.addNote(id, profile, draft);
       }
       this.updateDraft(id, '');
-    } catch (error) {
-      console.error('Error adding note:', error);
-      throw error;
     } finally {
       this.noteBusyState.update((state) => ({ ...state, [id]: false }));
     }

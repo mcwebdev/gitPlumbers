@@ -204,7 +204,6 @@ export class AiTrafficTrackingService {
       },
       body: JSON.stringify(data),
     }).catch((error) => {
-      console.warn('Failed to send analytics data:', error);
     });
   }
 

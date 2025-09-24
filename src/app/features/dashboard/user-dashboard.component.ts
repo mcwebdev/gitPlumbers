@@ -141,7 +141,6 @@ export class UserDashboardComponent {
 
         return this.githubIssuesService.getUserIssues(profile.uid).pipe(
           catchError((error) => {
-            console.error('Error fetching GitHub issues:', error);
             return of([]);
           })
         );
@@ -442,12 +441,10 @@ export class UserDashboardComponent {
   }
 
   onGitHubAppInstallationComplete(data: GitHubAppInstallationData): void {
-    console.log('✅ GitHub App installation completed:', data);
     // Handle installation completion if needed
   }
 
   onRepositorySelected(repoFullName: string): void {
-    console.log('✅ Repository selected:', repoFullName);
     // Handle repository selection if needed
   }
 
@@ -468,7 +465,6 @@ export class UserDashboardComponent {
   }
 
   private async performRemoveFromDashboard(issue: UnifiedRequest): Promise<void> {
-    console.log('🗑️ Removing issue from dashboard:', issue.id);
     
     try {
       const success = await this.githubIssuesService.removeIssueFromDashboard(issue.id).toPromise();
@@ -487,7 +483,6 @@ export class UserDashboardComponent {
         });
       }
     } catch (error) {
-      console.error('Error removing issue from dashboard:', error);
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
@@ -514,7 +509,6 @@ export class UserDashboardComponent {
   }
 
   private async performDeleteCompletely(issue: UnifiedRequest): Promise<void> {
-    console.log('🗑️ Deleting issue completely:', issue.id);
     
     try {
       // Get the full GitHub issue data from the current issues
@@ -549,7 +543,6 @@ export class UserDashboardComponent {
         });
       }
     } catch (error) {
-      console.error('Error deleting issue completely:', error);
       this.messageService.add({
         severity: 'error',
         summary: 'Error',

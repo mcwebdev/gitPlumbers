@@ -80,7 +80,6 @@ export class ProfileComponent {
         detail: 'Your profile has been updated successfully.',
       });
     } catch (error) {
-      console.error('Error updating profile:', error);
       this.messageService.add({
         severity: 'error',
         summary: 'Update Failed',
@@ -99,7 +98,6 @@ export class ProfileComponent {
     try {
       await this.authUser.logout();
     } catch (error) {
-      console.error('Error signing out:', error);
       this.messageService.add({
         severity: 'error',
         summary: 'Sign Out Failed',

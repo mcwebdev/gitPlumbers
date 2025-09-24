@@ -91,7 +91,6 @@ export class AiAnalyticsService {
       .post<{ success: boolean; eventId: string }>(`${this.baseUrl}/handleAiAnalytics`, event)
       .pipe(
         catchError((error) => {
-          console.error('Failed to track AI event:', error);
           return of({ success: false, eventId: '' });
         })
       );
@@ -115,7 +114,6 @@ export class AiAnalyticsService {
       })
       .pipe(
         catchError((error) => {
-          console.error('Failed to track citation:', error);
           return of({ success: false });
         })
       );
@@ -127,7 +125,6 @@ export class AiAnalyticsService {
   getDashboard(): Observable<AiAnalyticsDashboard> {
     return this._http.get<AiAnalyticsDashboard>(`${this.baseUrl}/getAiAnalyticsDashboard`).pipe(
       catchError((error) => {
-        console.error('Failed to load dashboard:', error);
         return of({
           summary: {
             totalAiTraffic: 0,
@@ -170,7 +167,6 @@ export class AiAnalyticsService {
       }>(`${this.baseUrl}/handleAiAnalytics?${params.toString()}`)
       .pipe(
         catchError((error) => {
-          console.error('Failed to get analytics report:', error);
           return of({
             success: false,
             period: { start: '', end: '' },

@@ -23,3 +23,4 @@ export * from './github-api';
 export * from './github-issues';
 export * from './sitemap-generator';
 export * from './sitemap-trigger';
+export * from './stripe';

@@ -12,6 +12,7 @@ import {
 } from '@angular/fire/firestore';
 import { from, map, of, shareReplay, switchMap, startWith, tap } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export type UserRole = 'user' | 'admin';
 
@@ -20,6 +21,7 @@ export interface UserProfile {
   email: string;
   displayName: string;
   role: UserRole;
+  stripeCustomerId?: string;
   githubInstallationId?: string;
   createdAt?: unknown;
   updatedAt?: unknown;
@@ -258,6 +260,29 @@ export class AuthUserService {
     }
   }
 
+  async updateUserProfileById(userId: string, updates: Partial<UserProfile>): Promise<void> {
+    if (!userId) {
+      throw new Error('User ID is required to update profile');
+    }
+    
+    const userDocRef = doc(this.firestore, 'users', userId);
+    
+    // Validate updates
+    if (updates.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updates.email)) {
+      throw new Error('Invalid email format');
+    }
+    
+    try {
+      await updateDoc(userDocRef, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to update user profile: ${errorMessage}`);
+    }
+  }
+
   async logout(): Promise<void> {
     this.clearCachedProfile();
     await signOut(this.auth);
@@ -287,7 +312,6 @@ export class AuthUserService {
         }
       }
     } catch (error) {
-      console.warn('Failed to parse cached auth profile:', error);
       this.clearCachedProfile();
     }
     return undefined;
@@ -301,7 +325,7 @@ export class AuthUserService {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(profile));
     } catch (error) {
-      console.warn('Failed to cache auth profile:', error);
+      // console.warn('Failed to cache auth profile:', error);
     }
   }
 
@@ -313,7 +337,7 @@ export class AuthUserService {
     try {
       localStorage.removeItem(this.STORAGE_KEY);
     } catch (error) {
-      console.warn('Failed to clear cached auth profile:', error);
+      // console.warn('Failed to clear cached auth profile:', error);
     }
   }
 }

@@ -157,7 +157,6 @@ export class SitemapGeneratorService {
         };
       });
     } catch (error) {
-      console.error('Error fetching blog posts for sitemap:', error);
       return [];
     }
   }

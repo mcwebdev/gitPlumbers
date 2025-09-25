@@ -22,6 +22,14 @@
             <i class="pi pi-plus"></i>
             {{ showForm() ? 'Cancel' : 'New Request' }}
           </button>
+          <button
+            type="button"
+            class="invoice-btn"
+            (click)="navigateToInvoices()"
+          >
+            <i class="pi pi-file-invoice"></i>
+            Manage Invoices
+          </button>
         </div>
       </div>
       <div class="hero-settings">
@@ -100,6 +108,11 @@
     </div>
   </section>
   }
+
+  <!-- Invoices Section -->
+  <section class="invoices-section">
+    <app-user-invoice-view></app-user-invoice-view>
+  </section>
 
   <!-- Main Content: Request History -->
   <section class="requests-section">

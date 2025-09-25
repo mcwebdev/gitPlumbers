@@ -105,6 +105,19 @@ export const routes: Routes = [
       import('./features/profile/profile.component').then((m) => m.ProfileComponent),
   },
   {
+    path: 'invoices',
+    canActivate: [userGuard],
+    loadComponent: () =>
+      import('./features/invoices/invoice-dashboard/invoice-dashboard.component').then((m) => m.InvoiceDashboardComponent),
+    data: {
+      seo: {
+        title: 'Invoice Management - GitPlumbers',
+        description: 'Create, manage, and track invoices for your work. Professional invoicing made simple with Stripe integration.',
+        keywords: ['invoice management', 'billing', 'payments', 'Stripe', 'freelance invoicing'],
+      },
+    },
+  },
+  {
     path: 'dashboard/contact',
     redirectTo: '/contact',
     pathMatch: 'full',
@@ -116,6 +129,21 @@ export const routes: Routes = [
       import('./features/dashboard/admin-dashboard.component').then(
         (m) => m.AdminDashboardComponent
       ),
+  },
+  {
+    path: 'admin/invoices',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/invoices/admin-invoice-management/admin-invoice-management.component').then(
+        (m) => m.AdminInvoiceManagementComponent
+      ),
+    data: {
+      seo: {
+        title: 'Admin Invoice Management - GitPlumbers',
+        description: 'Create and manage invoices for users. Administrative invoice management with Stripe integration.',
+        keywords: ['admin', 'invoice management', 'billing', 'Stripe', 'user invoices'],
+      },
+    },
   },
   {
     path: 'ai-analytics',

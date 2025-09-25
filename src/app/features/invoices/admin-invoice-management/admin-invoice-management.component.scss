@@ -1,0 +1,610 @@
+@use 'primeflex/primeflex';
+
+.admin-invoice-dashboard {
+  padding: 1.5rem;
+  background-color: var(--surface-ground);
+  min-height: 100vh;
+
+  .dashboard-header {
+    margin-bottom: 2rem;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+
+      .dashboard-title {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 2rem;
+        font-weight: 600;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+
+        .header-actions {
+          justify-content: center;
+        }
+      }
+    }
+  }
+
+  .stats-section {
+    margin-bottom: 2rem;
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+
+      .stat-card {
+        border-radius: 12px;
+        border: 1px solid var(--surface-border);
+        transition: all 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-content {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 0.5rem;
+
+          .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+
+            &.total {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+
+            &.paid {
+              background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+
+            &.outstanding {
+              background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            }
+
+            &.revenue {
+              background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            }
+          }
+
+          .stat-details {
+            flex: 1;
+
+            h3 {
+              margin: 0 0 0.25rem 0;
+              font-size: 1.75rem;
+              font-weight: 700;
+              color: var(--text-color);
+            }
+
+            p {
+              margin: 0;
+              color: var(--text-color-secondary);
+              font-size: 0.875rem;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .filters-section {
+    margin-bottom: 1.5rem;
+
+    .filters-content {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+
+      .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        label {
+          font-weight: 500;
+          color: var(--text-color);
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+
+  .invoices-section {
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0 0.5rem 0;
+
+      h2 {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .invoice-count {
+        color: var(--text-color-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+    }
+
+    // Table customizations
+    ::ng-deep .p-datatable {
+      .p-datatable-thead > tr > th {
+        background: var(--surface-section);
+        border-color: var(--surface-border);
+        font-weight: 600;
+      }
+
+      .p-datatable-tbody > tr {
+        &:hover {
+          background: var(--surface-hover);
+        }
+
+        td {
+          border-color: var(--surface-border);
+          padding: 1rem 0.75rem;
+        }
+      }
+
+      .invoice-number {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .customer-info {
+        .customer-email {
+          font-size: 0.875rem;
+          color: var(--text-color-secondary);
+          margin-top: 0.25rem;
+        }
+
+        .customer-meta {
+          margin-top: 0.25rem;
+
+          .user-id {
+            font-size: 0.75rem;
+            color: var(--text-color-secondary);
+            background: var(--surface-100);
+            padding: 0.125rem 0.25rem;
+            border-radius: 4px;
+          }
+        }
+      }
+
+      .amount {
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .date {
+        color: var(--text-color-secondary);
+        font-size: 0.875rem;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+
+        h3 {
+          margin: 1rem 0 0.5rem 0;
+          color: var(--text-color);
+        }
+
+        p {
+          margin: 0 0 1.5rem 0;
+          color: var(--text-color-secondary);
+        }
+      }
+    }
+  }
+
+  // Loading overlay
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+
+    ::ng-deep .p-progress-spinner {
+      width: 50px;
+      height: 50px;
+    }
+  }
+
+  // Dialog customizations
+  ::ng-deep .p-dialog {
+    .p-dialog-header {
+      background: var(--surface-section);
+      border-bottom: 1px solid var(--surface-border);
+    }
+
+    .p-dialog-content {
+      padding: 2rem;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+
+      .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        label {
+          font-weight: 500;
+          color: var(--text-color);
+        }
+
+        .form-hint {
+          color: var(--text-color-secondary);
+          font-size: 0.875rem;
+          font-style: italic;
+        }
+
+        .p-error {
+          margin-top: 0.25rem;
+        }
+
+        &.user-selection {
+          grid-column: 1 / -1;
+        }
+      }
+
+      .customer-preview {
+        background: var(--surface-100);
+        border: 1px solid var(--surface-border);
+        border-radius: 6px;
+        padding: 1rem;
+
+        div {
+          margin-bottom: 0.5rem;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--surface-border);
+    }
+
+    // User selection styling
+    .user-option {
+      padding: 0.5rem 0;
+
+      .user-name {
+        font-weight: 500;
+        color: var(--text-color);
+      }
+
+      .user-email {
+        font-size: 0.875rem;
+        color: var(--text-color-secondary);
+        margin-top: 0.25rem;
+      }
+    }
+
+    .selected-user {
+      padding: 0.25rem 0;
+      color: var(--text-color);
+    }
+
+    // Service templates styling
+    .service-templates {
+      margin-bottom: 1.5rem;
+
+      h3 {
+        margin: 0 0 1rem 0;
+        color: var(--text-color);
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .templates-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+
+        .template-card {
+          background: var(--surface-card);
+          border: 1px solid var(--surface-border);
+          border-radius: 8px;
+          padding: 1rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          }
+
+          .template-name {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+          }
+
+          .template-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+          }
+
+          .template-description {
+            font-size: 0.875rem;
+            color: var(--text-color-secondary);
+            line-height: 1.4;
+          }
+        }
+      }
+    }
+
+    // Invoice form specific styles
+    .invoice-items-section {
+      margin-bottom: 1.5rem;
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+
+        h3 {
+          margin: 0;
+          color: var(--text-color);
+          font-size: 1.25rem;
+          font-weight: 600;
+        }
+      }
+
+      .invoice-item {
+        background: var(--surface-section);
+        border: 1px solid var(--surface-border);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+
+        .item-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid var(--surface-border);
+
+          h4 {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 1rem;
+            font-weight: 600;
+          }
+
+          .item-actions {
+            display: flex;
+            gap: 0.5rem;
+          }
+        }
+
+        .item-form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+
+          .total-field {
+            display: flex;
+            align-items: end;
+
+            .total-amount {
+              font-weight: 700;
+              font-size: 1.125rem;
+              color: var(--primary-color);
+              padding: 0.75rem 0;
+            }
+          }
+        }
+      }
+
+      .invoice-total {
+        background: var(--surface-100);
+        border: 1px solid var(--surface-border);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+
+        .total-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          .total-label {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-color);
+          }
+
+          .total-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+          }
+        }
+      }
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    padding: 1rem;
+
+    .stats-section .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .filters-section .filters-content {
+      flex-direction: column;
+      align-items: stretch;
+
+      .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+
+        label {
+          margin-bottom: 0.5rem;
+        }
+      }
+    }
+
+    ::ng-deep .p-dialog {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .service-templates .templates-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .invoice-items-section .invoice-item .item-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dialog-footer {
+        flex-direction: column;
+
+        .p-button {
+          width: 100%;
+        }
+      }
+    }
+
+    ::ng-deep .p-datatable {
+      .action-buttons {
+        flex-direction: column;
+
+        .p-button {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  // Dark mode adjustments
+  :host-context(.p-dark) {
+    .loading-overlay {
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .stat-card:hover {
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+
+    .service-templates .template-card:hover {
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+// Accessibility improvements
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Focus styles
+::ng-deep .p-button:focus,
+::ng-deep .p-inputtext:focus,
+::ng-deep .p-dropdown:focus,
+::ng-deep .p-inputnumber:focus,
+::ng-deep .p-autocomplete:focus {
+  box-shadow: 0 0 0 2px var(--primary-color-text), 0 0 0 4px var(--primary-color);
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .admin-invoice-dashboard {
+    .stat-card,
+    .invoice-item,
+    .template-card {
+      border-width: 2px;
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .admin-invoice-dashboard {
+    .stat-card,
+    .template-card {
+      transition: none;
+
+      &:hover {
+        transform: none;
+      }
+    }
+
+    .loading-overlay ::ng-deep .p-progress-spinner {
+      animation: none;
+    }
+  }
+}

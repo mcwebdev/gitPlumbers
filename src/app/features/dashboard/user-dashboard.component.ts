@@ -23,6 +23,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 import { GitHubAppInstallerComponent, type GitHubAppInstallationData } from '../../shared/components/github-app-installer/github-app-installer.component';
 import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
+import { UserInvoiceViewComponent } from '../invoices/user-invoice-view/user-invoice-view.component';
 interface RequestStatusCopy {
   label: string;
   tone: 'neutral' | 'progress' | 'success' | 'warning';
@@ -66,7 +67,7 @@ const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, GitHubAppInstallerComponent, ConfirmDialogModule, MarkdownPipe],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, GitHubAppInstallerComponent, ConfirmDialogModule, MarkdownPipe, UserInvoiceViewComponent],
   providers: [MessageService, ConfirmationService],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.scss',
@@ -553,5 +554,9 @@ export class UserDashboardComponent {
 
   navigateToProfile(): void {
     this.router.navigate(['/profile']);
+  }
+
+  navigateToInvoices(): void {
+    this.router.navigate(['/invoices']);
   }
 }

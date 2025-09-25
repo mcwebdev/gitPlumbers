@@ -1,0 +1,567 @@
+<!-- Toast Messages -->
+<p-toast></p-toast>
+
+<!-- Confirmation Dialog -->
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Loading Overlay -->
+@if (isLoading()) {
+  <div class="loading-overlay">
+    <p-progressSpinner></p-progressSpinner>
+  </div>
+}
+
+<!-- Main Content -->
+<div class="admin-invoice-dashboard">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="dashboard-title">Admin Invoice Management</h1>
+      <div class="header-actions">
+        <p-button 
+          label="New Customer" 
+          icon="pi pi-user-plus" 
+          severity="secondary"
+          (onClick)="onCreateCustomer()"
+          [disabled]="isLoading()">
+        </p-button>
+        <p-button 
+          label="Create Invoice" 
+          icon="pi pi-plus" 
+          (onClick)="onCreateInvoice()"
+          [disabled]="isLoading()">
+        </p-button>
+        <p-button 
+          icon="pi pi-refresh" 
+          severity="secondary"
+          (onClick)="onRefresh()"
+          [disabled]="isLoading()"
+          pTooltip="Refresh Data">
+        </p-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  @if (invoiceStats(); as stats) {
+    <div class="stats-section">
+    <div class="stats-grid">
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon total">
+            <i class="pi pi-file"></i>
+          </div>
+          <div class="stat-details">
+            <h3>{{ stats.count }}</h3>
+            <p>Total Invoices</p>
+          </div>
+        </div>
+      </p-card>
+
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon paid">
+            <i class="pi pi-check-circle"></i>
+          </div>
+          <div class="stat-details">
+            <h3>{{ formatAmount(stats.paidAmount, 'usd') }}</h3>
+            <p>Total Paid</p>
+          </div>
+        </div>
+      </p-card>
+
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon outstanding">
+            <i class="pi pi-clock"></i>
+          </div>
+          <div class="stat-details">
+            <h3>{{ formatAmount(stats.outstandingAmount, 'usd') }}</h3>
+            <p>Outstanding</p>
+          </div>
+        </div>
+      </p-card>
+
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon revenue">
+            <i class="pi pi-dollar"></i>
+          </div>
+          <div class="stat-details">
+            <h3>{{ formatAmount(stats.totalAmount, 'usd') }}</h3>
+            <p>Total Revenue</p>
+          </div>
+        </div>
+      </p-card>
+    </div>
+    </div>
+  }
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <p-card>
+      <div class="filters-content">
+        <div class="filter-group">
+          <label for="statusFilter">Filter by Status:</label>
+          <p-select 
+            id="statusFilter"
+            [options]="statusOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="All Statuses"
+            (onChange)="onStatusFilter($event)"
+            [style]="{ 'min-width': '150px' }">
+          </p-select>
+        </div>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Invoices Table -->
+  <div class="invoices-section">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <h2>All Invoices</h2>
+          <span class="invoice-count">{{ invoices().length }} invoices</span>
+        </div>
+      </ng-template>
+
+      <p-table 
+        [value]="invoices()" 
+        [columns]="selectedColumns"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} invoices"
+        [tableStyle]="{'min-width': '60rem'}"
+        [loading]="isLoading()"
+        loadingIcon="pi pi-spin pi-spinner"
+        styleClass="p-datatable-striped">
+        
+        <ng-template pTemplate="header">
+          <tr>
+            @for (col of selectedColumns; track col.field) {
+              <th>{{ col.header }}</th>
+            }
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-invoice>
+          <tr>
+            <td>
+              <span class="invoice-number">
+                {{ invoice.number || invoice.id }}
+              </span>
+            </td>
+            <td>
+              <div class="customer-info">
+                <strong>{{ getCustomerName(invoice.customer) }}</strong>
+                <div class="customer-email" *ngIf="invoice.customer_email">
+                  {{ invoice.customer_email }}
+                </div>
+                <div class="customer-meta" *ngIf="invoice.metadata?.userId">
+                  <small class="user-id">User ID: {{ invoice.metadata.userId }}</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="amount">
+                {{ formatAmount(invoice.total, invoice.currency) }}
+              </span>
+            </td>
+            <td>
+              <p-tag 
+                [value]="invoice.status | titlecase"
+                [severity]="getStatusSeverity(invoice.status)">
+              </p-tag>
+            </td>
+            <td>
+              <span class="date">
+                {{ formatDate(invoice.created) }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <p-button 
+                  icon="pi pi-eye" 
+                  severity="info"
+                  size="small"
+                  (onClick)="onViewInvoice(invoice)"
+                  pTooltip="View Details">
+                </p-button>
+                
+                <p-button 
+                  icon="pi pi-check" 
+                  severity="success"
+                  size="small"
+                  (onClick)="onFinalizeInvoice(invoice)"
+                  [disabled]="invoice.status !== 'draft'"
+                  pTooltip="Finalize & Send to User">
+                </p-button>
+                
+                <p-button 
+                  icon="pi pi-link" 
+                  severity="warn"
+                  size="small"
+                  (onClick)="onCreatePaymentLink(invoice)"
+                  [disabled]="invoice.status !== 'open'"
+                  pTooltip="Create Payment Link">
+                </p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [attr.colspan]="selectedColumns.length" class="text-center">
+              <div class="empty-state">
+                <i class="pi pi-file" style="font-size: 3rem; color: var(--surface-500);"></i>
+                <h3>No invoices found</h3>
+                <p>Create your first invoice to get started</p>
+                <p-button 
+                  label="Create Invoice" 
+                  icon="pi pi-plus"
+                  (onClick)="onCreateInvoice()">
+                </p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      @if (hasMoreInvoices()) {
+        <div class="load-more-container">
+          <p-button 
+            label="Load More" 
+            icon="pi pi-plus" 
+            (onClick)="onLoadMoreInvoices()"
+            [loading]="isLoading()">
+          </p-button>
+        </div>
+      }
+    </p-card>
+  </div>
+</div>
+
+<!-- Customer Form Dialog -->
+<p-dialog 
+  header="Create New Customer" 
+  [modal]="true" 
+  [visible]="showCustomerForm()"
+  (onHide)="onCancelForm()"
+  [style]="{ width: '500px' }">
+  
+  <form [formGroup]="customerForm" (ngSubmit)="onSubmitCustomer()">
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="customerName">Customer Name *</label>
+        <input 
+          id="customerName"
+          type="text" 
+          pInputText 
+          formControlName="name"
+          [class.ng-invalid]="customerForm.get('name')?.invalid && customerForm.get('name')?.touched"
+          placeholder="Enter customer name">
+        <small 
+          class="p-error" 
+          *ngIf="customerForm.get('name')?.invalid && customerForm.get('name')?.touched">
+          Customer name is required
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="customerEmail">Email</label>
+        <input 
+          id="customerEmail"
+          type="email" 
+          pInputText 
+          formControlName="email"
+          [class.ng-invalid]="customerForm.get('email')?.invalid && customerForm.get('email')?.touched"
+          placeholder="customer@example.com">
+        <small 
+          class="p-error" 
+          *ngIf="customerForm.get('email')?.invalid && customerForm.get('email')?.touched">
+          Please enter a valid email address
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="customerDescription">Description</label>
+        <textarea 
+          id="customerDescription"
+          pInputTextarea 
+          formControlName="description"
+          [rows]="3"
+          placeholder="Optional description or notes">
+        </textarea>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <p-button 
+        label="Cancel" 
+        severity="secondary" 
+        (onClick)="onCancelForm()"
+        [disabled]="isLoading()">
+      </p-button>
+      <p-button 
+        label="Create Customer" 
+        type="submit"
+        [disabled]="isLoading() || customerForm.invalid"
+        [loading]="isLoading()">
+      </p-button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Invoice Form Dialog -->
+<p-dialog 
+  header="Create Invoice for User"
+  [modal]="true" 
+  [visible]="showInvoiceForm()"
+  (onHide)="onCancelForm()"
+  [style]="{ width: '900px', maxHeight: '90vh' }"
+  [maximizable]="true">
+  
+  <form [formGroup]="invoiceForm" (ngSubmit)="onSubmitInvoice()">
+    <div class="form-grid">
+      <!-- User Selection -->
+      <div class="form-field user-selection">
+        <label for="userSelect">Select User *</label>
+        <p-autoComplete
+          id="userSelect"
+          [(ngModel)]="selectedUser"
+          [ngModelOptions]="{standalone: true}"
+          [suggestions]="filteredUsers()"
+          (completeMethod)="onFilterUsers($event)"
+          (onSelect)="onUserSelect($event)"
+          (onClear)="onClearUserSelection()"
+          field="name"
+          placeholder="Start typing to search users..."
+          [dropdown]="true"
+          [style]="{ width: '100%' }">
+          
+          <ng-template pTemplate="item" let-user>
+            <div class="user-option">
+              <div class="user-name">{{ user.name }}</div>
+              <div class="user-email">{{ user.email }}</div>
+            </div>
+          </ng-template>
+          
+          <ng-template pTemplate="selectedItem" let-user>
+            <div class="selected-user" *ngIf="user">
+              <strong>{{ user.name }}</strong> - {{ user.email }}
+            </div>
+          </ng-template>
+        </p-autoComplete>
+        
+        <small class="form-hint">
+          This invoice will be sent to the selected user and appear on their dashboard
+        </small>
+      </div>
+
+      <!-- Auto-filled customer info -->
+      <div class="form-field" *ngIf="selectedUser">
+        <label>Customer Information (Auto-filled)</label>
+        <div class="customer-preview">
+          <div><strong>Name:</strong> {{ invoiceForm.get('customerName')?.value }}</div>
+          <div><strong>Email:</strong> {{ invoiceForm.get('customerEmail')?.value }}</div>
+        </div>
+      </div>
+
+      <!-- Invoice Description -->
+      <div class="form-field">
+        <label for="invoiceDescription">Invoice Description</label>
+        <textarea 
+          id="invoiceDescription"
+          pInputTextarea 
+          formControlName="description"
+          [rows]="2"
+          placeholder="Brief description of the work performed">
+        </textarea>
+      </div>
+
+      <!-- Days Until Due -->
+      <div class="form-field">
+        <label for="daysUntilDue">Days Until Due</label>
+        <p-inputNumber 
+          id="daysUntilDue"
+          formControlName="daysUntilDue"
+          [min]="0"
+          [max]="365"
+          [style]="{ width: '100%' }"
+          placeholder="30">
+        </p-inputNumber>
+      </div>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Service Templates -->
+    <div class="service-templates">
+
+      <h3>Quick Service Templates</h3>
+
+      <div class="templates-grid">
+
+        @for (template of serviceTemplates; track $index) {
+
+          <div 
+
+            class="template-card"
+
+            (click)="onApplyServiceTemplate(template, 0)">
+
+            <div class="template-name">{{ template.name }}</div>
+
+            <div class="template-price">{{ formatAmount(template.unitAmount, template.currency) }}</div>
+
+            <div class="template-description">{{ template.description }}</div>
+
+          </div>
+
+        }
+
+      </div>
+
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Invoice Items -->
+    <div class="invoice-items-section">
+      <div class="section-header">
+        <h3>Invoice Items</h3>
+        <p-button 
+          label="Add Item" 
+          icon="pi pi-plus" 
+          severity="secondary"
+          size="small"
+          (onClick)="onAddInvoiceItem()">
+        </p-button>
+      </div>
+
+      <div formArrayName="items">
+        @for (item of invoiceItems.controls; let i = $index; track i) {
+          <div 
+            [formGroupName]="i"
+            class="invoice-item">
+          
+          <div class="item-header">
+            <h4>Item {{ i + 1 }}</h4>
+            <div class="item-actions">
+              <p-button 
+                label="Apply Template"
+                icon="pi pi-copy"
+                severity="info"
+                size="small"
+                [disabled]="serviceTemplates.length === 0">
+                <!-- Template menu removed for now - will use direct buttons instead -->
+              </p-button>
+              <p-button 
+                icon="pi pi-trash" 
+                severity="danger"
+                size="small"
+                (onClick)="onRemoveInvoiceItem(i)"
+                [disabled]="invoiceItems.length === 1">
+              </p-button>
+            </div>
+          </div>
+
+          <div class="item-form-grid">
+            <div class="form-field">
+              <label>Service Name *</label>
+              <input 
+                type="text" 
+                pInputText 
+                formControlName="productName"
+                placeholder="e.g., Code Review & Optimization"
+                [style]="{ width: '100%' }">
+            </div>
+
+            <div class="form-field">
+              <label>Description</label>
+              <textarea 
+                pInputTextarea 
+                formControlName="description"
+                [rows]="2"
+                placeholder="Detailed description of the work performed"
+                [style]="{ width: '100%' }">
+              </textarea>
+            </div>
+
+            <div class="form-field">
+              <label>Rate (per unit) *</label>
+              <p-inputNumber 
+                formControlName="unitAmount"
+                mode="currency"
+                [currency]="item.get('currency')?.value || 'USD'"
+                [min]="0"
+                [style]="{ width: '100%' }"
+                placeholder="0.00">
+              </p-inputNumber>
+            </div>
+
+            <div class="form-field">
+              <label>Quantity *</label>
+              <p-inputNumber 
+                formControlName="quantity"
+                [min]="1"
+                [style]="{ width: '100%' }"
+                placeholder="1">
+              </p-inputNumber>
+            </div>
+
+            <div class="form-field">
+              <label>Currency</label>
+              <p-select 
+                formControlName="currency"
+                [options]="currencyOptions"
+                optionLabel="label"
+                optionValue="value"
+                [style]="{ width: '100%' }">
+              </p-select>
+            </div>
+
+            <div class="form-field total-field">
+              <label>Total</label>
+              <div class="total-amount">
+                {{ formatAmount((item.get('unitAmount')?.value || 0) * (item.get('quantity')?.value || 1) * 100, item.get('currency')?.value || 'usd') }}
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Invoice Total -->
+      @if (invoiceItems.length > 0) {
+        <div class="invoice-total">
+            <div class="total-row">
+              <span class="total-label">Invoice Total:</span>
+              <span class="total-value">
+                {{ getInvoiceTotal() }}
+              </span>
+            </div>
+        </div>
+      }
+    </div>
+
+    <div class="dialog-footer">
+      <p-button 
+        label="Cancel" 
+        severity="secondary" 
+        (onClick)="onCancelForm()"
+        [disabled]="isLoading()">
+      </p-button>
+      <p-button 
+        label="Create Invoice"
+        type="submit"
+        [disabled]="isLoading() || invoiceForm.invalid || !selectedUser"
+        [loading]="isLoading()">
+      </p-button>
+    </div>
+  </form>
+</p-dialog>

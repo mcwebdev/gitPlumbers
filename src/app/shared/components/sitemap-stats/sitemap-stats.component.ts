@@ -141,7 +141,7 @@ export class SitemapStatsComponent implements OnInit {
       this.loading = true;
       this.stats = await this._sitemapService.getSitemapStats();
     } catch (error) {
-      console.error('Error loading sitemap stats:', error);
+      // console.error('Error loading sitemap stats:', error);
     } finally {
       this.loading = false;
     }

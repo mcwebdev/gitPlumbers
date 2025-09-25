@@ -1,0 +1,338 @@
+<!-- Toast Messages -->
+<p-toast></p-toast>
+
+<!-- Loading Overlay -->
+<div *ngIf="isLoading()" class="loading-overlay">
+  <p-progressSpinner></p-progressSpinner>
+</div>
+
+<!-- Main Content -->
+<div class="user-invoice-view">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h2 class="section-title">Your Invoices</h2>
+      <p-button 
+        icon="pi pi-refresh" 
+        severity="secondary"
+        size="small"
+        (onClick)="onRefresh()"
+        [disabled]="isLoading()"
+        pTooltip="Refresh Invoices">
+      </p-button>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="stats-section" *ngIf="hasInvoices()">
+    <div class="stats-grid">
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon total">
+            <i class="pi pi-file"></i>
+          </div>
+          <div class="stat-details">
+            <h3>{{ userInvoices().length }}</h3>
+            <p>Total Invoices</p>
+          </div>
+        </div>
+      </p-card>
+
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon paid">
+            <i class="pi pi-check-circle"></i>
+          </div>
+          <div class="stat-details">
+            <h3>{{ formatAmount(totalPaid(), 'usd') }}</h3>
+            <p>Total Paid</p>
+          </div>
+        </div>
+      </p-card>
+
+      <p-card class="stat-card" [class.urgent]="hasOpenInvoices()">
+        <div class="stat-content">
+          <div class="stat-icon outstanding">
+            <i class="pi pi-clock"></i>
+          </div>
+          <div class="stat-details">
+            <h3>{{ formatAmount(totalOwed(), 'usd') }}</h3>
+            <p>Amount Due</p>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </div>
+
+  <!-- Open Invoices Alert -->
+  <div class="alert-section" *ngIf="hasOpenInvoices()">
+    <p-card class="alert-card">
+      <div class="alert-content">
+        <div class="alert-icon">
+          <i class="pi pi-exclamation-triangle"></i>
+        </div>
+        <div class="alert-text">
+          <h4>Outstanding Invoices</h4>
+          <p>You have {{ openInvoices().length }} unpaid invoice(s) totaling {{ formatAmount(totalOwed(), 'usd') }}.</p>
+        </div>
+        <div class="alert-actions">
+          <p-button 
+            label="View All" 
+            severity="warn"
+            size="small">
+          </p-button>
+        </div>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Invoices Table -->
+  <div class="invoices-section">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <h3>Invoice History</h3>
+          <span class="invoice-count" *ngIf="hasInvoices()">
+            {{ userInvoices().length }} invoice(s)
+          </span>
+        </div>
+      </ng-template>
+
+      <p-table 
+        [value]="userInvoices()" 
+        [columns]="selectedColumns"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} invoices"
+        [tableStyle]="{'min-width': '50rem'}"
+        [loading]="isLoading()"
+        loadingIcon="pi pi-spin pi-spinner"
+        styleClass="p-datatable-striped">
+        
+        <ng-template pTemplate="header">
+          <tr>
+            @for (col of selectedColumns; track col.field) {
+              <th>{{ col.header }}</th>
+            }
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-invoice>
+          <tr [class.overdue]="isOverdue(invoice)">
+            <td>
+              <span class="invoice-number">
+                {{ invoice.number || invoice.id }}
+              </span>
+            </td>
+            <td>
+              <div class="invoice-description">
+                <span class="main-description">{{ invoice.description || getInvoiceItemsSummary(invoice) }}</span>
+                <small class="item-count" *ngIf="invoice.lines.data.length > 1">
+                  {{ invoice.lines.data.length }} items
+                </small>
+              </div>
+            </td>
+            <td>
+              <span class="amount">
+                {{ formatAmount(invoice.total, invoice.currency) }}
+              </span>
+            </td>
+            <td>
+              <p-tag 
+                [value]="invoice.status | titlecase"
+                [severity]="getStatusSeverity(invoice.status)">
+              </p-tag>
+              <div class="due-info" *ngIf="invoice.status === 'open' && invoice.due_date">
+                <small [class]="isOverdue(invoice) ? 'overdue-text' : 'due-text'">
+                  {{ getDaysUntilDue(invoice) }}
+                </small>
+              </div>
+            </td>
+            <td>
+              <span class="date">
+                {{ formatDate(invoice.created) }}
+              </span>
+            </td>
+            <td>
+              <span class="date">
+                {{ formatDate(invoice.due_date) }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <p-button 
+                  icon="pi pi-eye" 
+                  severity="info"
+                  size="small"
+                  (onClick)="onViewInvoice(invoice)"
+                  pTooltip="View Details">
+                </p-button>
+                
+                <p-button 
+                  icon="pi pi-credit-card" 
+                  severity="success"
+                  size="small"
+                  (onClick)="onPayInvoice(invoice)"
+                  [disabled]="invoice.status !== 'open'"
+                  pTooltip="Pay Invoice">
+                </p-button>
+                
+                <p-button 
+                  icon="pi pi-download" 
+                  severity="secondary"
+                  size="small"
+                  (onClick)="onDownloadInvoice(invoice)"
+                  [disabled]="!invoice.invoice_pdf"
+                  pTooltip="Download PDF">
+                </p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [attr.colspan]="selectedColumns.length" class="text-center">
+              <div class="empty-state">
+                <i class="pi pi-inbox" style="font-size: 3rem; color: var(--surface-500);"></i>
+                <h3>No invoices yet</h3>
+                <p>When gitPlumbers creates invoices for your work, they'll appear here.</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+</div>
+
+<!-- Invoice Detail Dialog -->
+<p-dialog 
+  header="Invoice Details" 
+  [modal]="true" 
+  [visible]="showInvoiceDetail"
+  (onHide)="onCloseInvoiceDetail()"
+  [style]="{ width: '700px', maxHeight: '90vh' }"
+  [maximizable]="true">
+  
+  <div class="invoice-detail" *ngIf="selectedInvoice() as invoice">
+    <!-- Invoice Header -->
+    <div class="invoice-header">
+      <div class="invoice-meta">
+        <h3>Invoice {{ invoice.number || invoice.id }}</h3>
+        <p-tag 
+          [value]="invoice.status | titlecase"
+          [severity]="getStatusSeverity(invoice.status)"
+          [style]="{ 'font-size': '0.875rem' }">
+        </p-tag>
+      </div>
+      
+      <div class="invoice-dates">
+        <div class="date-item">
+          <label>Created:</label>
+          <span>{{ formatDate(invoice.created) }}</span>
+        </div>
+        <div class="date-item" *ngIf="invoice.due_date">
+          <label>Due:</label>
+          <span [class]="isOverdue(invoice) ? 'overdue-text' : ''">
+            {{ formatDate(invoice.due_date) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoice Description -->
+    <div class="invoice-description-section" *ngIf="invoice.description">
+      <h4>Description</h4>
+      <p>{{ invoice.description }}</p>
+    </div>
+
+    <!-- Invoice Items -->
+    <div class="invoice-items">
+      <h4>Items</h4>
+      <div class="items-table">
+        <div class="item-header">
+          <span>Description</span>
+          <span>Quantity</span>
+          <span>Rate</span>
+          <span>Amount</span>
+        </div>
+        
+        @for (item of invoice.lines.data; track item.id ?? $index) {
+          <div 
+            class="item-row">
+            <span class="item-description">
+              <strong>{{ item.description || 'Service' }}</strong>
+            </span>
+            <span class="item-quantity">{{ item.quantity || 1 }}</span>
+            <span class="item-rate">
+              {{ formatAmount(item.unit_amount || item.amount, item.currency) }}
+            </span>
+            <span class="item-amount">
+              {{ formatAmount(item.amount, item.currency) }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Invoice Totals -->
+    <div class="invoice-totals">
+      <div class="total-row" *ngIf="invoice.subtotal !== invoice.total">
+        <span>Subtotal:</span>
+        <span>{{ formatAmount(invoice.subtotal, invoice.currency) }}</span>
+      </div>
+      
+      <div class="total-row" *ngIf="invoice.tax">
+        <span>Tax:</span>
+        <span>{{ formatAmount(invoice.tax, invoice.currency) }}</span>
+      </div>
+      
+      <div class="total-row total-final">
+        <span><strong>Total:</strong></span>
+        <span><strong>{{ formatAmount(invoice.total, invoice.currency) }}</strong></span>
+      </div>
+      
+      <div class="total-row" *ngIf="invoice.amount_paid > 0">
+        <span>Paid:</span>
+        <span class="paid-amount">{{ formatAmount(invoice.amount_paid, invoice.currency) }}</span>
+      </div>
+      
+      <div class="total-row" *ngIf="invoice.amount_remaining > 0">
+        <span><strong>Amount Due:</strong></span>
+        <span class="due-amount"><strong>{{ formatAmount(invoice.amount_remaining, invoice.currency) }}</strong></span>
+      </div>
+    </div>
+
+    <!-- Payment Actions -->
+    <div class="payment-actions" *ngIf="invoice.status === 'open'">
+      <p-button 
+        label="Pay Now" 
+        icon="pi pi-credit-card"
+        severity="success"
+        (onClick)="onPayInvoice(invoice)"
+        [disabled]="!invoice.hosted_invoice_url">
+      </p-button>
+      
+      <p-button 
+        label="Download PDF" 
+        icon="pi pi-download"
+        severity="secondary"
+        (onClick)="onDownloadInvoice(invoice)"
+        [disabled]="!invoice.invoice_pdf">
+      </p-button>
+    </div>
+
+    <!-- Payment Status -->
+    <div class="payment-status" *ngIf="invoice.status === 'paid'">
+      <div class="status-message">
+        <i class="pi pi-check-circle" style="color: var(--green-500);"></i>
+        <span>This invoice has been paid in full.</span>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+
+

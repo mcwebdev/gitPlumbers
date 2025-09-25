@@ -89,6 +89,14 @@
     ],
     "rewrites": [
       {
+        "source": "/sitemap.xml",
+        "function": "generateSitemap"
+      },
+      {
+        "source": "/sitemap-index.xml",
+        "function": "generateSitemapIndex"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

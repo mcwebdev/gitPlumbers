@@ -58,6 +58,14 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'legal/privacy',
+    renderMode: RenderMode.Prerender,
+  },
+  {
+    path: 'legal/terms',
+    renderMode: RenderMode.Prerender,
+  },
+  {
     path: '**',
     renderMode: RenderMode.Prerender,
   },

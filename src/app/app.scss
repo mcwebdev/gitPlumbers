@@ -12,7 +12,8 @@
 
 .app-content {
   flex: 1 1 auto;
-  display: block;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0; /* Important for flex child to be scrollable */
@@ -22,6 +23,7 @@
 // Global page transition animations
 router-outlet {
   display: block;
+  flex: 1;
   animation: routeTransition 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 

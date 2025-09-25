@@ -73,11 +73,23 @@ export class BlogPostComponent implements OnDestroy {
   private readonly _seoEffect = effect(() => {
     const slug = this.slug();
     const post = this.post();
+    const isLoading = this.isLoading();
+    const canonicalUrl = `https://gitplumbers.com/blog/${slug}/`;
+
+    if (isLoading) {
+      this._seo.updateMetadata({
+        canonical: canonicalUrl,
+        ogUrl: canonicalUrl,
+      });
+      return;
+    }
 
     if (!post) {
       this._seo.updateMetadata({
         title: 'Post not found | GitPlumbers Insights',
         description: 'The resource you requested is unavailable. Explore our latest insights instead.',
+        canonical: canonicalUrl,
+        ogUrl: canonicalUrl,
         robotsIndex: false,
         robotsFollow: false,
       });
@@ -88,7 +100,7 @@ export class BlogPostComponent implements OnDestroy {
       title: `${post.title} | GitPlumbers Insights`,
       description: post.summary,
       keywords: [...post.keywords],
-      url: `https://gitplumbers.com/blog/${slug}/`,
+      url: canonicalUrl,
     });
 
     this._seo.updateMetadata(metadata);
@@ -108,7 +120,7 @@ export class BlogPostComponent implements OnDestroy {
         '@type': 'Organization',
         name: 'GitPlumbers',
       },
-      url: `https://gitplumbers.com/blog/${slug}/`,
+      url: canonicalUrl,
     };
 
     if (post.faq && post.faq.length) {
@@ -143,7 +155,6 @@ export class BlogPostComponent implements OnDestroy {
     const slug = this.slug();
     return this._content.renderCTA(cta, slug);
   }
-
 
   ngOnDestroy(): void {
     this._seoEffect.destroy();

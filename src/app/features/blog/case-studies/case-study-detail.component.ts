@@ -54,11 +54,14 @@ export class CaseStudyDetailComponent implements OnDestroy {
   private readonly _seoEffect = effect(() => {
     const slug = this.slug();
     const study = this._requestedStudy();
+    const canonicalUrl = `https://gitplumbers.com/blog/case-studies/${slug}/`;
 
     if (!study) {
       this._seo.updateMetadata({
         title: 'Case study not found | GitPlumbers',
         description: 'The case study you attempted to reach is unavailable. Review our recent wins instead.',
+        canonical: canonicalUrl,
+        ogUrl: canonicalUrl,
         robotsIndex: false,
         robotsFollow: false,
       });
@@ -69,7 +72,7 @@ export class CaseStudyDetailComponent implements OnDestroy {
       title: `${study.title} | GitPlumbers Case Study`,
       description: study.summary,
       keywords: [...study.keywords],
-      url: `https://gitplumbers.com/blog/case-studies/${slug}/`,
+      url: canonicalUrl,
     });
 
     this._seo.updateMetadata(metadata);
@@ -78,7 +81,7 @@ export class CaseStudyDetailComponent implements OnDestroy {
       '@type': 'CaseStudy',
       name: study.title,
       description: study.summary,
-      url: `https://gitplumbers.com/blog/case-studies/${slug}/`,
+      url: canonicalUrl,
       audience: 'Engineering leaders modernising software platforms',
       about: study.challenge,
       provider: {

@@ -146,6 +146,31 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/blog/blog-admin/blog-admin.component').then((m) => m.BlogAdminComponent),
   },
+  // Legal pages
+  {
+    path: 'legal/privacy',
+    loadComponent: () =>
+      import('./features/legal/privacy/privacy.component').then((m) => m.PrivacyComponent),
+    data: {
+      seo: {
+        title: 'Privacy Policy | GitPlumbers',
+        description: 'Learn how GitPlumbers protects your privacy and handles your data. Our commitment to data security and user privacy.',
+        keywords: ['privacy policy', 'data protection', 'user privacy', 'GitPlumbers privacy'],
+      },
+    },
+  },
+  {
+    path: 'legal/terms',
+    loadComponent: () =>
+      import('./features/legal/terms/terms.component').then((m) => m.TermsComponent),
+    data: {
+      seo: {
+        title: 'Terms of Service | GitPlumbers',
+        description: 'Read GitPlumbers Terms of Service. Understand your rights and responsibilities when using our code optimization and enterprise modernization services.',
+        keywords: ['terms of service', 'user agreement', 'GitPlumbers terms', 'service terms'],
+      },
+    },
+  },
   // Import blog routes
   ...blogRoutes,
   {

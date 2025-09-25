@@ -20,6 +20,7 @@
   padding: clamp(2rem, 6vw, 4rem);
   display: grid;
   gap: clamp(2rem, 5vw, 3rem);
+  min-height: calc(100vh - 200px); // Account for header and footer
   animation: contentFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
 }
 

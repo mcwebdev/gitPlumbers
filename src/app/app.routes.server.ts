@@ -1,8 +1,24 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
+  // Blog main page
+  {
+    path: 'blog',
+    renderMode: RenderMode.Prerender,
+  },
+  // Blog archive
   {
     path: 'blog/articles',
+    renderMode: RenderMode.Prerender,
+  },
+  // Case studies listing
+  {
+    path: 'blog/case-studies',
+    renderMode: RenderMode.Prerender,
+  },
+  // Technical guides listing
+  {
+    path: 'blog/guides',
     renderMode: RenderMode.Prerender,
   },
   {

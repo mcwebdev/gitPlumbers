@@ -372,31 +372,67 @@ export class AdminInvoiceManagementComponent implements OnInit {
   /**
    * Create payment link for invoice
    */
+  canOpenPayment(invoice: StripeInvoice): boolean {
+    if (!invoice) {
+      console.warn('AdminInvoiceManagementComponent: canOpenPayment called without invoice');
+      return false;
+    }
+
+    const hostedUrl = invoice.hosted_invoice_url || invoice.invoice_pdf;
+    const reasons: string[] = [];
+    if (invoice.status !== 'open') {
+      reasons.push('status=' + (invoice.status ?? 'unknown'));
+    }
+    if (!hostedUrl) {
+      reasons.push('missing hosted URL');
+    }
+
+    const canPay = reasons.length === 0;
+    console.debug('AdminInvoiceManagementComponent: canOpenPayment check', {
+      invoiceId: invoice.id,
+      status: invoice.status,
+      hostedInvoiceUrl: invoice.hosted_invoice_url,
+      invoicePdf: invoice.invoice_pdf,
+      result: canPay,
+      blockers: reasons,
+    });
+
+    return canPay;
+  }
+
   onCreatePaymentLink(invoice: StripeInvoice): void {
+    console.log('AdminInvoiceManagementComponent: onCreatePaymentLink click', { invoiceId: invoice.id, status: invoice.status, hostedUrl: invoice.hosted_invoice_url, invoicePdf: invoice.invoice_pdf });
     if (invoice.status !== 'open') {
       this._messageService.add({
         severity: 'warn',
-        summary: 'Cannot Create Payment Link',
-        detail: 'Only open invoices can have payment links created',
-        life: 3000
+        summary: 'Unavailable',
+        detail: 'Only open invoices can be paid online.',
+        life: 3000,
       });
       return;
     }
 
-    const firstItem = invoice.lines.data[0];
-    if (!firstItem || !firstItem.price) {
+    const hostedUrl = invoice.hosted_invoice_url || invoice.invoice_pdf;
+    if (!hostedUrl) {
       this._messageService.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Invoice must have at least one item with a price',
-        life: 3000
+        summary: 'Missing Payment Link',
+        detail: 'This invoice does not have an online payment URL yet. Finalize the invoice or try refreshing.',
+        life: 4000,
       });
       return;
     }
 
-    this._invoiceStore.createPaymentLink({
-      price: typeof firstItem.price === 'string' ? firstItem.price : firstItem.price.id,
-      quantity: firstItem.quantity || 1,
+    if (typeof window !== 'undefined') {
+      window.open(hostedUrl, '_blank', 'noopener');
+    } else {
+      console.log('AdminInvoiceManagementComponent: Payment URL', hostedUrl);
+    }
+    this._messageService.add({
+      severity: 'info',
+      summary: 'Payment Page Opened',
+      detail: 'A new tab was opened with the Stripe payment page.',
+      life: 3000,
     });
   }
 
@@ -506,27 +542,46 @@ export class AdminInvoiceManagementComponent implements OnInit {
       name: event.value?.name ?? event.value?.displayName ?? event.value?.email ?? 'Unknown user',
       displayName: event.value?.displayName ?? event.value?.name ?? event.value?.email ?? 'Unknown user'
     };
-    this.selectedUser = user;
 
     try {
       let customerId = user.stripeCustomerId;
+      const existingCustomers = this.customers();
+      const customerExists = customerId
+        ? existingCustomers.some(customer => customer.id === customerId)
+        : false;
+
+      if (customerId && !customerExists) {
+        console.warn('AdminInvoiceManagementComponent: Stale Stripe customer ID detected. Creating a new customer.', {
+          user,
+          customerId,
+        });
+        this._messageService.add({
+          severity: 'warn',
+          summary: 'Refreshing Stripe Customer',
+          detail: 'Existing Stripe customer record was not found. Creating a new one.',
+          life: 4000,
+        });
+        customerId = undefined;
+      }
 
       if (!customerId) {
         const customerData: CreateCustomerRequest = {
           name: user.name ?? user.displayName,
           email: user.email,
           description: `Customer for user ${user.uid}`,
-          metadata: { userId: user.uid }
+          metadata: { userId: user.uid },
         };
 
         this._pendingCustomerUserId.set(user.uid);
         this._invoiceStore.createCustomer(customerData);
       }
 
+      this.selectedUser = { ...user, stripeCustomerId: customerId };
+
       this.invoiceForm.patchValue({
         userId: user.uid,
         customerName: user.name ?? user.displayName,
-        customerEmail: user.email
+        customerEmail: user.email,
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -534,7 +589,7 @@ export class AdminInvoiceManagementComponent implements OnInit {
         severity: 'error',
         summary: 'Error',
         detail: `Failed to prepare customer: ${message}`,
-        life: 5000
+        life: 5000,
       });
     }
   }
@@ -693,3 +748,5 @@ export class AdminInvoiceManagementComponent implements OnInit {
     return this.formatAmount(total, 'usd');
   }
 }
+
+

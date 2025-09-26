@@ -260,7 +260,7 @@ export class InvoiceService {
   }
 
   async createCustomer(params: { name: string; email?: string; description?: string; metadata?: Record<string, string> }): Promise<StripeCustomer> {
-    const createCustomerCallable = httpsCallable<{ name: string; email?: string }, CreateCustomerResponse>(this.functions, 'createStripeCustomer');
+    const createCustomerCallable = httpsCallable<{ name: string; email?: string; description?: string; metadata?: Record<string, string> }, CreateCustomerResponse>(this.functions, 'createStripeCustomer');
     try {
       const result = await createCustomerCallable(params);
       return result.data.customer;

@@ -1,63 +1,47 @@
-# Invoicing Feature TODOs
+# Invoicing System TODOs
 
-This document lists all remaining tasks and improvements needed to fully implement the invoicing system where admins can create/send invoices to users (customers), and users can view them on their dashboard. Based on a review of changed files (functions/src/stripe.ts, src/app/shared/services/invoice.service.ts, functions/src/index.ts, and related components/stores).
+Comprehensive backlog compiled from the current repo state (`functions/src/stripe.ts`, admin/user invoice dashboards, store/service layers) and from observed failures during manual testing.
 
-## High-Priority TODOs (Required for Basic Functionality)
-1. **Implement User Dashboard Invoice Display**:
-   - In `src/app/features/dashboard/user-dashboard.component.ts` and `.html`: Add logic to fetch and display invoices for the current user.
-     - Use `InvoiceStore.loadInvoices()` with filters for the user's Stripe customer ID (from auth profile).
-     - Display list of invoices with status, amount, due date, and payment links.
-     - Handle real-time updates (e.g., via Firestore subscriptions) for when webhooks update invoice status.
+## 1. Core Invoice Flow (blocking)
+- [ ] **Fix draft visibility**: user dashboard should only render invoices where `status === 'open'` (or `paid`). Drafts must remain admin-only until finalized.
+- [ ] **Guarantee line-item creation**: double-check `addStripeInvoiceItem` end-to-end (callable + UI) so every invoice gets non-zero items before finalization. Log Stripe ID, amount, and Firestore write success; fail loudly if any item insert is rejected.
+- [ ] **Revisit finalize step**: choose a single consistent UX:
+  - Either auto-finalize immediately after items are created, **or** keep the explicit admin button but block leaving the form until it succeeds.
+  - Ensure finalization transitions Stripe to `open`, not `paid`, and persists hosted URLs/amounts in Firestore.
+- [ ] **Enable pay button when actionable**: front end should enable “Pay Invoice” only when the Firestore doc has `status === 'open'` and a `hosted_invoice_url`.
+- [ ] **Validate Stripe responses**: after finalize/send, assert `amount_due > 0`; if zero, surface an actionable error rather than silently storing a “paid” invoice.
 
-2. **Link Users to Stripe Customers**:
-   - Ensure every user has a Stripe customer ID stored in their profile (Firestore or auth metadata).
-     - On user signup or first invoice, automatically create a Stripe customer and save the ID.
-     - Update `onUserSelect` in admin component to handle this if not already.
+## 2. Backend Reliability & Data Integrity
+- [ ] Add `initializeApp()` at the top of `functions/src/stripe.ts` to ensure Admin SDK is ready in all environments.
+- [ ] Normalize Firestore invoice schema:
+  - Use consistent field names (`amountDue`, `amountPaid`, `hostedInvoiceUrl`, `invoicePdf`, `stripeCreatedAt`, `updatedAt`).
+  - Store timestamps as Firestore `Timestamp` or ISO strings, not mixed seconds/ms.
+- [ ] Convert all Firestore `update()` calls that can hit non-existent docs to `set(..., { merge: true })`.
+- [ ] Include idempotency keys on every Stripe “create” call (customers, products, prices, invoices, invoice items) to avoid duplicates during retries.
+- [ ] Retry-safe webhook: ensure invoice updates are idempotent and tolerate out-of-order/events (check `event.created` before overwriting newer data).
 
-3. **Implement createPaymentLink**:
-   - In `invoice.service.ts`: Add callable to `createStripePaymentLink` (add matching function in stripe.ts if missing).
-     - In admin component: Generate and display/share payment links for open invoices.
+## 3. Security Hardening
+- [ ] Remove all secret logging (e.g., `...${stripeKey.slice(-4)}`); never log user emails/PII in request bodies.
+- [ ] Harden every HTTP endpoint:
+  - Restrict methods to POST, short-circuit OPTIONS, tighten CORS to known origins.
+  - Require Firebase Auth/Admin claim (or App Check) before listing/cleaning invoices.
+- [ ] Add `secrets: [...]` to `stripeWebhook` and enforce POST-only access.
+- [ ] Validate payloads with a schema helper (e.g., Zod) before calling Stripe.
 
-4. **Filter Invoices by User/Customer**:
-   - In `InvoiceStore`: Add methods to load invoices filtered by customer ID for user-specific views.
-     - Update `loadInvoices` to accept customer ID and use it in the callable params.
+## 4. Frontend Adjustments
+- [ ] User dashboard: filter to current user’s invoices only (matching metadata `userId` or `customer_email`).
+- [ ] Add clear UI messaging for drafts (“Pending admin finalization”) instead of showing a disabled pay button if drafts must stay visible.
+- [ ] Clean up debug logging once diagnostics are complete; keep at most a single `logger.debug` guarded by an env flag.
+- [ ] Remove the unused payment-link flow (store+service code) or finish it end-to-end; currently the button no longer triggers the callable but dead code remains.
 
-5. **Handle Invoice Items Properly**:
-   - In admin form submission (`onSubmitInvoice`): After creating invoice, loop through form items and call `createInvoiceItem` for each.
-     - Update `createInvoiceItem` to return the updated invoice and handle multiple items.
+## 5. Testing & Observability
+- [ ] Write an integration test plan: create invoice ? add items ? finalize ? pay in Stripe test mode ? confirm webhook updates UI.
+- [ ] Add structured logging (severity, invoiceId, userId) and consider routing critical failures to an alerting channel.
+- [ ] Document manual QA steps (and expected Stripe dashboard screenshots) so regressions are obvious.
 
-## Medium-Priority TODOs (For Better UX and Reliability)
-1. **Webhook Enhancements** (from stripe.ts comments):
-   - `invoice.created`: Send initial notification/email to customer.
-   - `invoice.deleted`: Remove invoice from Firestore.
-   - `invoice.finalization_failed`: Notify admin of failure.
-   - `invoice.paid` / `invoice.payment_succeeded`: Send confirmation email, update user dashboard.
-   - `invoice.payment_failed`: Notify customer/admin, perhaps retry logic.
-   - `invoice.overdue` / `invoice.will_be_due`: Send reminder emails.
-   - Add email sending (integrate with SendGrid or Firebase email triggers).
+## 6. Deployment Checklist
+- [ ] Run `npm run build` (root + `functions/`) before every deploy; enforce via CI if possible.
+- [ ] After function redeploy, smoke-test both admin and user dashboards against Stripe test data.
+- [ ] Keep this TODO updated—check items off or expand as new gaps are discovered.
 
-2. **Error Handling and Logging**:
-   - In all service methods: Add more specific error messages and logging to Firebase.
-   - In components: Show user-friendly errors (e.g., if customer creation fails during invoice process).
-
-3. **Testing**:
-   - Test full flow: Admin creates invoice â†’ Finalizes/sends â†’ Webhook updates on payment â†’ User sees updated status.
-   - Use Stripe test mode: Create test customers/invoices, simulate payments via Stripe CLI or dashboard.
-   - Check Firestore security rules for invoices collection (ensure users can only read their own).
-
-4. **Security**:
-   - Add auth checks in Cloud Functions (e.g., ensure only admins can call createInvoice).
-   - Validate metadata (e.g., userId) in webhooks to prevent tampering.
-
-## Low-Priority TODOs (Nice-to-Haves)
-1. **Recurring Invoices/Subcriptions**: If needed, add support for recurring prices.
-2. **PDF Generation**: Generate/download invoice PDFs from Stripe.
-3. **Analytics**: Track invoice metrics in admin dashboard.
-4. **Internationalization**: Support multiple currencies in forms.
-
-## Status Check
-- **Admin Can Create Invoice**: Mostly yes (form exists, callables wired), but needs multi-item support and customer linking.
-- **User Sees Invoice on Dashboard**: Noâ€”dashboard doesn't query/display invoices yet.
-- **Webhook Updates**: Yes, basic status updates work; expand for notifications.
-
-Track progress by checking off items as completed. If new TODOs arise, add them here.
+This list should stay alongside the code until every checkbox is complete. Update it whenever behaviour changes.

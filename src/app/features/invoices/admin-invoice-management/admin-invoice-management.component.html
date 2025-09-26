@@ -205,8 +205,8 @@
                   severity="warn"
                   size="small"
                   (onClick)="onCreatePaymentLink(invoice)"
-                  [disabled]="invoice.status !== 'open'"
-                  pTooltip="Create Payment Link">
+                  [disabled]="!canOpenPayment(invoice)"
+                  pTooltip="Open Payment Page">
                 </p-button>
               </div>
             </td>
@@ -338,7 +338,7 @@
           (completeMethod)="onFilterUsers($event)"
           (onSelect)="onUserSelect($event)"
           (onClear)="onClearUserSelection()"
-          field="name"
+          optionLabel="name"
           placeholder="Start typing to search users..."
           [dropdown]="true"
           [style]="{ width: '100%' }">
@@ -565,3 +565,5 @@
     </div>
   </form>
 </p-dialog>
+
+

@@ -383,13 +383,17 @@ export const InvoiceStore = signalStore(
           const transformedData = store._invoiceService.transformCustomerData(customerData);
           
           // Use Stripe MCP tool to create customer
+          const requestPayload = {
+            name: transformedData.name,
+            email: transformedData.email,
+            description: transformedData.description,
+            metadata: transformedData.metadata,
+          };
+
           return from(
-            store._invoiceService.createCustomer({
-              name: transformedData.name,
-              email: transformedData.email,
-              description: transformedData.description
-            })
+            store._invoiceService.createCustomer(requestPayload)
           ).pipe(
+          
             tap((customer) => {
               patchState(store, { 
                 customers: [...store.customers(), customer],

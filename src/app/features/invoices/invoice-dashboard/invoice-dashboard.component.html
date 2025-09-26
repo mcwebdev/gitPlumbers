@@ -105,8 +105,8 @@
                   severity="warn"
                   size="small"
                   (onClick)="onCreatePaymentLink(invoice)"
-                  [disabled]="invoice.status !== 'open'"
-                  pTooltip="Create Payment Link">
+                  [disabled]="!canOpenPayment(invoice)"
+                  pTooltip="Pay Invoice">
                 </p-button>
               </div>
             </td>
@@ -128,3 +128,5 @@
     </p-card>
   </div>
 </div>
+
+

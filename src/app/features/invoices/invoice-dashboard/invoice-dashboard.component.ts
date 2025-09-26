@@ -207,32 +207,68 @@ export class InvoiceDashboardComponent {
   /**
    * Create payment link for invoice
    */
+
+  canOpenPayment(invoice: StripeInvoice): boolean {
+    if (!invoice) {
+      console.warn('InvoiceDashboardComponent: canOpenPayment called without invoice');
+      return false;
+    }
+
+    const hostedUrl = invoice.hosted_invoice_url || invoice.invoice_pdf;
+    const reasons: string[] = [];
+    if (invoice.status !== 'open') {
+      reasons.push('status=' + (invoice.status ?? 'unknown'));
+    }
+    if (!hostedUrl) {
+      reasons.push('missing hosted URL');
+    }
+
+    const canPay = reasons.length === 0;
+    console.debug('InvoiceDashboardComponent: canOpenPayment check', {
+      invoiceId: invoice.id,
+      status: invoice.status,
+      hostedInvoiceUrl: invoice.hosted_invoice_url,
+      invoicePdf: invoice.invoice_pdf,
+      result: canPay,
+      blockers: reasons,
+    });
+
+    return canPay;
+  }
+
   onCreatePaymentLink(invoice: StripeInvoice): void {
+    console.log('InvoiceDashboardComponent: onCreatePaymentLink click', { invoiceId: invoice.id, status: invoice.status, hostedUrl: invoice.hosted_invoice_url, invoicePdf: invoice.invoice_pdf });
     if (invoice.status !== 'open') {
       this._messageService.add({
         severity: 'warn',
-        summary: 'Cannot Create Payment Link',
-        detail: 'Only open invoices can have payment links created',
-        life: 3000
+        summary: 'Unavailable',
+        detail: 'Only open invoices can be paid online.',
+        life: 3000,
       });
       return;
     }
 
-    // For simplicity, using the first line item
-    const firstItem = invoice.lines.data[0];
-    if (!firstItem || !firstItem.price) {
+    const hostedUrl = invoice.hosted_invoice_url || invoice.invoice_pdf;
+    if (!hostedUrl) {
       this._messageService.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Invoice must have at least one item with a price',
-        life: 3000
+        summary: 'Missing Payment Link',
+        detail: 'This invoice does not have an online payment URL yet. Please contact support.',
+        life: 4000,
       });
       return;
     }
 
-    this._invoiceStore.createPaymentLink({
-      price: typeof firstItem.price === 'string' ? firstItem.price : firstItem.price.id,
-      quantity: firstItem.quantity || 1,
+    if (typeof window !== 'undefined') {
+      window.open(hostedUrl, '_blank', 'noopener');
+    } else {
+      console.log('InvoiceDashboardComponent: Payment URL', hostedUrl);
+    }
+    this._messageService.add({
+      severity: 'info',
+      summary: 'Payment Page Opened',
+      detail: 'A new tab was opened with your Stripe payment page.',
+      life: 3000,
     });
   }
 
@@ -325,3 +361,4 @@ export class InvoiceDashboardComponent {
     this._invoiceStore.loadInvoices();
   }
 }
+

@@ -165,7 +165,23 @@ export class SeoService {
     if (this._meta.getTag(`${attribute}="${name}"`)) {
       this._meta.updateTag({ [attribute]: name, content });
     } else {
-      this._meta.addTag({ [attribute]: name, content });
+      // Insert meta tags at the beginning of head to ensure proper HTML structure
+      // This ensures meta tags appear before styles and other elements
+      const head = this._document.head;
+      const metaTag = this._document.createElement('meta');
+      metaTag.setAttribute(attribute, name);
+      metaTag.setAttribute('content', content);
+      
+      // Insert at the beginning of head, after charset and viewport meta tags
+      const charsetMeta = head.querySelector('meta[charset]');
+      const viewportMeta = head.querySelector('meta[name="viewport"]');
+      const insertAfter = viewportMeta || charsetMeta;
+      
+      if (insertAfter) {
+        head.insertBefore(metaTag, insertAfter.nextSibling);
+      } else {
+        head.insertBefore(metaTag, head.firstChild);
+      }
     }
   }
 
@@ -245,7 +261,16 @@ export class SeoService {
     if (!linkElement) {
       linkElement = this._document.createElement('link') as HTMLLinkElement;
       linkElement.setAttribute('rel', 'canonical');
-      headElement.appendChild(linkElement);
+      
+      // Insert canonical link at the beginning of head, after meta tags
+      const viewportMeta = headElement.querySelector('meta[name="viewport"]');
+      const insertAfter = viewportMeta;
+      
+      if (insertAfter) {
+        headElement.insertBefore(linkElement, insertAfter.nextSibling);
+      } else {
+        headElement.insertBefore(linkElement, headElement.firstChild);
+      }
     } else if (!linkElement.parentNode) {
       headElement.appendChild(linkElement);
     }

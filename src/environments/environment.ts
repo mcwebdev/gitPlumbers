@@ -9,6 +9,7 @@
     messagingSenderId: '26354659373',
     appId: '1:26354659373:web:41a73fb6c95a3098f5c8a4',
     measurementId: 'G-QL89VJ3CC3',
+    functionsUrl: 'https://us-central1-gitplumbers-35d92.cloudfunctions.net',
   },
   github: {
     appInstallUrl: 'https://github.com/apps/gitplumbers/installations/new',

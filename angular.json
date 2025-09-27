@@ -18,9 +18,7 @@
           "builder": "@angular/build:application",
           "options": {
             "outputPath": "dist/gitplumbers-35d92",
-            "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [

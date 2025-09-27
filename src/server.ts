@@ -25,6 +25,35 @@ const angularApp = new AngularNodeAppEngine();
  */
 
 /**
+ * Handle sitemap.xml requests by calling the Cloud Function
+ */
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const functionsUrl = 'https://us-central1-gitplumbers-35d92.cloudfunctions.net';
+    const sitemapUrl = `${functionsUrl}/generateSitemap`;
+    
+    // Fetch sitemap from Cloud Function
+    const response = await fetch(sitemapUrl, {
+      headers: {
+        'Accept': 'application/xml, text/xml, */*'
+      }
+    });
+
+    if (response.ok) {
+      const sitemapContent = await response.text();
+      res.set('Content-Type', 'application/xml');
+      res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+      res.send(sitemapContent);
+    } else {
+      res.status(500).send('<?xml version="1.0" encoding="UTF-8"?><error>Sitemap not available</error>');
+    }
+  } catch (error) {
+    console.error('Error fetching sitemap:', error);
+    res.status(500).send('<?xml version="1.0" encoding="UTF-8"?><error>Sitemap not available</error>');
+  }
+});
+
+/**
  * Serve static files from /browser
  */
 app.use(

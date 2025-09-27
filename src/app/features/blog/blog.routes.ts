@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { blogPostResolver } from './blog-post/blog-post.resolver';
 
 export const blogRoutes: Routes = [
   {
@@ -113,6 +114,7 @@ export const blogRoutes: Routes = [
         data: {
           prerender: false,
         },
+        resolve: { blogPost: blogPostResolver },
         loadComponent: () =>
           import('./blog-post/blog-post.component').then((m) => m.BlogPostComponent),
       },

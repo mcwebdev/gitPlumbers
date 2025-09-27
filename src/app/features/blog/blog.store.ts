@@ -297,6 +297,7 @@ export const BlogStore = signalStore(
               publishedOnMs?: number;
               createdAtMs?: number;
               updatedAtMs?: number;
+              seoMetadata?: unknown;
             };
 
             const publishedOnMs = raw.publishedOnMs ?? coerceToMillis(raw.publishedOn);
@@ -322,6 +323,7 @@ export const BlogStore = signalStore(
               publishedOnMs: normalisedPublishedOnMs,
               createdAtMs: normalisedCreatedMs,
               updatedAtMs: normalisedUpdatedMs,
+              seoMetadata: raw.seoMetadata,
             };
           });
 

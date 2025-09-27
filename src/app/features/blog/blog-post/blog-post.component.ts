@@ -3,7 +3,6 @@ import {
   Component,
   OnDestroy,
   computed,
-  effect,
   inject,
 } from '@angular/core';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
@@ -17,6 +16,7 @@ import { SeoService } from '../../../shared/services/seo.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { BreadcrumbNavComponent, BreadcrumbItem } from '../../../shared/components/breadcrumb-nav/breadcrumb-nav.component';
 import { ReadingProgressComponent } from '../../../shared/components/reading-progress/reading-progress.component';
+import { BlogPostResolverResult } from './blog-post.resolver';
 
 @Component({
   selector: 'app-blog-post',
@@ -37,19 +37,24 @@ export class BlogPostComponent implements OnDestroy {
     { initialValue: 'react-refactors-without-regressions' }
   );
 
+  // Get resolver data
+  private readonly _resolverData = toSignal(
+    this._route.data.pipe(map((data) => data['blogPost'] as BlogPostResolverResult)),
+    { initialValue: { slug: '', post: null, relatedPosts: [], foundExact: false } }
+  );
+
   protected readonly slug = computed(() => this._slug());
 
   protected readonly post = computed(() => {
-    const slug = this.slug();
-    return this._blogStore.getPostBySlug(slug);
+    const resolverData = this._resolverData();
+    return resolverData.post;
   });
 
   protected readonly unknownPost = computed(() => !this.post());
 
   protected readonly relatedPosts = computed(() => {
-    const currentPost = this.post();
-    if (!currentPost) return [];
-    return this._blogStore.getRelatedPosts(currentPost.slug, currentPost.categorySlug);
+    const resolverData = this._resolverData();
+    return resolverData.relatedPosts;
   });
 
   protected readonly isLoading = computed(() => this._blogStore.loading());
@@ -70,72 +75,8 @@ export class BlogPostComponent implements OnDestroy {
     ];
   });
 
-  private readonly _seoEffect = effect(() => {
-    const slug = this.slug();
-    const post = this.post();
-    const isLoading = this.isLoading();
-    const canonicalUrl = `https://gitplumbers.com/blog/${slug}/`;
-
-    if (isLoading) {
-      this._seo.updateMetadata({
-        canonical: canonicalUrl,
-        ogUrl: canonicalUrl,
-      });
-      return;
-    }
-
-    if (!post) {
-      this._seo.updateMetadata({
-        title: 'Post not found | GitPlumbers Insights',
-        description: 'The resource you requested is unavailable. Explore our latest insights instead.',
-        canonical: canonicalUrl,
-        ogUrl: canonicalUrl,
-        robotsIndex: false,
-        robotsFollow: false,
-      });
-      return;
-    }
-
-    const metadata = this._seo.generateAiOptimizedMetadata({
-      title: `${post.title} | GitPlumbers Insights`,
-      description: post.summary,
-      keywords: [...post.keywords],
-      url: canonicalUrl,
-    });
-
-    this._seo.updateMetadata(metadata);
-
-    const structuredData: Record<string, unknown> = {
-      '@context': 'https://schema.org',
-      '@type': 'BlogPosting',
-      headline: post.title,
-      description: post.summary,
-      datePublished: post.publishedOn,
-      articleSection: post.categorySlug,
-      author: {
-        '@type': 'Organization',
-        name: 'GitPlumbers',
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'GitPlumbers',
-      },
-      url: canonicalUrl,
-    };
-
-    if (post.faq && post.faq.length) {
-      structuredData['mainEntity'] = post.faq.map((item) => ({
-        '@type': 'Question',
-        name: item.question,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: item.answer,
-        },
-      }));
-    }
-
-    this._seo.addStructuredData(structuredData);
-  });
+  // SEO metadata is now applied in the resolver during route resolution (server-side)
+  // This ensures metadata appears in the initial HTML response
 
   // SEO Helper Methods
   protected getArticleSchema(post: BlogPost): object {
@@ -157,7 +98,9 @@ export class BlogPostComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this._seoEffect.destroy();
+    // Clean up structured data when component is destroyed
+    this._seo.removeStructuredData('blog-article');
+    this._seo.removeStructuredData('blog-faq');
   }
 }
 

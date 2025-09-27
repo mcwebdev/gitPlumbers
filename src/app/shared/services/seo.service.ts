@@ -13,6 +13,7 @@ export interface SeoMetadata {
   ogDescription?: string;
   ogImage?: string;
   ogUrl?: string;
+  ogType?: string;
   twitterCard?: 'summary' | 'summary_large_image';
   twitterTitle?: string;
   twitterDescription?: string;
@@ -20,6 +21,10 @@ export interface SeoMetadata {
   canonical?: string;
   robotsIndex?: boolean;
   robotsFollow?: boolean;
+  articleSection?: string;
+  articleAuthor?: string;
+  articlePublishedTime?: string;
+  articleModifiedTime?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -99,8 +104,24 @@ export class SeoService {
     );
     this.updateTag('og:image', finalMetadata.ogImage!, 'property');
     this.updateTag('og:url', canonicalUrl, 'property');
-    this.updateTag('og:type', 'website', 'property');
+    this.updateTag('og:type', finalMetadata.ogType || 'website', 'property');
     this.updateTag('og:site_name', 'GitPlumbers', 'property');
+
+    // Add article-specific Open Graph tags
+    if (finalMetadata.ogType === 'article') {
+      if (finalMetadata.articleSection) {
+        this.updateTag('og:article:section', finalMetadata.articleSection, 'property');
+      }
+      if (finalMetadata.articleAuthor) {
+        this.updateTag('og:article:author', finalMetadata.articleAuthor, 'property');
+      }
+      if (finalMetadata.articlePublishedTime) {
+        this.updateTag('og:article:published_time', finalMetadata.articlePublishedTime, 'property');
+      }
+      if (finalMetadata.articleModifiedTime) {
+        this.updateTag('og:article:modified_time', finalMetadata.articleModifiedTime, 'property');
+      }
+    }
 
     // Update Twitter Card meta tags
     this.updateTag('twitter:card', finalMetadata.twitterCard!);
@@ -127,6 +148,17 @@ export class SeoService {
     this.updateTag('author', 'GitPlumbers');
     this.updateTag('theme-color', '#1976d2');
     this.updateTag('msapplication-TileColor', '#1976d2');
+
+    // Add mobile app and platform-specific meta tags
+    this.updateTag('msapplication-config', '/browserconfig.xml');
+    this.updateTag('format-detection', 'telephone=no');
+    this.updateTag('mobile-web-app-capable', 'yes');
+    this.updateTag('apple-mobile-web-app-capable', 'yes');
+    this.updateTag('apple-mobile-web-app-status-bar-style', 'default');
+    this.updateTag('apple-mobile-web-app-title', 'GitPlumbers');
+    this.updateTag('application-name', 'GitPlumbers');
+    this.updateTag('msapplication-tooltip', 'GitPlumbers - AI Code Optimization');
+    this.updateTag('msapplication-starturl', '/');
   }
 
   private updateTag(name: string, content: string, attribute: string = 'name'): void {
@@ -365,12 +397,12 @@ export class SeoService {
   /**
    * Add structured data to page for better AI understanding
    */
-  addStructuredData(schema: Record<string, unknown>): void {
-    if (!this._isBrowser) return;
-
-    // Remove existing structured data
+  addStructuredData(schema: Record<string, unknown>, options: { identifier?: string } = {}): void {
+    const identifier = options.identifier || 'default';
+    
+    // Remove existing structured data with this identifier
     const existingScript = this._document.querySelector(
-      'script[type="application/ld+json"][data-dynamic]'
+      `script[type="application/ld+json"][data-identifier="${identifier}"]`
     );
     if (existingScript) {
       existingScript.remove();
@@ -379,9 +411,21 @@ export class SeoService {
     // Add new structured data
     const script = this._document.createElement('script');
     script.type = 'application/ld+json';
-    script.setAttribute('data-dynamic', 'true');
+    script.setAttribute('data-identifier', identifier);
     script.textContent = JSON.stringify(schema);
     this._document.head.appendChild(script);
+  }
+
+  /**
+   * Remove structured data by identifier
+   */
+  removeStructuredData(identifier: string): void {
+    const existingScript = this._document.querySelector(
+      `script[type="application/ld+json"][data-identifier="${identifier}"]`
+    );
+    if (existingScript) {
+      existingScript.remove();
+    }
   }
 }
 

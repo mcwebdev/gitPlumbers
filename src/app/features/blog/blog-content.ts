@@ -55,6 +55,19 @@ export interface BlogPost {
   readonly publishedOnMs?: number;
   readonly createdAtMs?: number;
   readonly updatedAtMs?: number;
+  readonly seoMetadata?: {
+    readonly title: string;
+    readonly description: string;
+    readonly ogTitle: string;
+    readonly ogDescription: string;
+    readonly ogImage: string;
+    readonly twitterTitle: string;
+    readonly twitterDescription: string;
+    readonly twitterImage: string;
+    readonly articleSection: string;
+    readonly structuredDataArticle: Record<string, unknown>;
+    readonly structuredDataFAQ?: Record<string, unknown>;
+  };
 }
 
 export interface CaseStudy {

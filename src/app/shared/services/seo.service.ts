@@ -162,27 +162,41 @@ export class SeoService {
   }
 
   private updateTag(name: string, content: string, attribute: string = 'name'): void {
-    if (this._meta.getTag(`${attribute}="${name}"`)) {
-      this._meta.updateTag({ [attribute]: name, content });
-    } else {
-      // Insert meta tags at the beginning of head to ensure proper HTML structure
-      // This ensures meta tags appear before styles and other elements
-      const head = this._document.head;
-      const metaTag = this._document.createElement('meta');
-      metaTag.setAttribute(attribute, name);
-      metaTag.setAttribute('content', content);
-      
-      // Insert at the beginning of head, after charset and viewport meta tags
-      const charsetMeta = head.querySelector('meta[charset]');
-      const viewportMeta = head.querySelector('meta[name="viewport"]');
-      const insertAfter = viewportMeta || charsetMeta;
-      
-      if (insertAfter) {
-        head.insertBefore(metaTag, insertAfter.nextSibling);
-      } else {
-        head.insertBefore(metaTag, head.firstChild);
-      }
+    // Allow meta tag updates during SSR for proper SEO
+    // if (!this._isBrowser) {
+    //   return;
+    // }
+
+    const head = this._document.head;
+    if (!head) {
+      console.warn(`SEO: No document head found for ${name}`);
+      return;
     }
+
+    // Debug logging during SSR
+    if (!this._isBrowser) {
+      console.log(
+        `SEO SSR: Updating ${attribute}="${name}" with content="${content}"`
+      );
+    }
+
+    const selector = `meta[${attribute}="${name}"]`;
+    let element = head.querySelector(selector) as HTMLMetaElement | null;
+
+    if (!content) {
+      if (element) {
+        element.remove();
+      }
+      return;
+    }
+
+    if (!element) {
+      element = this._document.createElement('meta');
+      element.setAttribute(attribute, name);
+      head.appendChild(element);
+    }
+
+    element.setAttribute('content', content);
   }
 
   private buildRobotsContent(index?: boolean, follow?: boolean): string {
@@ -249,38 +263,26 @@ export class SeoService {
   }
 
   private applyCanonicalLink(url: string): void {
-    const headElement =
-      this._document.head ??
-      (this._document.getElementsByTagName('head').item(0) as HTMLHeadElement | null);
-
-    if (!headElement) {
+    if (!url) {
       return;
     }
+    // Allow canonical link updates during SSR for proper SEO
+    // if (!this._isBrowser) {
+    //   return;
+    // }
 
-    let linkElement = headElement.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    const head = this._document.head;
+    let linkElement = this._document.querySelector(
+      'link[rel="canonical"]'
+    ) as HTMLLinkElement | null;
+
     if (!linkElement) {
-      linkElement = this._document.createElement('link') as HTMLLinkElement;
+      linkElement = this._document.createElement('link');
       linkElement.setAttribute('rel', 'canonical');
-      
-      // Insert canonical link at the beginning of head, after meta tags
-      const viewportMeta = headElement.querySelector('meta[name="viewport"]');
-      const insertAfter = viewportMeta;
-      
-      if (insertAfter) {
-        headElement.insertBefore(linkElement, insertAfter.nextSibling);
-      } else {
-        headElement.insertBefore(linkElement, headElement.firstChild);
-      }
-    } else if (!linkElement.parentNode) {
-      headElement.appendChild(linkElement);
-    }
-
-    if (linkElement.getAttribute('href') === url && this._currentCanonical === url) {
-      return;
+      head.appendChild(linkElement);
     }
 
     linkElement.setAttribute('href', url);
-    this._currentCanonical = url;
   }
 
   // Predefined metadata for different pages
@@ -423,21 +425,28 @@ export class SeoService {
    * Add structured data to page for better AI understanding
    */
   addStructuredData(schema: Record<string, unknown>, options: { identifier?: string } = {}): void {
-    const identifier = options.identifier || 'default';
-    
-    // Remove existing structured data with this identifier
+    // Allow structured data updates during SSR for proper SEO
+    // if (!this._isBrowser) {
+    //   return;
+    // }
+
+    const identifier = options.identifier ?? 'seo-structured-data';
+    const selector = `script[type="application/ld+json"][data-seo-id="${identifier}"]`;
+    const serialized = JSON.stringify(schema);
+
     const existingScript = this._document.querySelector(
-      `script[type="application/ld+json"][data-identifier="${identifier}"]`
-    );
+      selector
+    ) as HTMLScriptElement | null;
+
     if (existingScript) {
-      existingScript.remove();
+      existingScript.textContent = serialized;
+      return;
     }
 
-    // Add new structured data
     const script = this._document.createElement('script');
     script.type = 'application/ld+json';
-    script.setAttribute('data-identifier', identifier);
-    script.textContent = JSON.stringify(schema);
+    script.setAttribute('data-seo-id', identifier);
+    script.textContent = serialized;
     this._document.head.appendChild(script);
   }
 
@@ -445,9 +454,13 @@ export class SeoService {
    * Remove structured data by identifier
    */
   removeStructuredData(identifier: string): void {
-    const existingScript = this._document.querySelector(
-      `script[type="application/ld+json"][data-identifier="${identifier}"]`
-    );
+    // Allow structured data removal during SSR for proper SEO
+    // if (!this._isBrowser) {
+    //   return;
+    // }
+
+    const selector = `script[type="application/ld+json"][data-seo-id="${identifier}"]`;
+    const existingScript = this._document.querySelector(selector);
     if (existingScript) {
       existingScript.remove();
     }

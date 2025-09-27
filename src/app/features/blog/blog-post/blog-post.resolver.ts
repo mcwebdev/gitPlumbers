@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, ResolveFn } from '@angular/router';
-import { BlogStore } from '../blog.store';
+import { BlogSearchService } from '../../../shared/services/blog-search.service';
 import { SeoService } from '../../../shared/services/seo.service';
-import { BlogPost } from '../blog-content';
+import { BlogPost, getBlogPostBySlug, getPostsByCategory } from '../blog-content';
 
 export interface BlogPostResolverResult {
   slug: string;
@@ -62,22 +62,78 @@ const toDateString = (date: string | Date | undefined | unknown): string | undef
 
 export const blogPostResolver: ResolveFn<BlogPostResolverResult> = async (route: ActivatedRouteSnapshot) => {
   const slug = route.paramMap.get('slug') ?? '';
-  const blogStore = inject(BlogStore);
+  const blogSearch = inject(BlogSearchService);
   const seoService = inject(SeoService);
 
-  // Get the post from the store
-  const post: BlogPost | null = blogStore.getPostBySlug(slug) ?? null;
-  const foundExact = !!post;
-  
-  // Get related posts if post exists
-  const relatedPosts = post ? blogStore.getRelatedPosts(post.slug, post.categorySlug) : [];
+  if (!slug) {
+    return { slug, post: null, relatedPosts: [], foundExact: false };
+  }
+
+  const staticPost = getBlogPostBySlug(slug) ?? null;
+
+  let post: BlogPost | null = staticPost;
+  let foundExact = !!staticPost;
+
+  try {
+    const firestorePost = await blogSearch.getPostBySlug(slug);
+    if (firestorePost) {
+      post = firestorePost;
+      foundExact = firestorePost.slug === slug;
+    } else {
+      foundExact = false;
+    }
+  } catch {
+    foundExact = !!staticPost;
+  }
+
+  let relatedPosts: BlogPost[] = [];
+
+  if (post) {
+    try {
+      const firestoreRelated = await blogSearch.getPublishedPostsByCategory(
+        post.categorySlug,
+        3,
+        post.slug
+      );
+      relatedPosts = firestoreRelated;
+    } catch {
+      // Failed to load related posts
+    }
+  }
+
+  if (relatedPosts.length === 0) {
+    const fallbackCategory = post?.categorySlug ?? staticPost?.categorySlug;
+
+    if (fallbackCategory) {
+      relatedPosts = getPostsByCategory(fallbackCategory)
+        .filter((candidate) => !post || candidate.slug !== post.slug)
+        .slice(0, 3) as BlogPost[];
+    }
+  }
+
+  if (!post && relatedPosts.length > 0) {
+    post = relatedPosts[0];
+    relatedPosts = relatedPosts.slice(1);
+    foundExact = false;
+  }
+
+  if (!post) {
+    return { slug, post: null, relatedPosts: [], foundExact: false };
+  }
+
+  const resolved = {
+    slug,
+    post,
+    relatedPosts: relatedPosts.slice(0, 2),
+    foundExact,
+  };
 
   // Apply SEO metadata during route resolution (server-side)
   if (post) {
-    const canonicalUrl = `https://gitplumbers.com/blog/${slug}/`;
+    const canonicalUrl = `https://gitplumbers.com/blog/${slug}`;
 
-    // Use pre-generated metadata from database if available
     if (post.seoMetadata) {
+      // Use pre-generated metadata from database
       const seo = post.seoMetadata;
       seoService.updateMetadata({
         title: seo.title,
@@ -93,7 +149,11 @@ export const blogPostResolver: ResolveFn<BlogPostResolverResult> = async (route:
         articleSection: seo.articleSection,
         articleAuthor: post.author?.name,
         articlePublishedTime: post.publishedOn,
-        articleModifiedTime: toDateString(post.updatedAt) ?? post.publishedOn,
+        articleModifiedTime: post.updatedAt
+          ? typeof post.updatedAt === 'string'
+            ? post.updatedAt
+            : post.updatedAt.toISOString()
+          : post.publishedOn,
         canonical: canonicalUrl,
         robotsIndex: foundExact,
         robotsFollow: foundExact,
@@ -110,75 +170,20 @@ export const blogPostResolver: ResolveFn<BlogPostResolverResult> = async (route:
       }
     } else {
       // Fallback for posts without pre-generated SEO
-      const metadata = seoService.generateAiOptimizedMetadata({
-        title: `${post.title} | GitPlumbers Insights`,
-        description: post.summary,
-        keywords: [...post.keywords],
-        url: canonicalUrl,
-      });
-
       seoService.updateMetadata({
-        ...metadata,
-        ogType: 'article',
-        articleAuthor: post.author?.name,
-        articlePublishedTime: post.publishedOn,
-        articleModifiedTime: toDateString(post.updatedAt) ?? post.publishedOn,
+        title: post.title
+          ? `${post.title} | GitPlumbers`
+          : 'Post not found | GitPlumbers',
+        description:
+          post.summary ??
+          'Explore our latest insights on code optimization and modernization.',
         canonical: canonicalUrl,
+        ogUrl: canonicalUrl,
         robotsIndex: foundExact,
         robotsFollow: foundExact,
       });
-
-      // Add structured data for article
-      const structuredData: Record<string, unknown> = {
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        headline: post.title,
-        description: post.summary,
-        datePublished: post.publishedOn,
-        articleSection: post.categorySlug,
-        author: {
-          '@type': 'Organization',
-          name: 'GitPlumbers',
-        },
-        publisher: {
-          '@type': 'Organization',
-          name: 'GitPlumbers',
-        },
-        url: canonicalUrl,
-      };
-
-      if (post.faq && post.faq.length) {
-        structuredData['mainEntity'] = post.faq.map((item) => ({
-          '@type': 'Question',
-          name: item.question,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: item.answer,
-          },
-        }));
-      }
-
-      seoService.addStructuredData(structuredData, {
-        identifier: 'blog-article',
-      });
     }
-  } else {
-    // Handle post not found case
-    const canonicalUrl = `https://gitplumbers.com/blog/${slug}/`;
-    seoService.updateMetadata({
-      title: 'Post not found | GitPlumbers Insights',
-      description: 'The resource you requested is unavailable. Explore our latest insights instead.',
-      canonical: canonicalUrl,
-      ogUrl: canonicalUrl,
-      robotsIndex: false,
-      robotsFollow: false,
-    });
   }
 
-  return {
-    slug,
-    post,
-    relatedPosts,
-    foundExact,
-  };
+  return resolved;
 };

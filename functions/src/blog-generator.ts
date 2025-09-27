@@ -117,7 +117,7 @@ const BASELINE_POST_TITLES: ReadonlyArray<string> = [
   'The gitPlumbers Method: Diagnose, Stabilize, Accelerate',
 ];
 
-type CategorySlug = 'culture' | 'ai-delivery' | 'guides' | 'case-studies' | 'reliability-observability' | 'security-compliance' | 'release-engineering' | 'platform-productivity';
+type CategorySlug = 'culture' | 'ai-delivery' | 'guides' | 'case-studies' | 'reliability-observability' | 'security-compliance' | 'release-engineering' | 'platform-productivity' | 'performance-optimization' | 'data-engineering';
 
 interface CategoryTheme {
   slug: CategorySlug;
@@ -185,6 +185,14 @@ export const CATEGORY_THEMES: CategoryTheme[] = [
       'Codify rollback and kill-switch guardrails for AI-assisted applications handling regulated data.',
       'Quantify the business impact of AI augmentations with instrumentation and controlled experiments.',
       'Stabilize prompt/feature drift with versioning, datasets, and automatic regression barriers.',
+      'Build A/B testing frameworks for AI model performance in production environments.',
+      'Implement circuit breakers and fallback mechanisms for AI service failures.',
+      'Create monitoring dashboards that detect AI model degradation before user impact.',
+      'Establish data lineage tracking for AI training and inference pipelines.',
+      'Design cost optimization strategies for AI compute resources without sacrificing quality.',
+      'Build automated bias detection and fairness monitoring for AI systems.',
+      'Create disaster recovery plans specifically for AI-dependent applications.',
+      'Implement feature store architectures for consistent AI model serving.',
     ],
     emphasis: [
       'Stress instrumentation, observability, and safety guardrails across AI-enabled flows.',
@@ -198,7 +206,15 @@ export const CATEGORY_THEMES: CategoryTheme[] = [
       'Create decision cadences that keep modernization aligned with product delivery.',
       'Coach engineering leadership on balancing roadmap work with remediation/guardrail investments.',
       'Build feedback loops that convert incident reviews into prioritized modernization backlogs.',
-      'Establish “definition of ready/done” that encodes reliability and accessibility requirements.',
+      'Establish "definition of ready/done" that encodes reliability and accessibility requirements.',
+      'Design blameless postmortem processes that actually prevent future incidents.',
+      'Create engineering career progression frameworks that reward reliability work.',
+      'Build cross-functional collaboration patterns for complex technical initiatives.',
+      'Establish technical debt budgeting and ROI measurement practices.',
+      'Create psychological safety frameworks for high-stakes technical decisions.',
+      'Design remote-first engineering practices that maintain code quality.',
+      'Build mentorship programs that transfer critical system knowledge.',
+      'Create innovation time allocation strategies that balance exploration with delivery.',
     ],
     emphasis: [
       'Highlight communication rituals, leadership behaviors, and measurable outcomes.',
@@ -213,6 +229,14 @@ export const CATEGORY_THEMES: CategoryTheme[] = [
       'Sequence a modernization using reversible thin slices with safety nets and shadow traffic.',
       'Deliver a hands-on checklist for migrating a critical workload with zero downtime.',
       'Reduce flaky tests and pipeline latency to unlock faster, safer releases.',
+      'Build comprehensive logging strategies that enable effective debugging.',
+      'Create database migration strategies for zero-downtime schema changes.',
+      'Design API versioning strategies that maintain backward compatibility.',
+      'Implement distributed tracing across microservices architectures.',
+      'Build chaos engineering practices for resilience testing.',
+      'Create performance optimization playbooks for common bottlenecks.',
+      'Design caching strategies that improve both performance and reliability.',
+      'Build automated security scanning into CI/CD pipelines.',
     ],
     emphasis: [
       'Provide step-by-step guidance with checkpoints, metrics, and tooling suggestions.',
@@ -226,7 +250,15 @@ export const CATEGORY_THEMES: CategoryTheme[] = [
       'Outline an anonymized engagement where modernization unblocked a critical launch.',
       'Show how GitPlumbers stabilized an AI-assisted application under real customer load.',
       'Demonstrate ROI from pairing reliability guardrails with delivery coaching.',
-      'Trace “before/after” metrics (MTTR, change failure rate, velocity) to business outcomes.',
+      'Trace "before/after" metrics (MTTR, change failure rate, velocity) to business outcomes.',
+      'Document a complex microservices migration that reduced operational overhead.',
+      'Show how implementing SLOs transformed an engineering team\'s incident response.',
+      'Demonstrate the business impact of reducing technical debt in a high-growth startup.',
+      'Case study: How observability improvements prevented a major outage.',
+      'Document a successful platform migration that improved developer productivity.',
+      'Show how implementing progressive delivery reduced deployment risk.',
+      'Case study: Transforming a legacy monolith into a maintainable architecture.',
+      'Demonstrate how security-first development practices prevented costly breaches.',
     ],
     emphasis: [
       'Include industry context, constraints, and measurable outcomes or metrics.',
@@ -241,6 +273,14 @@ export const CATEGORY_THEMES: CategoryTheme[] = [
       'Implement runbooks and game days that actually shrink MTTR.',
       'Make dashboards actionable: fewer charts, clearer thresholds, faster decisions.',
       'Instrument release health to spot regressions before customers do.',
+      'Build alert fatigue reduction strategies through intelligent notification routing.',
+      'Create incident response playbooks that scale across multiple teams.',
+      'Design error budget allocation strategies for different service tiers.',
+      'Implement distributed tracing to understand complex system interactions.',
+      'Build capacity planning models that predict scaling needs accurately.',
+      'Create synthetic monitoring that validates user experience continuously.',
+      'Design correlation analysis tools that connect symptoms to root causes.',
+      'Build automated incident detection that reduces mean time to detection.',
     ],
     emphasis: [
       'Focus on leading indicators that predict incidents, not vanity metrics.',
@@ -254,6 +294,15 @@ export const CATEGORY_THEMES: CategoryTheme[] = [
       'Bake threat modeling into modernization sprints without slowing delivery.',
       'Codify least-privilege, secret rotation, and dependency risk controls as code.',
       'Operationalize WCAG 2.2 AA and ARIA support as non-negotiable acceptance criteria.',
+      'Build automated compliance checking into deployment pipelines.',
+      'Create security incident response procedures that minimize business impact.',
+      'Design zero-trust architectures for distributed systems.',
+      'Implement data privacy controls that meet GDPR and CCPA requirements.',
+      'Build vulnerability management workflows that prioritize by business risk.',
+      'Create secure coding standards that integrate with developer workflows.',
+      'Design identity and access management systems for complex organizations.',
+      'Build security monitoring that detects threats in real-time.',
+      'Create disaster recovery plans that include security breach scenarios.',
     ],
     emphasis: [
       'Translate policies into guardrails, checks, and automated proofs.',
@@ -267,6 +316,15 @@ export const CATEGORY_THEMES: CategoryTheme[] = [
       'Stand up progressive delivery (feature flags, canaries, blue/green) with governance.',
       'Reduce CI flake and cut pipeline time to accelerate feedback loops.',
       'Design rollback strategies that make Friday deploys boring.',
+      'Build automated testing strategies that catch regressions early.',
+      'Create deployment automation that handles complex multi-service releases.',
+      'Design feature flag management systems that enable safe experimentation.',
+      'Build release coordination tools for distributed engineering teams.',
+      'Create automated rollback triggers based on real-time metrics.',
+      'Design blue-green deployment strategies for zero-downtime releases.',
+      'Build release validation pipelines that ensure quality gates.',
+      'Create deployment monitoring that provides immediate feedback on releases.',
+      'Design release communication systems that keep stakeholders informed.',
     ],
     emphasis: [
       'Prioritize change failure rate, lead time, and recovery time as north-star metrics.',
@@ -277,13 +335,66 @@ export const CATEGORY_THEMES: CategoryTheme[] = [
     slug: 'platform-productivity',
     label: 'Platform & Developer Productivity',
     angles: [
-      'Adopt “just-enough platform” patterns to unblock product teams without over-centralizing.',
+      'Adopt "just-enough platform" patterns to unblock product teams without over-centralizing.',
       'Use ADRs and paved roads to prevent drift and support safe refactors.',
       'Measure developer friction and eliminate the top sources of wait/hand-off time.',
+      'Build internal developer portals that provide self-service capabilities.',
+      'Create standardized development environments that reduce setup friction.',
+      'Design code review automation that maintains quality without slowing delivery.',
+      'Build internal tooling that abstracts away infrastructure complexity.',
+      'Create developer onboarding programs that accelerate time to productivity.',
+      'Design metrics dashboards that track developer experience and satisfaction.',
+      'Build automated code quality gates that prevent technical debt accumulation.',
+      'Create knowledge sharing systems that preserve institutional expertise.',
+      'Design experimentation platforms that enable safe feature testing.',
     ],
     emphasis: [
       'Favor simplification and paved-road defaults over bespoke tooling.',
       'Show cost/benefit trade-offs with concrete before/after examples.',
+    ],
+  },
+  {
+    slug: 'performance-optimization',
+    label: 'Performance & Scalability',
+    angles: [
+      'Build performance monitoring that identifies bottlenecks before they impact users.',
+      'Create load testing strategies that validate system behavior under stress.',
+      'Design caching architectures that improve both performance and cost efficiency.',
+      'Implement database optimization techniques that scale with user growth.',
+      'Build CDN strategies that reduce latency for global user bases.',
+      'Create resource optimization frameworks that balance performance and cost.',
+      'Design horizontal scaling strategies for stateless and stateful services.',
+      'Build performance regression detection that prevents gradual degradation.',
+      'Create capacity planning models that predict scaling needs accurately.',
+      'Design performance budgets that maintain consistent user experience.',
+      'Build automated performance testing that validates optimization efforts.',
+      'Create performance optimization playbooks for common architectural patterns.',
+    ],
+    emphasis: [
+      'Focus on user-facing metrics and business impact of performance improvements.',
+      'Provide concrete optimization techniques with measurable outcomes.',
+    ],
+  },
+  {
+    slug: 'data-engineering',
+    label: 'Data & Analytics',
+    angles: [
+      'Build real-time data pipelines that support business-critical decision making.',
+      'Create data quality monitoring that prevents downstream analytics failures.',
+      'Design data governance frameworks that ensure compliance and security.',
+      'Implement data lake architectures that scale with growing data volumes.',
+      'Build ETL optimization strategies that reduce processing time and costs.',
+      'Create data lineage tracking that enables impact analysis and debugging.',
+      'Design streaming data architectures that handle high-velocity data sources.',
+      'Build data warehouse optimization techniques that improve query performance.',
+      'Create data privacy controls that meet regulatory requirements.',
+      'Design A/B testing data pipelines that provide reliable experiment results.',
+      'Build machine learning data pipelines that support model training and serving.',
+      'Create data visualization platforms that enable self-service analytics.',
+    ],
+    emphasis: [
+      'Focus on data reliability, quality, and business value delivery.',
+      'Provide practical data engineering solutions with measurable outcomes.',
     ],
   },
 ];
@@ -344,7 +455,7 @@ export const generateBlogArticleHourly = onSchedule(
     const firestore = admin.firestore();
 
     const recentContext = await fetchRecentContext(firestore);
-    const theme = pickTheme();
+    const theme = await pickTheme(firestore);
 
     const prompt = buildPrompt(theme, recentContext);
 
@@ -436,6 +547,12 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
 
   // Enhanced engagement requirements
   sections.push(
+    'UNIQUENESS REQUIREMENT: Create a completely unique title and angle that has never been written about before. ' +
+    'Avoid generic phrases and common patterns. Think of specific, novel scenarios that engineering leaders face. ' +
+    'Use unexpected angles, specific metrics, or unique problem statements that make this article stand out.'
+  );
+
+  sections.push(
     'HOOK REQUIREMENT: Start with a bold, high-stakes opening that immediately grabs attention. ' +
     'Use scenarios like: "Your AI model just hallucinated in production, costing $50K in customer refunds" ' +
     'or "A single line of legacy code brought down your entire payment system during Black Friday." ' +
@@ -466,6 +583,12 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
   );
 
   sections.push(
+    'CONTENT DIFFERENTIATION: Create content that offers a unique perspective or novel approach to the topic. ' +
+    'Use specific examples, industry-specific scenarios, or unconventional problem-solving methods. ' +
+    'Avoid generic advice that could apply to any engineering team - make it specific and actionable.'
+  );
+
+  sections.push(
     'Deliver concrete modernization tactics, instrumentation ideas, and measurable outcomes. Blend strategic framing with hands-on steps.'
   );
   sections.push(
@@ -478,7 +601,12 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
   const avoided = [...new Set([...BASELINE_POST_TITLES, ...recent])];
   if (avoided.length > 0) {
     sections.push(
-      `Avoid overlapping topics or phrasing with these existing posts: ${avoided.join(' | ')}`
+      `CRITICAL: Avoid overlapping topics, similar phrasing, or semantic similarity with these existing posts: ${avoided.join(' | ')}`
+    );
+    sections.push(
+      'Create a title that is semantically different from all existing articles. Use different keywords, ' +
+      'different problem framing, different solution approaches, or different industry contexts. ' +
+      'The title should feel completely fresh and novel to readers familiar with our content.'
     );
   }
 
@@ -526,8 +654,37 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
   return sections.join('\n\n');
 }
 
-function pickTheme(): CategoryTheme {
-  return pick(CATEGORY_THEMES);
+async function pickTheme(firestore: Firestore): Promise<CategoryTheme> {
+  try {
+    // Get recently used categories to avoid repetition
+    const snapshot = await firestore
+      .collection(BLOG_COLLECTION)
+      .orderBy('publishedOn', 'desc')
+      .limit(10)
+      .get();
+
+    const recentCategories = new Set(
+      snapshot.docs
+        .map((doc) => {
+          const data = doc.data() as { categorySlug?: string };
+          return data.categorySlug;
+        })
+        .filter((slug): slug is string => Boolean(slug))
+    );
+
+    // Filter out recently used categories
+    const availableThemes = CATEGORY_THEMES.filter(
+      (theme) => !recentCategories.has(theme.slug)
+    );
+
+    // If all categories have been used recently, use all themes
+    const themesToChooseFrom = availableThemes.length > 0 ? availableThemes : CATEGORY_THEMES;
+    
+    return pick(themesToChooseFrom);
+  } catch (error) {
+    logger.warn('Unable to fetch recent categories, using random selection', { error });
+    return pick(CATEGORY_THEMES);
+  }
 }
 
 function pick<T>(items: ReadonlyArray<T>): T {
@@ -537,10 +694,11 @@ function pick<T>(items: ReadonlyArray<T>): T {
 
 async function fetchRecentContext(firestore: Firestore): Promise<string[]> {
   try {
+    // Fetch more recent articles to better avoid duplicates
     const snapshot = await firestore
       .collection(BLOG_COLLECTION)
       .orderBy('publishedOn', 'desc')
-      .limit(5)
+      .limit(20)
       .get();
 
     return snapshot.docs
@@ -549,11 +707,13 @@ async function fetchRecentContext(firestore: Firestore): Promise<string[]> {
           title?: string;
           summary?: string;
           categorySlug?: string;
+          keywords?: string[];
         };
         if (!data.title || !data.summary || !data.categorySlug) {
           return undefined;
         }
-        return `${data.title} (${data.categorySlug}): ${data.summary}`;
+        const keywords = data.keywords ? ` [Keywords: ${data.keywords.join(', ')}]` : '';
+        return `${data.title} (${data.categorySlug}): ${data.summary}${keywords}`;
       })
       .filter((value): value is string => Boolean(value));
   } catch (error) {
@@ -790,12 +950,20 @@ async function ensureUniqueSlug(firestore: Firestore, slug: string): Promise<str
   let candidate = slug;
   let attempts = 0;
 
-  while (attempts < 5) {
+  while (attempts < 10) {
     const snapshot = await firestore.collection(BLOG_COLLECTION).doc(candidate).get();
     if (!snapshot.exists) {
       return candidate;
     }
-    candidate = `${slug}-${randomSuffix()}`;
+    
+    // Try different suffix strategies to ensure uniqueness
+    if (attempts < 3) {
+      candidate = `${slug}-${randomSuffix()}`;
+    } else if (attempts < 6) {
+      candidate = `${slug}-${Date.now().toString(36)}`;
+    } else {
+      candidate = `${slug}-${randomSuffix()}-${Date.now().toString(36)}`;
+    }
     attempts += 1;
   }
 
@@ -874,6 +1042,31 @@ function validatePayload(payload: GeneratedArticlePayload, expectedCategory: Cat
   }
   if (!payload.schemaHints || payload.schemaHints.aboutEntity !== 'GitPlumbers' || !payload.schemaHints.articleSection || typeof payload.schemaHints.faqIsFAQPage !== 'boolean') {
     throw new Error('Generated article missing complete schema hints');
+  }
+
+  // Additional uniqueness validation
+  if (payload.title.length < 20) {
+    throw new Error('Generated article title is too short - needs to be more specific and unique');
+  }
+  
+  // Check for generic phrases that indicate low uniqueness
+  const genericPhrases = [
+    'how to', 'best practices', 'guide to', 'introduction to', 'overview of',
+    'getting started', 'fundamentals', 'basics of', 'understanding'
+  ];
+  const titleLower = payload.title.toLowerCase();
+  const hasGenericPhrase = genericPhrases.some(phrase => titleLower.includes(phrase));
+  if (hasGenericPhrase) {
+    throw new Error('Generated article title contains generic phrases - needs to be more specific and unique');
+  }
+
+  // Validate that keywords are diverse and not too generic
+  const genericKeywords = ['development', 'software', 'engineering', 'technology', 'best practices'];
+  const hasGenericKeywords = payload.keywords.some(keyword => 
+    genericKeywords.some(generic => keyword.toLowerCase().includes(generic))
+  );
+  if (hasGenericKeywords && payload.keywords.length < 6) {
+    throw new Error('Generated article keywords are too generic - needs more specific technical terms');
   }
 }
 

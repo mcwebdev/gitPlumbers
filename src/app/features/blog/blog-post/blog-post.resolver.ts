@@ -12,10 +12,52 @@ export interface BlogPostResolverResult {
 }
 
 // Helper function to convert date to string for SEO metadata
-const toDateString = (date: string | Date | undefined): string | undefined => {
+const toDateString = (date: string | Date | undefined | unknown): string | undefined => {
   if (!date) return undefined;
   if (typeof date === 'string') return date;
-  return date.toISOString();
+  if (date instanceof Date) return date.toISOString();
+  
+  // Handle Firestore timestamps and other date-like objects
+  if (typeof date === 'object' && date !== null) {
+    const candidate = date as {
+      toDate?: () => Date;
+      toMillis?: () => number;
+      seconds?: number;
+      nanoseconds?: number;
+    };
+
+    if (typeof candidate.toDate === 'function') {
+      const result = candidate.toDate();
+      return result instanceof Date ? result.toISOString() : undefined;
+    }
+
+    if (typeof candidate.toMillis === 'function') {
+      return new Date(candidate.toMillis()).toISOString();
+    }
+
+    if (typeof candidate.seconds === 'number') {
+      const base = candidate.seconds * 1000;
+      if (typeof candidate.nanoseconds === 'number') {
+        return new Date(base + Math.floor(candidate.nanoseconds / 1000000)).toISOString();
+      }
+      return new Date(base).toISOString();
+    }
+  }
+
+  // Handle numbers (timestamps)
+  if (typeof date === 'number') {
+    // Check if it's a valid timestamp
+    if (date > 1000000000000) {
+      // Already in milliseconds
+      return new Date(date).toISOString();
+    } else if (date > 1000000000) {
+      // In seconds, convert to milliseconds
+      return new Date(date * 1000).toISOString();
+    }
+  }
+
+  // If we can't convert it, return undefined
+  return undefined;
 };
 
 export const blogPostResolver: ResolveFn<BlogPostResolverResult> = async (route: ActivatedRouteSnapshot) => {

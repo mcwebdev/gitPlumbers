@@ -131,7 +131,27 @@ export class SitemapGeneratorService {
       return snapshot.docs.map(doc => {
         const post = doc.data() as BlogPost;
         const publishedDate = post.publishedOn || post.createdAt;
-        const lastmod = publishedDate ? new Date(publishedDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+        
+        // Safely convert date to ISO string
+        let lastmod: string;
+        if (publishedDate) {
+          try {
+            if (typeof publishedDate === 'string') {
+              lastmod = new Date(publishedDate).toISOString().slice(0, 10);
+            } else if (publishedDate instanceof Date) {
+              lastmod = publishedDate.toISOString().slice(0, 10);
+            } else {
+              // Handle Firestore timestamps and other date-like objects
+              const dateObj = new Date(publishedDate as any);
+              lastmod = dateObj.toISOString().slice(0, 10);
+            }
+          } catch (error) {
+            // Fallback to current date if conversion fails
+            lastmod = new Date().toISOString().slice(0, 10);
+          }
+        } else {
+          lastmod = new Date().toISOString().slice(0, 10);
+        }
 
         // Determine priority based on category
         let priority = 0.7; // Default for articles

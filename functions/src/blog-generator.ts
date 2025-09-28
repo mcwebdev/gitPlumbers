@@ -512,12 +512,66 @@ export const generateBlogArticleHourly = onSchedule(
       7;
     const readTime = `${readTimeMinutes} minute read`;
 
+    // Generate SEO metadata with structured data
+    const seoMetadata = {
+      title: `${payload.title} | GitPlumbers`,
+      description: payload.summary,
+      ogTitle: `${payload.title} | GitPlumbers`,
+      ogDescription: payload.summary,
+      ogImage: 'https://gitplumbers.com/logo.png',
+      ogType: 'article',
+      twitterTitle: `${payload.title} | GitPlumbers`,
+      twitterDescription: payload.summary,
+      twitterImage: 'https://gitplumbers.com/logo.png',
+      articleSection: payload.schemaHints.articleSection,
+      structuredDataArticle: {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: payload.title,
+        description: payload.summary,
+        publisher: {
+          '@type': 'Organization',
+          name: 'GitPlumbers',
+          url: 'https://gitplumbers.com/',
+          logo: 'https://gitplumbers.com/logo.png'
+        },
+        mainEntityOfPage: `https://gitplumbers.com/blog/${slug}/`,
+        datePublished: publishedOn,
+        dateModified: publishedOn,
+        author: {
+          '@type': 'Person',
+          name: payload.author.name,
+          ...(payload.author.title && { jobTitle: payload.author.title }),
+          ...(payload.author.url && { url: payload.author.url })
+        },
+        articleSection: payload.schemaHints.articleSection,
+        keywords: payload.keywords.join(', '),
+        wordCount: payload.body.join(' ').split(' ').length,
+        timeRequired: `PT${readTimeMinutes}M`
+      },
+      ...(payload.faq && payload.faq.length > 0 && {
+        structuredDataFAQ: {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: payload.faq.map(faq => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: faq.answer
+            }
+          }))
+        }
+      })
+    };
+
     const document = {
       ...payload,
       readTimeMinutes,
       slug,
       readTime,
       publishedOn,
+      seoMetadata,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       status: 'published',

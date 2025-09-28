@@ -160,11 +160,60 @@ export const blogPostResolver: ResolveFn<BlogPostResolverResult> = async (route:
       });
 
       // Add structured data
-      seoService.addStructuredData(seo.structuredDataArticle, {
-        identifier: 'blog-article',
-      });
+      if (seo.structuredDataArticle) {
+        seoService.addStructuredData(seo.structuredDataArticle, {
+          identifier: 'blog-article',
+        });
+      } else {
+        // Fallback: generate structured data if not available
+        const articleSchema = {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: post.title,
+          description: post.summary,
+          publisher: {
+            '@type': 'Organization',
+            name: 'GitPlumbers',
+            url: 'https://gitplumbers.com/',
+            logo: 'https://gitplumbers.com/logo.png'
+          },
+          mainEntityOfPage: canonicalUrl,
+          datePublished: post.publishedOn,
+          dateModified: post.updatedAt ? (typeof post.updatedAt === 'string' ? post.updatedAt : post.updatedAt.toISOString()) : post.publishedOn,
+          ...(post.author && {
+            author: {
+              '@type': 'Person',
+              name: post.author.name,
+              ...(post.author.title && { jobTitle: post.author.title }),
+              ...(post.author.url && { url: post.author.url })
+            }
+          }),
+          ...(seo.articleSection && { articleSection: seo.articleSection })
+        };
+        seoService.addStructuredData(articleSchema, {
+          identifier: 'blog-article',
+        });
+      }
+      
       if (seo.structuredDataFAQ) {
         seoService.addStructuredData(seo.structuredDataFAQ, {
+          identifier: 'blog-faq',
+        });
+      } else if (post.faq && post.faq.length > 0) {
+        // Fallback: generate FAQ schema if not available
+        const faqSchema = {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: post.faq.map(faq => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: faq.answer
+            }
+          }))
+        };
+        seoService.addStructuredData(faqSchema, {
           identifier: 'blog-faq',
         });
       }

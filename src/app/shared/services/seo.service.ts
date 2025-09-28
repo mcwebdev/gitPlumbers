@@ -210,54 +210,6 @@ export class SeoService {
     }
   }
 
-
-  private updateTag(
-    name: string,
-    content: string | undefined,
-    attribute: 'name' | 'property' = 'name'
-  ): void {
-    // Allow meta tag updates during SSR for proper SEO
-    // if (!this._isBrowser) {
-    //   return;
-    // }
-
-    const head = this._document.head;
-    if (!head) {
-      console.warn(`SEO: No document head found for ${name}`);
-      return;
-    }
-
-    // Debug logging during SSR
-    if (!this._isBrowser) {
-      console.log(
-        `SEO SSR: Updating ${attribute}="${name}" with content="${content}"`
-      );
-    }
-
-    const selector = `meta[${attribute}="${name}"]`;
-    let element = head.querySelector(selector) as HTMLMetaElement | null;
-
-    if (!content) {
-      if (element) {
-        element.remove();
-      }
-      return;
-    }
-
-    if (!element) {
-      element = this._document.createElement('meta');
-      element.setAttribute(attribute, name);
-      // Don't append to head yet - we'll position it later
-    }
-
-    element.setAttribute('content', content);
-    
-    // If element was just created, append it to head
-    if (!element.parentNode) {
-      head.appendChild(element);
-    }
-  }
-
   private buildRobotsContent(index?: boolean, follow?: boolean): string {
     const indexValue = index !== false ? 'index' : 'noindex';
     const followValue = follow !== false ? 'follow' : 'nofollow';
@@ -505,12 +457,21 @@ export class SeoService {
     const selector = `script[type="application/ld+json"][data-seo-id="${identifier}"]`;
     const serialized = JSON.stringify(schema);
 
+    // Debug logging
+    if (!this._isBrowser) {
+      console.log(`SEO SSR: Adding structured data with identifier: ${identifier}`);
+      console.log(`SEO SSR: Schema type: ${schema['@type'] || 'unknown'}`);
+    }
+
     const existingScript = this._document.querySelector(
       selector
     ) as HTMLScriptElement | null;
 
     if (existingScript) {
       existingScript.textContent = serialized;
+      if (!this._isBrowser) {
+        console.log(`SEO SSR: Updated existing structured data script: ${identifier}`);
+      }
       return;
     }
 
@@ -519,6 +480,10 @@ export class SeoService {
     script.setAttribute('data-seo-id', identifier);
     script.textContent = serialized;
     this._document.head.appendChild(script);
+    
+    if (!this._isBrowser) {
+      console.log(`SEO SSR: Created new structured data script: ${identifier}`);
+    }
   }
 
   /**

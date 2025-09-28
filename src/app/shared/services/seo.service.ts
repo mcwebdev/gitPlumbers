@@ -66,10 +66,11 @@ export class SeoService {
   }
 
   private initializeRouteTracking(): void {
+    if (!this._isBrowser) return;
     this._router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
-        this.updateCanonicalUrl(event.urlAfterRedirects);
+        this.setCanonicalLink(`${this._baseUrl}${event.urlAfterRedirects}`);
       });
   }
 
@@ -80,88 +81,207 @@ export class SeoService {
   updateMetadata(metadata: Partial<SeoMetadata>): void {
     const finalMetadata: SeoMetadata = { ...this.defaultMetadata, ...metadata };
 
-    // Update title
+    const canonicalUrl = this.resolveCanonical(finalMetadata.canonical ?? finalMetadata.ogUrl);
+    finalMetadata.ogUrl = canonicalUrl;
+    finalMetadata.canonical = canonicalUrl;
+
+    // Set title first
     this._title.setTitle(finalMetadata.title);
 
-    // Update basic meta tags
-    this.updateTag('description', finalMetadata.description);
+    // Insert essential meta tags in proper order
+    this.insertMetaTagsInOrder(finalMetadata);
+  }
+
+  private insertMetaTagsInOrder(finalMetadata: SeoMetadata): void {
+    // Ensure meta tags are inserted in the right position in the DOM
+    this.ensureMetaTagsPosition();
+
+    // 1. Essential meta tags (after title, before styles)
+    this._meta.updateTag({
+      name: 'description',
+      content: finalMetadata.description,
+    });
+
     if (finalMetadata.keywords) {
       const keywordContent = Array.isArray(finalMetadata.keywords)
         ? finalMetadata.keywords.join(', ')
         : finalMetadata.keywords;
-      this.updateTag('keywords', keywordContent);
+      this._meta.updateTag({ name: 'keywords', content: keywordContent });
     }
 
-    const canonicalUrl = this.resolveCanonical(finalMetadata.canonical ?? finalMetadata.ogUrl);
-    this.applyCanonicalLink(canonicalUrl);
+    this._meta.updateTag({ name: 'author', content: 'GitPlumbers' });
 
-    // Update Open Graph meta tags
-    this.updateTag('og:title', finalMetadata.ogTitle || finalMetadata.title, 'property');
-    this.updateTag(
-      'og:description',
-      finalMetadata.ogDescription || finalMetadata.description,
-      'property'
-    );
-    this.updateTag('og:image', finalMetadata.ogImage!, 'property');
-    this.updateTag('og:url', canonicalUrl, 'property');
-    this.updateTag('og:type', finalMetadata.ogType || 'website', 'property');
-    this.updateTag('og:site_name', 'GitPlumbers', 'property');
-
-    // Add article-specific Open Graph tags
-    if (finalMetadata.ogType === 'article') {
-      if (finalMetadata.articleSection) {
-        this.updateTag('og:article:section', finalMetadata.articleSection, 'property');
-      }
-      if (finalMetadata.articleAuthor) {
-        this.updateTag('og:article:author', finalMetadata.articleAuthor, 'property');
-      }
-      if (finalMetadata.articlePublishedTime) {
-        this.updateTag('og:article:published_time', finalMetadata.articlePublishedTime, 'property');
-      }
-      if (finalMetadata.articleModifiedTime) {
-        this.updateTag('og:article:modified_time', finalMetadata.articleModifiedTime, 'property');
-      }
-    }
-
-    // Update Twitter Card meta tags
-    this.updateTag('twitter:card', finalMetadata.twitterCard!);
-    this.updateTag('twitter:title', finalMetadata.twitterTitle || finalMetadata.title);
-    this.updateTag(
-      'twitter:description',
-      finalMetadata.twitterDescription || finalMetadata.description
-    );
-    this.updateTag('twitter:image', finalMetadata.twitterImage || finalMetadata.ogImage!);
-    this.updateTag('twitter:site', '@gitplumbers');
-    this.updateTag('twitter:creator', '@gitplumbers');
-
-    // Update robots meta tag
     const robotsContent = this.buildRobotsContent(
       finalMetadata.robotsIndex,
       finalMetadata.robotsFollow
     );
-    this.updateTag('robots', robotsContent);
+    this._meta.updateTag({ name: 'robots', content: robotsContent });
 
-    // Update viewport for mobile optimization
-    this.updateTag('viewport', 'width=device-width, initial-scale=1');
+    this._meta.updateTag({ name: 'theme-color', content: '#1976d2' });
+    this._meta.updateTag({
+      name: 'msapplication-TileColor',
+      content: '#1976d2',
+    });
+    this._meta.updateTag({
+      name: 'msapplication-config',
+      content: '/browserconfig.xml',
+    });
+    this._meta.updateTag({ name: 'format-detection', content: 'telephone=no' });
+    this._meta.updateTag({ name: 'mobile-web-app-capable', content: 'yes' });
+    this._meta.updateTag({
+      name: 'apple-mobile-web-app-capable',
+      content: 'yes',
+    });
+    this._meta.updateTag({
+      name: 'apple-mobile-web-app-status-bar-style',
+      content: 'default',
+    });
+    this._meta.updateTag({
+      name: 'apple-mobile-web-app-title',
+      content: 'GitPlumbers',
+    });
+    this._meta.updateTag({
+      name: 'application-name',
+      content: 'GitPlumbers',
+    });
+    this._meta.updateTag({
+      name: 'msapplication-tooltip',
+      content: 'GitPlumbers - AI Code Optimization',
+    });
+    this._meta.updateTag({ name: 'msapplication-starturl', content: '/' });
 
-    // Add additional SEO meta tags
-    this.updateTag('author', 'GitPlumbers');
-    this.updateTag('theme-color', '#1976d2');
-    this.updateTag('msapplication-TileColor', '#1976d2');
+    // 2. Open Graph tags
+    const ogType = finalMetadata.ogType ?? 'website';
+    this._meta.updateTag({ property: 'og:type', content: ogType });
+    this._meta.updateTag({
+      property: 'og:title',
+      content: finalMetadata.ogTitle || finalMetadata.title,
+    });
+    this._meta.updateTag({
+      property: 'og:description',
+      content: finalMetadata.ogDescription || finalMetadata.description,
+    });
+    this._meta.updateTag({
+      property: 'og:image',
+      content: finalMetadata.ogImage!,
+    });
+    this._meta.updateTag({ property: 'og:url', content: finalMetadata.ogUrl! });
+    this._meta.updateTag({
+      property: 'og:site_name',
+      content: 'GitPlumbers',
+    });
 
-    // Add mobile app and platform-specific meta tags
-    this.updateTag('msapplication-config', '/browserconfig.xml');
-    this.updateTag('format-detection', 'telephone=no');
-    this.updateTag('mobile-web-app-capable', 'yes');
-    this.updateTag('apple-mobile-web-app-capable', 'yes');
-    this.updateTag('apple-mobile-web-app-status-bar-style', 'default');
-    this.updateTag('apple-mobile-web-app-title', 'GitPlumbers');
-    this.updateTag('application-name', 'GitPlumbers');
-    this.updateTag('msapplication-tooltip', 'GitPlumbers - AI Code Optimization');
-    this.updateTag('msapplication-starturl', '/');
+    // 3. Article-specific tags (if applicable)
+    if (ogType === 'article' && finalMetadata.articleSection) {
+      this._meta.updateTag({
+        property: 'article:section',
+        content: finalMetadata.articleSection,
+      });
+    }
+    if (ogType === 'article' && finalMetadata.articleAuthor) {
+      this._meta.updateTag({
+        property: 'article:author',
+        content: finalMetadata.articleAuthor,
+      });
+    }
+    if (ogType === 'article' && finalMetadata.articlePublishedTime) {
+      this._meta.updateTag({
+        property: 'article:published_time',
+        content: finalMetadata.articlePublishedTime,
+      });
+    }
+    if (ogType === 'article' && finalMetadata.articleModifiedTime) {
+      this._meta.updateTag({
+        property: 'article:modified_time',
+        content: finalMetadata.articleModifiedTime,
+      });
+    }
+
+    // 4. Twitter tags
+    this._meta.updateTag({
+      name: 'twitter:card',
+      content: finalMetadata.twitterCard!,
+    });
+    this._meta.updateTag({
+      name: 'twitter:title',
+      content: finalMetadata.twitterTitle || finalMetadata.title,
+    });
+    this._meta.updateTag({
+      name: 'twitter:description',
+      content: finalMetadata.twitterDescription || finalMetadata.description,
+    });
+    this._meta.updateTag({
+      name: 'twitter:image',
+      content: finalMetadata.twitterImage || finalMetadata.ogImage!,
+    });
+    this._meta.updateTag({ name: 'twitter:site', content: '@gitplumbers' });
+    this._meta.updateTag({
+      name: 'twitter:creator',
+      content: '@gitplumbers',
+    });
+
+    // 5. Canonical link
+    this._meta.updateTag({ rel: 'canonical', href: finalMetadata.canonical! });
+
+    // Add HTML comments for better organization
+    this.addOrganizationComments();
   }
 
-  private updateTag(name: string, content: string, attribute: string = 'name'): void {
+  private addOrganizationComments(): void {
+    if (!this._isBrowser) return; // Only add comments in browser for better readability
+
+    const head = this._document.head;
+    if (!head) return;
+
+    // Find Open Graph tags and add comment before them
+    const firstOgTag = head.querySelector('meta[property="og:type"]');
+    if (firstOgTag) {
+      const comment = this._document.createComment(' Open Graph / Facebook ');
+      firstOgTag.parentNode?.insertBefore(comment, firstOgTag);
+    }
+
+    // Find Twitter tags and add comment before them
+    const firstTwitterTag = head.querySelector('meta[name="twitter:card"]');
+    if (firstTwitterTag) {
+      const comment = this._document.createComment(' Twitter ');
+      firstTwitterTag.parentNode?.insertBefore(comment, firstTwitterTag);
+    }
+
+    // Find canonical link and add comment before it
+    const canonicalLink = head.querySelector('link[rel="canonical"]');
+    if (canonicalLink) {
+      const comment = this._document.createComment(' Canonical URL ');
+      canonicalLink.parentNode?.insertBefore(comment, canonicalLink);
+    }
+  }
+
+  private ensureMetaTagsPosition(): void {
+    // Move meta tags to appear right after the title tag
+    const head = this._document.head;
+    if (!head) return;
+
+    const titleTag = head.querySelector('title');
+    if (!titleTag) return;
+
+    // Find all meta tags we want to move
+    const metaTagsToMove = head.querySelectorAll(
+      'meta[name="description"], meta[name="keywords"], meta[property^="og:"], meta[name^="twitter:"], meta[name="robots"], meta[name="author"], meta[name="theme-color"], meta[name="msapplication-TileColor"], meta[name="msapplication-config"], meta[name="format-detection"], meta[name="mobile-web-app-capable"], meta[name="apple-mobile-web-app-capable"], meta[name="apple-mobile-web-app-status-bar-style"], meta[name="apple-mobile-web-app-title"], meta[name="application-name"], meta[name="msapplication-tooltip"], meta[name="msapplication-starturl"]'
+    );
+
+    // Move each meta tag to appear right after the title
+    metaTagsToMove.forEach((metaTag) => {
+      if (metaTag.parentNode) {
+        metaTag.parentNode.removeChild(metaTag);
+        titleTag.parentNode?.insertBefore(metaTag, titleTag.nextSibling);
+      }
+    });
+  }
+
+  private updateTag(
+    name: string,
+    content: string | undefined,
+    attribute: 'name' | 'property' = 'name'
+  ): void {
     // Allow meta tag updates during SSR for proper SEO
     // if (!this._isBrowser) {
     //   return;
@@ -207,7 +327,7 @@ export class SeoService {
 
   private updateCanonicalUrl(url: string): void {
     const canonicalUrl = this.resolveCanonical(url);
-    this.applyCanonicalLink(canonicalUrl);
+    this.setCanonicalLink(canonicalUrl);
   }
 
   private resolveCanonical(target?: string): string {
@@ -262,7 +382,7 @@ export class SeoService {
     return lastSegment.length > 0 && !lastSegment.includes('.');
   }
 
-  private applyCanonicalLink(url: string): void {
+  private setCanonicalLink(url: string): void {
     if (!url) {
       return;
     }

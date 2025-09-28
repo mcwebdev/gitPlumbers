@@ -174,11 +174,14 @@ export const blogPostResolver: ResolveFn<BlogPostResolverResult> = async (route:
         title: post.title
           ? `${post.title} | GitPlumbers`
           : 'Post not found | GitPlumbers',
-        description:
-          post.summary ??
-          'Explore our latest insights on code optimization and modernization.',
-        canonical: canonicalUrl,
+        description: post.summary ?? 'Explore our latest insights on code optimization and modernization.',
+        ogTitle: post.title ? `${post.title} | GitPlumbers` : 'Post not found | GitPlumbers',
+        ogDescription: post.summary ?? 'Explore our latest insights on code optimization and modernization.',
+        ogType: 'article',
         ogUrl: canonicalUrl,
+        twitterTitle: post.title ? `${post.title} | GitPlumbers` : 'Post not found | GitPlumbers',
+        twitterDescription: post.summary ?? 'Explore our latest insights on code optimization and modernization.',
+        canonical: canonicalUrl,
         robotsIndex: foundExact,
         robotsFollow: foundExact,
       });

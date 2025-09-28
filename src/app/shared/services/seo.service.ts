@@ -221,7 +221,7 @@ export class SeoService {
     });
 
     // 5. Canonical link
-    this._meta.updateTag({ rel: 'canonical', href: finalMetadata.canonical! });
+    this.setCanonicalLink(finalMetadata.canonical!);
 
     // Add HTML comments for better organization
     this.addOrganizationComments();
@@ -263,9 +263,9 @@ export class SeoService {
     const titleTag = head.querySelector('title');
     if (!titleTag) return;
 
-    // Find all meta tags we want to move
+    // Find all meta tags and canonical link we want to move
     const metaTagsToMove = head.querySelectorAll(
-      'meta[name="description"], meta[name="keywords"], meta[property^="og:"], meta[name^="twitter:"], meta[name="robots"], meta[name="author"], meta[name="theme-color"], meta[name="msapplication-TileColor"], meta[name="msapplication-config"], meta[name="format-detection"], meta[name="mobile-web-app-capable"], meta[name="apple-mobile-web-app-capable"], meta[name="apple-mobile-web-app-status-bar-style"], meta[name="apple-mobile-web-app-title"], meta[name="application-name"], meta[name="msapplication-tooltip"], meta[name="msapplication-starturl"]'
+      'meta[name="description"], meta[name="keywords"], meta[property^="og:"], meta[name^="twitter:"], meta[name="robots"], meta[name="author"], meta[name="theme-color"], meta[name="msapplication-TileColor"], meta[name="msapplication-config"], meta[name="format-detection"], meta[name="mobile-web-app-capable"], meta[name="apple-mobile-web-app-capable"], meta[name="apple-mobile-web-app-status-bar-style"], meta[name="apple-mobile-web-app-title"], meta[name="application-name"], meta[name="msapplication-tooltip"], meta[name="msapplication-starturl"], link[rel="canonical"]'
     );
 
     // Move each meta tag to appear right after the title
@@ -275,6 +275,11 @@ export class SeoService {
         titleTag.parentNode?.insertBefore(metaTag, titleTag.nextSibling);
       }
     });
+
+    // Debug logging to help troubleshoot
+    if (!this._isBrowser) {
+      console.log(`SEO SSR: Moved ${metaTagsToMove.length} meta tags after title`);
+    }
   }
 
   private updateTag(
@@ -392,17 +397,20 @@ export class SeoService {
     // }
 
     const head = this._document.head;
-    let linkElement = this._document.querySelector(
-      'link[rel="canonical"]'
-    ) as HTMLLinkElement | null;
+    
+    // Remove all existing canonical links to prevent duplicates
+    const existingCanonicalLinks = head.querySelectorAll('link[rel="canonical"]');
+    existingCanonicalLinks.forEach(link => link.remove());
+    
+    // Also remove any meta tags with rel="canonical" (incorrect usage)
+    const existingCanonicalMetas = head.querySelectorAll('meta[rel="canonical"]');
+    existingCanonicalMetas.forEach(meta => meta.remove());
 
-    if (!linkElement) {
-      linkElement = this._document.createElement('link');
-      linkElement.setAttribute('rel', 'canonical');
-      head.appendChild(linkElement);
-    }
-
+    // Create new canonical link
+    const linkElement = this._document.createElement('link');
+    linkElement.setAttribute('rel', 'canonical');
     linkElement.setAttribute('href', url);
+    head.appendChild(linkElement);
   }
 
   // Predefined metadata for different pages

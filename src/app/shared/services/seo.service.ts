@@ -93,74 +93,82 @@ export class SeoService {
   }
 
   private applyMetaTags(finalMetadata: SeoMetadata): void {
+    const managedMetaTags: HTMLMetaElement[] = [];
+    const trackMeta = (
+      definition: Pick<MetaDefinition, 'name' | 'property'>,
+      value?: string | null
+    ): void => {
+      const element = this.upsertMeta(definition, value);
+      if (element) {
+        managedMetaTags.push(element);
+      }
+    };
+
     const robotsContent = this.buildRobotsContent(
       finalMetadata.robotsIndex,
       finalMetadata.robotsFollow
     );
 
-    this.upsertMeta({ name: 'description' }, finalMetadata.description);
-    this.upsertMeta({ name: 'author' }, finalMetadata.articleAuthor || 'GitPlumbers');
-    this.upsertMeta({ name: 'robots' }, robotsContent);
+    trackMeta({ name: 'description' }, finalMetadata.description);
+    trackMeta({ name: 'author' }, finalMetadata.articleAuthor || 'GitPlumbers');
+    trackMeta({ name: 'robots' }, robotsContent);
 
     // Application & platform tags
-    this.upsertMeta({ name: 'theme-color' }, '#1976d2');
-    this.upsertMeta({ name: 'format-detection' }, 'telephone=no');
-    this.upsertMeta({ name: 'mobile-web-app-capable' }, 'yes');
-    this.upsertMeta({ name: 'apple-mobile-web-app-capable' }, 'yes');
-    this.upsertMeta({ name: 'apple-mobile-web-app-status-bar-style' }, 'default');
-    this.upsertMeta({ name: 'apple-mobile-web-app-title' }, 'GitPlumbers');
-    this.upsertMeta({ name: 'application-name' }, 'GitPlumbers');
-    this.upsertMeta({ name: 'msapplication-TileColor' }, '#1976d2');
-    this.upsertMeta({ name: 'msapplication-config' }, '/browserconfig.xml');
-    this.upsertMeta({ name: 'msapplication-tooltip' }, 'GitPlumbers - AI Code Optimization');
-    this.upsertMeta({ name: 'msapplication-starturl' }, '/');
+    trackMeta({ name: 'theme-color' }, '#1976d2');
+    trackMeta({ name: 'format-detection' }, 'telephone=no');
+    trackMeta({ name: 'mobile-web-app-capable' }, 'yes');
+    trackMeta({ name: 'apple-mobile-web-app-capable' }, 'yes');
+    trackMeta({ name: 'apple-mobile-web-app-status-bar-style' }, 'default');
+    trackMeta({ name: 'apple-mobile-web-app-title' }, 'GitPlumbers');
+    trackMeta({ name: 'application-name' }, 'GitPlumbers');
+    trackMeta({ name: 'msapplication-TileColor' }, '#1976d2');
+    trackMeta({ name: 'msapplication-config' }, '/browserconfig.xml');
+    trackMeta({ name: 'msapplication-tooltip' }, 'GitPlumbers - AI Code Optimization');
+    trackMeta({ name: 'msapplication-starturl' }, '/');
 
     // Open Graph tags
     const ogType = finalMetadata.ogType ?? 'website';
-    this.upsertMeta({ property: 'og:type' }, ogType);
-    this.upsertMeta({ property: 'og:title' }, finalMetadata.ogTitle || finalMetadata.title);
-    this.upsertMeta(
+    trackMeta({ property: 'og:type' }, ogType);
+    trackMeta({ property: 'og:title' }, finalMetadata.ogTitle || finalMetadata.title);
+    trackMeta(
       { property: 'og:description' },
       finalMetadata.ogDescription || finalMetadata.description
     );
-    this.upsertMeta({ property: 'og:image' }, finalMetadata.ogImage || this.defaultMetadata.ogImage);
-    this.upsertMeta({ property: 'og:url' }, finalMetadata.ogUrl || finalMetadata.canonical);
-    this.upsertMeta({ property: 'og:site_name' }, 'GitPlumbers');
-    this.upsertMeta({ property: 'og:locale' }, 'en_US');
+    trackMeta({ property: 'og:image' }, finalMetadata.ogImage || this.defaultMetadata.ogImage);
+    trackMeta({ property: 'og:url' }, finalMetadata.ogUrl || finalMetadata.canonical);
+    trackMeta({ property: 'og:site_name' }, 'GitPlumbers');
+    trackMeta({ property: 'og:locale' }, 'en_US');
 
     const includeArticleTags = ogType === 'article';
-    this.upsertMeta(
-      { property: 'article:section' },
-      includeArticleTags ? finalMetadata.articleSection : undefined
-    );
-    this.upsertMeta(
-      { property: 'article:author' },
-      includeArticleTags ? finalMetadata.articleAuthor : undefined
-    );
-    this.upsertMeta(
-      { property: 'article:published_time' },
-      includeArticleTags ? finalMetadata.articlePublishedTime : undefined
-    );
-    this.upsertMeta(
-      { property: 'article:modified_time' },
-      includeArticleTags ? finalMetadata.articleModifiedTime : undefined
-    );
+    if (includeArticleTags) {
+      trackMeta({ property: 'article:section' }, finalMetadata.articleSection);
+      trackMeta({ property: 'article:author' }, finalMetadata.articleAuthor);
+      trackMeta({ property: 'article:published_time' }, finalMetadata.articlePublishedTime);
+      trackMeta({ property: 'article:modified_time' }, finalMetadata.articleModifiedTime);
+    } else {
+      this.upsertMeta({ property: 'article:section' });
+      this.upsertMeta({ property: 'article:author' });
+      this.upsertMeta({ property: 'article:published_time' });
+      this.upsertMeta({ property: 'article:modified_time' });
+    }
 
     // Twitter tags
     const twitterCard = finalMetadata.twitterCard ?? 'summary_large_image';
     const twitterImage = finalMetadata.twitterImage || finalMetadata.ogImage;
 
-    this.upsertMeta({ name: 'twitter:card' }, twitterCard);
-    this.upsertMeta({ name: 'twitter:title' }, finalMetadata.twitterTitle || finalMetadata.title);
-    this.upsertMeta(
+    trackMeta({ name: 'twitter:card' }, twitterCard);
+    trackMeta({ name: 'twitter:title' }, finalMetadata.twitterTitle || finalMetadata.title);
+    trackMeta(
       { name: 'twitter:description' },
       finalMetadata.twitterDescription || finalMetadata.description
     );
-    this.upsertMeta({ name: 'twitter:image' }, twitterImage || this.defaultMetadata.twitterImage);
-    this.upsertMeta({ name: 'twitter:site' }, '@gitplumbers');
-    this.upsertMeta({ name: 'twitter:creator' }, '@gitplumbers');
+    trackMeta({ name: 'twitter:image' }, twitterImage || this.defaultMetadata.twitterImage);
+    trackMeta({ name: 'twitter:site' }, '@gitplumbers');
+    trackMeta({ name: 'twitter:creator' }, '@gitplumbers');
 
     this.setCanonicalLink(finalMetadata.canonical!);
+
+    this.positionSeoMetaTags(managedMetaTags);
   }
 
   private buildRobotsContent(index?: boolean, follow?: boolean): string {
@@ -490,15 +498,16 @@ export class SeoService {
   private upsertMeta(
     definition: Pick<MetaDefinition, 'name' | 'property'>,
     value?: string | null
-  ): void {
+  ): HTMLMetaElement | null {
+    const selector = this.buildSelector(definition);
     const normalized = value === undefined || value === null ? undefined : `${value}`.trim();
 
     if (!normalized) {
-      this._meta.removeTag(this.buildSelector(definition));
-      return;
+      this._meta.removeTag(selector);
+      return null;
     }
 
-    this._meta.updateTag({ ...definition, content: normalized });
+    return this._meta.updateTag({ ...definition, content: normalized }, selector) ?? null;
   }
 
   private buildSelector(definition: Pick<MetaDefinition, 'name' | 'property'>): string {
@@ -511,6 +520,40 @@ export class SeoService {
     }
 
     throw new Error('Meta definition must include a name or property.');
+  }
+
+  private positionSeoMetaTags(metaTags: HTMLMetaElement[]): void {
+    if (!metaTags.length) {
+      return;
+    }
+
+    const head = this._document.head;
+    const viewportMeta = head.querySelector('meta[name="viewport"]');
+    const parent = viewportMeta?.parentNode;
+
+    if (!viewportMeta || !parent) {
+      return;
+    }
+
+    let anchor: ChildNode | null = viewportMeta.nextSibling;
+    for (const tag of metaTags) {
+      if (!tag.parentNode || tag.parentNode !== parent) {
+        continue;
+      }
+
+      if (anchor === tag) {
+        anchor = tag.nextSibling;
+        continue;
+      }
+
+      if (anchor) {
+        parent.insertBefore(tag, anchor);
+      } else {
+        parent.appendChild(tag);
+      }
+
+      anchor = tag.nextSibling;
+    }
   }
 }
 

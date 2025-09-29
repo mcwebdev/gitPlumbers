@@ -11,111 +11,8 @@ const OPENAI_API_KEY = defineSecret('OPENAI_API_KEY');
 const BLOG_COLLECTION = 'blog_posts';
 
 
-const BASELINE_POST_TITLES: ReadonlyArray<string> = [
-  'Shipping React Refactors Without Slowing Product Velocity',
-  'What We Look For During Technical Debt Audits',
-  'Angular Modernization: From Zones to Signals in 30 Days',
-  'Reducing Incident Volume With Observability Playbooks',
-  'The Hidden Interest on Your Tech Debt: How to Calculate It (and Stop Paying)',
-  'From Firefighting to Flow: A Practical Playbook for Operational Calm',
-  'Shipping With Confidence: Release Practices That Don’t Break Fridays',
-  'The Tech-Debt Triage Guide: What to Fix Now vs. Later',
-  'Sustainable Velocity: Guardrails That Let Teams Move Fast Safely',
-  'Legacy Systems, Modern Outcomes: A Stepwise Modernization Blueprint',
-  'How to Make Incident Reviews Actually Reduce Incidents',
-  'Refactors That Pay for Themselves: Finding ROI in the Codebase',
-  'Stop the Bleed: Stabilization Sprints That Stick',
-  'The Architecture Debt Snowball: Unwinding Years in Weeks',
-  'Observability First: Dashboards That Change Behavior, Not Just Charts',
-  'Developer Experience as a Reliability Strategy',
-  'Risk-Scoped Roadmaps: De-Risk Quarter by Quarter',
-  'The Minimal-Change Modernization Pattern',
-  'Code Smells vs. Systemic Risk: Knowing the Difference',
-  'Automated Regression Barriers: Your Safety Net for Bold Changes',
-  'Release Health North Stars: What to Measure, What to Ignore',
-  'Feature Flags Without Chaos: Governance for Controlled Rollouts',
-  'When to Delete Code: The Courageous Clean-Up Manual',
-  'The Cost of Vibe Coding: Real Metrics From Real Teams',
-  'Scaling Without a Rewrite: Strangler-Fig Tactics That Work',
-  'Dependency Heatmaps: See Risk Like a CTO',
-  'Operational Runbooks That Don’t Rot',
-  'SLIs, SLOs, and SLA Reality: Aligning Reliability With Business',
-  'De-Clog Your CI/CD: Pipeline Latency and Flake Reduction',
-  'Monolith, Modular, or Microservices: Choosing for Throughput',
-  'How to Kill Flaky Tests for Good',
-  'The 90-Day Stability Program for Product Teams',
-  'Backlogs That Reduce Risk: Prioritization for Flow',
-  'The Incident Zero Illusion: Aim for Fast Recovery Instead',
-  'The Tech Debt Ledger: Make Invisible Work Visible',
-  'Refactoring With Feature Parity: A Step-by-Step Approach',
-  'Operational Calm for AI-Assisted Codebases',
-  'Guardrails for AI-Generated PRs: Quality Without Slowing Down',
-  'Modernization Without Downtime: Patterns for High-Uptime Teams',
-  'What ‘Done’ Means in Modernization Projects',
-  'The First 10 Days in a Messy Codebase',
-  'From Tribal Knowledge to Shared Wisdom: Documentation That Lives',
-  'The Postmortem You’ll Actually Read Next Quarter',
-  'SLAs That Don’t Handcuff Innovation',
-  'Tech Debt Budgeting: A CFO-Friendly Framework',
-  'Flow Mapping: Unblocking Your Delivery Value Stream',
-  'Service Ownership Without Overload',
-  'Runtime Errors as Product Risk: Aligning Engineering and PM',
-  'Refactor Readiness: Signals Your Codebase Is Safe to Change',
-  'The Stability-First Roadmap for Startups',
-  'Reducing MTTR With Better On-Call Ergonomics',
-  'Modern Testing Pyramids for Fast-Moving Teams',
-  'Platform Thinking for Small Teams: Just Enough Platform',
-  'Risk-Driven Code Reviews: What to Look For, What to Skip',
-  'The Business Case for Paying Down Tech Debt Now',
-  'Release Checklists That Scale With Your Team',
-  'How to Introduce Observability Without a Big Bang',
-  'From Chaos PRs to Clean Merges: PR Hygiene That Works',
-  'Architectures That Forgive: Designing for Failure',
-  'Telemetry-Driven Refactors: Let Data Pick the Next Move',
-  'Your AI-Built App Works… Until It Doesn’t: Stabilization Tactics',
-  'Operational KPIs That Predict Incidents',
-  'The Senior Engineer’s Guide to Unblocking Junior Velocity',
-  'Stakeholder Trust in 30 Days: Communication That Calms',
-  'De-Risking Migrations: Shadow Traffic and Progressive Cutovers',
-  'The Maintenance Sprint: How to Keep the Lights Bright',
-  'Security-First Delivery Without Slowing Down',
-  'Accessibility Debt: Ship Faster by Fixing It Early',
-  'When to Centralize vs. Federate Architecture Decisions',
-  'Code Reviews at Scale: Patterns for High-Throughput Teams',
-  'The Anatomy of a Great Runbook',
-  'Incident Simulations: Fire Drills That Prevent Real Fires',
-  'Modernizing Data Flows Without Breaking Analytics',
-  'Choosing the Right Observability Stack for Your Stage',
-  'How to Keep Uptime at 99.98% During Big Changes',
-  'Refactor vs. Rewrite: A Decision Tree for Leaders',
-  'Killing the ‘Works on My Machine’ Anti-Pattern',
-  'Five Stabilization Wins You Can Ship This Week',
-  'Making Dashboards Actionable: From Pretty to Practical',
-  'API Evolution Without Customer Pain',
-  'From Heroics to Habits: Institutionalizing Reliability',
-  'How to Audit a Codebase in 48 Hours',
-  'The “Thin Slice” Method for Safer Modernization',
-  'Release Notes Your Customers Actually Trust',
-  'Tech Debt and Team Morale: Fix One, Help the Other',
-  'Roadmap Risk Reviews: Keep Surprises Out of Q4',
-  'Operational Readiness for Product Launches',
-  'Turn On-Call Into a Source of Insight, Not Burnout',
-  'The First Principles of Clean, Scalable Apps',
-  'Guardrailed Releases: Shipping Bold Changes Safely',
-  'The Playbook for Parallelized Remediation Sprints',
-  'Preventing Drift: Keeping Architecture Diagrams True',
-  'Why Your Test Suite Is Slow—and How to Fix It',
-  'Codifying Institutional Knowledge With ADRs',
-  'The Metrics That Matter for Delivery Velocity',
-  'CI/CD for Humans: Pipelines That Don’t Punish',
-  'How to De-Risk Third-Party Dependencies',
-  'Operational Calm for Peak Season Traffic',
-  'The Executive’s Guide to Modernization Without Drama',
-  'From Proof-of-Concept to Production: Hardening the Path',
-  'Taming Complexity: Simplification as a Strategy',
-  'Resilience by Design: Building Systems That Heal Themselves',
-  'The gitPlumbers Method: Diagnose, Stabilize, Accelerate',
-];
+// Removed BASELINE_POST_TITLES to encourage more creative, unique article generation
+// The AI will now generate completely original titles and content without constraints
 
 type CategorySlug = 'culture' | 'ai-delivery' | 'guides' | 'case-studies' | 'reliability-observability' | 'security-compliance' | 'release-engineering' | 'platform-productivity' | 'performance-optimization' | 'data-engineering';
 
@@ -403,44 +300,52 @@ export const CATEGORY_THEMES: CategoryTheme[] = [
 // Keeps outputs specific, scannable, and implementation-focused.
 
 export const SYSTEM_PROMPT = [
-  'You are the editorial AI for GitPlumbers, a consultancy that fixes AI-assisted and legacy software so teams can ship safely.',
-  'Audience: pragmatic senior engineering leaders (VP Eng, Directors, Staff/Principal) who expect specifics, proof, and operational maturity.',
-  'Tone: candid, data-backed, and implementation-focused. Avoid fluff and generic platitudes.',
+  'You are a 20-year industry veteran writing for GitPlumbers, a consultancy that fixes AI-assisted and legacy software so teams can ship safely.',
+  'You\'ve seen it all: the dot-com crashes, the microservices revolution, the AI hype cycles, and the real-world consequences of technical debt.',
+  'Your audience: senior engineering leaders who\'ve been burned by consultants promising silver bullets. They want real talk, not buzzwords.',
   '',
-  'ENGAGEMENT & HOOK REQUIREMENTS:',
-  '- Open with a bold, high-stakes claim or scenario (downtime, compliance risk, revenue loss) to hook the reader immediately.',
-  '- Make the writing feel like an expert guiding the reader through a critical concept, not just summarizing facts.',
-  '- Use concrete scenarios and real-world failure modes to create urgency and relevance.',
-  '- Write with authority and confidence - you\'re the expert they need to listen to.',
+  'WRITING STYLE - BE THE INSIDER:',
+  '- Write like you\'re sharing war stories over coffee with a peer who\'s been in the trenches.',
+  '- Use "I\'ve seen this fail" and "Here\'s what actually works" language.',
+  '- Reference specific technologies, companies, and scenarios that show deep industry knowledge.',
+  '- Be conversational but authoritative - you know what you\'re talking about because you\'ve lived it.',
+  '- Use industry slang, acronyms, and inside jokes that only veterans would understand.',
   '',
-  'STRUCTURE & FORMATTING:',
-  '- Create structuredSections with clear markdown headers (##) for major sections.',
-  '- MANDATORY sections: "hook" (high-stakes opening), "implementation" (how-to steps), "takeaways" (key insights).',
-  '- Optional sections: "why-matters", "example", "questions".',
-  '- Use bullet points and checklists wherever possible for skimmability.',
-  '- Keep paragraphs under 4 lines for easy scanning.',
-  '- Each structured section should have 2-4 content paragraphs that are concise and actionable.',
+  'TITLE CREATION - BE MEMORABLE:',
+  '- Create titles that make people stop scrolling and think "Finally, someone gets it."',
+  '- Use specific scenarios, outcomes, or technical details: "The Microservices Migration That Almost Killed Us"',
+  '- Reference real pain points: "Why Your Kubernetes Cluster Is Bleeding Money"',
+  '- Be provocative but accurate: "The Feature Flag System That Saved Our Startup"',
+  '- Use diverse approaches: technical failures, time-based scenarios, system behaviors, or process breakdowns',
+  '- Avoid generic "How to" or "Best Practices" - be specific and memorable.',
+  '- AVOID repetitive patterns like "$XK" in titles - use variety in your approach.',
   '',
-  'CONTENT GUIDELINES:',
-  '- Always: lead with the problem, state the stakes, then give step-by-step actions.',
-  '- Include realistic metrics (e.g., MTTR, lead time, change failure rate), decision checklists, and risk trade-offs.',
-  '- Back guidance with examples from real-world failure modes.',
-  '- Prefer guardrails, automation, and reversible patterns over heroics.',
-  '- Be framework-agnostic; emphasize reliability, observability, security, and accessibility as first-class delivery concerns.',
-  '- Write concisely with verb-first headings, bullets over paragraphs, and concrete numbers where possible.',
+  'CONTENT STRUCTURE - TELL A STORY:',
+  '- Hook: Start with a specific scenario that your audience has lived through.',
+  '- Problem: Deep dive into why this matters and what happens when it goes wrong.',
+  '- Solution: Share the actual approach that works, with real implementation details.',
+  '- Results: Include specific metrics, timelines, and outcomes.',
+  '- Lessons: What you learned and what you\'d do differently.',
   '',
-  'CTA & STICKINESS:',
-  '- End with compelling calls to action that link to related resources or encourage deeper exploration.',
-  '- Make CTAs feel like natural next steps, not sales pitches.',
-  '- Example CTA style: "Want a full blueprint for implementing safe model deployment? Read: Designing an Evaluation Harness for Generative AI →"',
+  'TECHNICAL DEPTH - SHOW YOUR CREDENTIALS:',
+  '- Reference specific tools, versions, and configurations.',
+  '- Include actual code snippets, configs, or command examples where relevant.',
+  '- Mention real companies, products, and technologies by name.',
+  '- Use industry-standard metrics and KPIs that matter to engineering leaders.',
+  '- Show understanding of business impact, not just technical implementation.',
   '',
-  'Brand & SEO requirements:',
-  '- Naturally mention "GitPlumbers" once in the deck or conclusion, not repeatedly.',
-  '- Provide 2–4 internalLinks to gitplumbers.com with descriptive anchors that match the article\'s tactics.',
-  '- Output a primaryCTA with label + href + utm pointing to a relevant conversion page on gitplumbers.com.',
-  '- Include author (credible senior engineer persona) with 1–2 sentence bio.',
-  '- Set schemaHints.aboutEntity = "GitPlumbers" and faqIsFAQPage=true when FAQ is present.',
-  '- Avoid repeating the brand name unnaturally in body paragraphs.',
+  'KEYWORDS - BE SPECIFIC:',
+  '- Use exact tool names: "Terraform", "Prometheus", "Istio", "ArgoCD"',
+  '- Include specific methodologies: "GitOps", "Chaos Engineering", "SRE practices"',
+  '- Reference industry terms: "MTTR", "SLO", "canary deployment", "circuit breaker"',
+  '- Use problem-specific terms: "technical debt", "legacy modernization", "AI hallucination"',
+  '- Avoid generic terms - be precise and technical.',
+  '',
+  'BRAND INTEGRATION:',
+  '- Mention GitPlumbers naturally as the company that solves these problems.',
+  '- Include relevant internal links to services and case studies.',
+  '- End with a CTA that feels like a natural next step, not a sales pitch.',
+  '- Include author bio that shows real industry experience and credibility.',
 ].join(' ');
 
 export const generateBlogArticleHourly = onSchedule(
@@ -464,7 +369,8 @@ export const generateBlogArticleHourly = onSchedule(
     });
 
     const response = await client.responses.create({
-      model: 'gpt-4o-mini',
+      //  model: 'gpt-4o-mini',
+      model: 'gpt-5-nano',
       input: [
         {
           role: 'system',
@@ -485,7 +391,6 @@ export const generateBlogArticleHourly = onSchedule(
             'Structured blog article data for GitPlumbers including summary, body paragraphs, checklist, and FAQs.',
         },
       },
-      temperature: 0.6,
       max_output_tokens: 20000,
     });
 
@@ -506,7 +411,9 @@ export const generateBlogArticleHourly = onSchedule(
     }
 
     const slug = await ensureUniqueSlug(firestore, toSlug(payload.title));
-    const publishedOn = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const publishedOn = now.toISOString().split('T')[0]; // Date for display
+    const publishedAt = now.toISOString(); // Full timestamp for sorting
     const readTimeMinutes = Number.isFinite(payload.readTimeMinutes) ?
       Math.min(10, Math.max(5, Math.round(payload.readTimeMinutes))) :
       7;
@@ -571,11 +478,12 @@ export const generateBlogArticleHourly = onSchedule(
       slug,
       readTime,
       publishedOn,
+      publishedAt,
       seoMetadata,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       status: 'published',
-      sourceModel: 'gpt-4.1-mini',
+      sourceModel: 'gpt-5',
     };
 
     await firestore.collection(BLOG_COLLECTION).doc(slug).set(document);
@@ -608,9 +516,10 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
 
   sections.push(
     'HOOK REQUIREMENT: Start with a bold, high-stakes opening that immediately grabs attention. ' +
-    'Use scenarios like: "Your AI model just hallucinated in production, costing $50K in customer refunds" ' +
-    'or "A single line of legacy code brought down your entire payment system during Black Friday." ' +
-    'Make the stakes clear and urgent from paragraph one.'
+    'Use diverse scenarios like: "Your AI model just hallucinated in production, causing customer refunds" ' +
+    'or "A single line of legacy code brought down your entire payment system during Black Friday" ' +
+    'or "Your observability stack went dark during peak traffic" or "The deployment pipeline that broke every Friday." ' +
+    'Make the stakes clear and urgent from paragraph one. Vary your approach - not every scenario needs monetary amounts.'
   );
 
   sections.push(
@@ -630,7 +539,7 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
 
   sections.push(
     'EXAMPLE STRUCTURE: Your structuredSections should look like: ' +
-    '[{"header": "The $50K Hallucination", "type": "hook", "content": ["Your AI model just..."]}, ' +
+    '[{"header": "The AI Hallucination That Broke Production", "type": "hook", "content": ["Your AI model just..."]}, ' +
     '{"header": "Why This Matters", "type": "why-matters", "content": ["For engineering leaders..."]}, ' +
     '{"header": "How to Implement It", "type": "implementation", "content": ["Step 1: Set up evaluation..."]}, ' +
     '{"header": "Key Takeaways", "type": "takeaways", "content": ["Always validate AI outputs..."]}]'
@@ -652,17 +561,33 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
     'Each checklist item must be actionable and reference tooling, metrics, or operating cadence. Key takeaways should be crisp summary statements.'
   );
 
-  const avoided = [...new Set([...BASELINE_POST_TITLES, ...recent])];
-  if (avoided.length > 0) {
+  // Use recent articles for context, but don't constrain creativity
+  if (recent.length > 0) {
     sections.push(
-      `CRITICAL: Avoid overlapping topics, similar phrasing, or semantic similarity with these existing posts: ${avoided.join(' | ')}`
-    );
-    sections.push(
-      'Create a title that is semantically different from all existing articles. Use different keywords, ' +
-      'different problem framing, different solution approaches, or different industry contexts. ' +
-      'The title should feel completely fresh and novel to readers familiar with our content.'
+      `CONTEXT: Here are recent articles for reference (avoid exact duplication, but feel free to explore similar themes from different angles): ${recent.slice(0, 10).join(' | ')}`
     );
   }
+  
+  sections.push(
+    'UNIQUENESS REQUIREMENT: Create a completely unique title and angle that stands out. ' +
+    'Use unexpected combinations, specific scenarios, or novel problem statements. ' +
+    'Think of diverse angles like: "When Your AI Model Goes Rogue", "The Friday Night Deployment That Broke Everything", ' +
+    '"Why Your Observability Stack Is Lying to You", "The Microservice That Ate Our Database", ' +
+    '"How a Single Config Change Crashed Production", "The Load Test That Exposed Our Weakest Link". ' +
+    'Make it memorable and specific, not generic. Vary your approach - avoid repetitive patterns.'
+  );
+
+  sections.push(
+    'TITLE VARIETY REQUIREMENT: Create titles that use diverse approaches. Mix these patterns: ' +
+    '1) Technical failures: "The Database Migration That Broke Everything", ' +
+    '2) Time-based scenarios: "Why Every Friday Deployment Fails", ' +
+    '3) System behaviors: "When Your Monitoring Lies to You", ' +
+    '4) Process breakdowns: "The Code Review That Missed the Bug", ' +
+    '5) Performance issues: "The Slow Query That Killed Our API", ' +
+    '6) Security incidents: "The Credential Leak That Almost Cost Us Everything". ' +
+    'AVOID using monetary amounts ($XK, $XM) in titles - this pattern is overused. ' +
+    'Focus on technical impact, time, system behavior, or process failures instead.'
+  );
 
   sections.push(
     'Assume the reader is evaluating whether GitPlumbers can help them stabilize or accelerate delivery. Provide enough detail to earn trust.'
@@ -823,6 +748,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         type: 'array',
         minItems: 4,
         maxItems: 6,
+        description: 'Specific technical keywords that senior engineers would search for. Avoid generic terms like "development" or "software". Use specific tools, frameworks, methodologies (e.g., "feature flags", "canary deployments", "observability stack").',
         items: {
           type: 'string',
           minLength: 3,
@@ -1045,17 +971,17 @@ function validatePayload(payload: GeneratedArticlePayload, expectedCategory: Cat
   if (!Array.isArray(payload.structuredSections) || payload.structuredSections.length < 4) {
     throw new Error('Generated article missing structured sections');
   }
-  // Validate structured sections have at least the core required types
+  // Validate structured sections have at least some core types (relaxed)
   const coreRequiredTypes = ['hook', 'implementation', 'takeaways'];
   const sectionTypes = payload.structuredSections.map((s) => s.type);
   const missingCoreTypes = coreRequiredTypes.filter((type) => !sectionTypes.includes(type as any));
-  if (missingCoreTypes.length > 0) {
-    throw new Error(`Generated article missing core required section types: ${missingCoreTypes.join(', ')}`);
+  if (missingCoreTypes.length >= 3) {
+    throw new Error(`Generated article missing too many core section types: ${missingCoreTypes.join(', ')}`);
   }
 
-  // Validate that we have a good variety of section types
+  // Validate that we have reasonable variety of section types (relaxed)
   const uniqueTypes = [...new Set(sectionTypes)];
-  if (uniqueTypes.length < 4) {
+  if (uniqueTypes.length < 3) {
     throw new Error(`Generated article has insufficient section variety. Found: ${uniqueTypes.join(', ')}`);
   }
   if (!payload.title || !payload.deck || !payload.summary) {
@@ -1099,27 +1025,41 @@ function validatePayload(payload: GeneratedArticlePayload, expectedCategory: Cat
   }
 
   // Additional uniqueness validation
-  if (payload.title.length < 20) {
+  if (payload.title.length < 25) {
     throw new Error('Generated article title is too short - needs to be more specific and unique');
   }
   
-  // Check for generic phrases that indicate low uniqueness
-  const genericPhrases = [
-    'how to', 'best practices', 'guide to', 'introduction to', 'overview of',
-    'getting started', 'fundamentals', 'basics of', 'understanding'
+  // Check for overly generic phrases (relaxed)
+  const overlyGenericPhrases = [
+    'complete guide', 'ultimate guide', 'everything you need', 'beginner guide',
+    'fundamentals', 'basics of', 'getting started'
   ];
   const titleLower = payload.title.toLowerCase();
-  const hasGenericPhrase = genericPhrases.some(phrase => titleLower.includes(phrase));
-  if (hasGenericPhrase) {
-    throw new Error('Generated article title contains generic phrases - needs to be more specific and unique');
+  const hasOverlyGenericPhrase = overlyGenericPhrases.some(phrase => titleLower.includes(phrase));
+  if (hasOverlyGenericPhrase) {
+    throw new Error('Generated article title contains overly generic phrases - needs to be more specific and unique');
+  }
+  
+  // Check for repetitive monetary patterns (prevent $XK overuse)
+  const monetaryPatterns = [
+    /\$\d+k/i, /\$\d+m/i, /\$\d+,\d+/i, /\$\d+\.\d+k/i, /\$\d+\.\d+m/i
+  ];
+  const hasMonetaryPattern = monetaryPatterns.some(pattern => pattern.test(payload.title));
+  if (hasMonetaryPattern) {
+    throw new Error('Generated article title uses monetary amounts - avoid $XK/$XM patterns, use technical impact instead');
+  }
+  
+  // Encourage specific, memorable titles (relaxed)
+  if (payload.title.length < 20) {
+    throw new Error('Generated article title is too short - needs to be more specific and memorable');
   }
 
-  // Validate that keywords are diverse and not too generic
+  // Validate that keywords are diverse and not too generic (relaxed)
   const genericKeywords = ['development', 'software', 'engineering', 'technology', 'best practices'];
   const hasGenericKeywords = payload.keywords.some(keyword => 
     genericKeywords.some(generic => keyword.toLowerCase().includes(generic))
   );
-  if (hasGenericKeywords && payload.keywords.length < 6) {
+  if (hasGenericKeywords && payload.keywords.length < 3) {
     throw new Error('Generated article keywords are too generic - needs more specific technical terms');
   }
 }

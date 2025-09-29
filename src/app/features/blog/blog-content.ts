@@ -37,6 +37,7 @@ export interface BlogPost {
   readonly deck: string;
   readonly categorySlug: string;
   readonly publishedOn: string; // ISO date for easier formatting
+  readonly publishedAt?: string; // Full ISO timestamp for sorting
   readonly readTime: string;
   readonly summary: string;
   readonly body: ReadonlyArray<string>;

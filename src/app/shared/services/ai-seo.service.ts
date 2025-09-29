@@ -199,7 +199,7 @@ export class AiSeoService {
         name: 'GitPlumbers',
         url: 'https://gitplumbers.com/',
       },
-      datePublished: article.publishedAt.toISOString(),
+      datePublished: typeof article.publishedAt === 'string' ? article.publishedAt : article.publishedAt.toISOString(),
       programmingLanguage: article.technologies,
       proficiencyLevel: article.difficulty,
       about: {

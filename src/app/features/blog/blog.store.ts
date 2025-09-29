@@ -92,13 +92,15 @@ const getSortKey = (post: BlogPost): number => {
   const enriched = post as BlogPost & {
     slug?: string;
     publishedOnMs?: number;
+    publishedAtMs?: number;
     createdAtMs?: number;
     updatedAtMs?: number;
     createdAt?: string | Date;
     updatedAt?: string | Date;
   };
 
-  const publishedMs = enriched.publishedOnMs ?? coerceToMillis(enriched.publishedOn);
+  // Use publishedAt (full timestamp) if available, otherwise fall back to publishedOn (date only)
+  const publishedMs = enriched.publishedAtMs ?? coerceToMillis(enriched.publishedAt) ?? enriched.publishedOnMs ?? coerceToMillis(enriched.publishedOn);
   const createdMs = enriched.createdAtMs ?? coerceToMillis(enriched.createdAt);
   const updatedMs = enriched.updatedAtMs ?? coerceToMillis(enriched.updatedAt);
 
@@ -295,32 +297,57 @@ export const BlogStore = signalStore(
               createdAt?: unknown;
               updatedAt?: unknown;
               publishedOnMs?: number;
+              publishedAtMs?: number;
               createdAtMs?: number;
               updatedAtMs?: number;
               seoMetadata?: unknown;
             };
 
             const publishedOnMs = raw.publishedOnMs ?? coerceToMillis(raw.publishedOn);
+            const publishedAtMs = raw.publishedAtMs ?? coerceToMillis(raw.publishedAt);
             const createdAtMs = raw.createdAtMs ?? coerceToMillis(raw.createdAt);
             const updatedAtMs = raw.updatedAtMs ?? coerceToMillis(raw.updatedAt);
             const docCreatedMs = coerceToMillis((doc as unknown as { createTime?: unknown }).createTime);
             const docUpdatedMs = coerceToMillis((doc as unknown as { updateTime?: unknown }).updateTime);
 
-            const normalisedCreatedMs = createdAtMs ?? docCreatedMs ?? updatedAtMs ?? docUpdatedMs ?? publishedOnMs ?? Date.now();
+            const normalisedCreatedMs = createdAtMs ?? docCreatedMs ?? updatedAtMs ?? docUpdatedMs ?? publishedAtMs ?? publishedOnMs ?? Date.now();
             const normalisedUpdatedMs = updatedAtMs ?? docUpdatedMs ?? normalisedCreatedMs;
             const normalisedPublishedOnMs = publishedOnMs ?? normalisedCreatedMs;
+            const normalisedPublishedAtMs = publishedAtMs ?? publishedOnMs ?? normalisedCreatedMs;
 
             const normalisedPublishedOn =
               typeof raw.publishedOn === 'string' && raw.publishedOn.length > 0
                 ? raw.publishedOn
                 : new Date(normalisedPublishedOnMs).toISOString().slice(0, 10);
 
+            const processedUpdatedAt = raw.updatedAt 
+              ? (typeof raw.updatedAt === 'string' 
+                  ? raw.updatedAt 
+                  : (raw.updatedAt as any) instanceof Date 
+                    ? (raw.updatedAt as Date).toISOString()
+                    : (raw.updatedAt as any).toDate ? (raw.updatedAt as any).toDate().toISOString() : new Date(normalisedUpdatedMs).toISOString())
+              : new Date(normalisedUpdatedMs).toISOString();
+
             return {
               ...raw,
               publishedOn: normalisedPublishedOn,
-              createdAt: raw.createdAt ?? new Date(normalisedCreatedMs).toISOString(),
-              updatedAt: raw.updatedAt ?? new Date(normalisedUpdatedMs).toISOString(),
+              publishedAt: raw.publishedAt 
+                ? (typeof raw.publishedAt === 'string' 
+                    ? raw.publishedAt 
+                    : (raw.publishedAt as any) instanceof Date 
+                      ? (raw.publishedAt as Date).toISOString()
+                      : (raw.publishedAt as any).toDate ? (raw.publishedAt as any).toDate().toISOString() : new Date(normalisedPublishedAtMs).toISOString())
+                : new Date(normalisedPublishedAtMs).toISOString(),
+              createdAt: raw.createdAt 
+                ? (typeof raw.createdAt === 'string' 
+                    ? raw.createdAt 
+                    : (raw.createdAt as any) instanceof Date 
+                      ? (raw.createdAt as Date).toISOString()
+                      : (raw.createdAt as any).toDate ? (raw.createdAt as any).toDate().toISOString() : new Date(normalisedCreatedMs).toISOString())
+                : new Date(normalisedCreatedMs).toISOString(),
+              updatedAt: processedUpdatedAt,
               publishedOnMs: normalisedPublishedOnMs,
+              publishedAtMs: normalisedPublishedAtMs,
               createdAtMs: normalisedCreatedMs,
               updatedAtMs: normalisedUpdatedMs,
               seoMetadata: raw.seoMetadata,
@@ -328,7 +355,10 @@ export const BlogStore = signalStore(
           });
 
           const sortedPosts = posts.sort((a, b) => {
-            const publishedDiff = (b.publishedOnMs ?? 0) - (a.publishedOnMs ?? 0);
+            // Use publishedAtMs (full timestamp) for more precise sorting, fall back to publishedOnMs
+            const aTime = (a as any).publishedAtMs ?? a.publishedOnMs ?? 0;
+            const bTime = (b as any).publishedAtMs ?? b.publishedOnMs ?? 0;
+            const publishedDiff = bTime - aTime;
             if (publishedDiff !== 0) {
               return publishedDiff;
             }

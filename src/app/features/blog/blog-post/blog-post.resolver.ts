@@ -149,11 +149,26 @@ export const blogPostResolver: ResolveFn<BlogPostResolverResult> = async (route:
         articleSection: seo.articleSection,
         articleAuthor: post.author?.name,
         articlePublishedTime: post.publishedOn,
-        articleModifiedTime: post.updatedAt
-          ? typeof post.updatedAt === 'string'
-            ? post.updatedAt
-            : post.updatedAt.toISOString()
-          : post.publishedOn,
+        articleModifiedTime: (() => {
+          if (!post.updatedAt) {
+            return post.publishedOn;
+          }
+          
+          if (typeof post.updatedAt === 'string') {
+            return post.updatedAt;
+          }
+          
+          if (post.updatedAt instanceof Date) {
+            return post.updatedAt.toISOString();
+          }
+          
+          // Handle Firestore Timestamp
+          if ((post.updatedAt as any).toDate) {
+            return (post.updatedAt as any).toDate().toISOString();
+          }
+          
+          return post.publishedOn;
+        })(),
         canonical: canonicalUrl,
         robotsIndex: foundExact,
         robotsFollow: foundExact,
@@ -179,7 +194,34 @@ export const blogPostResolver: ResolveFn<BlogPostResolverResult> = async (route:
           },
           mainEntityOfPage: canonicalUrl,
           datePublished: post.publishedOn,
-          dateModified: post.updatedAt ? (typeof post.updatedAt === 'string' ? post.updatedAt : post.updatedAt.toISOString()) : post.publishedOn,
+          dateModified: (() => {
+            console.log('DEBUG RESOLVER STRUCTURED DATA: post.updatedAt type:', typeof post.updatedAt);
+            console.log('DEBUG RESOLVER STRUCTURED DATA: post.updatedAt value:', post.updatedAt);
+            
+            if (!post.updatedAt) {
+              console.log('DEBUG RESOLVER STRUCTURED DATA: No updatedAt, using publishedOn:', post.publishedOn);
+              return post.publishedOn;
+            }
+            
+            if (typeof post.updatedAt === 'string') {
+              console.log('DEBUG RESOLVER STRUCTURED DATA: updatedAt is string, returning as-is:', post.updatedAt);
+              return post.updatedAt;
+            }
+            
+            if (post.updatedAt instanceof Date) {
+              console.log('DEBUG RESOLVER STRUCTURED DATA: updatedAt is Date, converting to ISO string');
+              return post.updatedAt.toISOString();
+            }
+            
+            // Handle Firestore Timestamp
+            if ((post.updatedAt as any).toDate) {
+              console.log('DEBUG RESOLVER STRUCTURED DATA: updatedAt is Firestore Timestamp, converting to Date then ISO string');
+              return (post.updatedAt as any).toDate().toISOString();
+            }
+            
+            console.log('DEBUG RESOLVER STRUCTURED DATA: Unknown updatedAt type, using publishedOn:', post.publishedOn);
+            return post.publishedOn;
+          })(),
           ...(post.author && {
             author: {
               '@type': 'Person',

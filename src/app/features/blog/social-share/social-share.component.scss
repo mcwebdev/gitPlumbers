@@ -1,0 +1,127 @@
+.share-toolbar {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(12, 20, 36, 0.12);
+  background: rgba(0, 76, 137, 0.04);
+  display: grid;
+  gap: 1rem;
+}
+
+.share-toolbar__title {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0f172a;
+}
+
+.share-toolbar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.share-button {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  min-width: 10.5rem;
+  justify-content: center;
+  border-width: 2px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover,
+  &:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
+  }
+}
+
+.share-button--system {
+  color: #004c89;
+  border-color: rgba(0, 76, 137, 0.35);
+
+  &:hover,
+  &:focus {
+    background: rgba(0, 76, 137, 0.08);
+    border-color: rgba(0, 76, 137, 0.55);
+  }
+}
+
+.share-button--linkedin {
+  background: #0a66c2;
+  border-color: #0a66c2;
+  color: #ffffff;
+
+  &:hover,
+  &:focus {
+    background: #084f9c;
+    border-color: #084f9c;
+  }
+}
+
+.share-button--x {
+  background: #111827;
+  border-color: #111827;
+  color: #ffffff;
+
+  &:hover,
+  &:focus {
+    background: #0b1324;
+    border-color: #0b1324;
+  }
+}
+
+.share-button--facebook {
+  background: #1877f2;
+  border-color: #1877f2;
+  color: #ffffff;
+
+  &:hover,
+  &:focus {
+    background: #115fca;
+    border-color: #115fca;
+  }
+}
+
+.share-button--copy {
+  color: #0f172a;
+  border-color: rgba(12, 20, 36, 0.35);
+
+  &:hover,
+  &:focus {
+    background: rgba(12, 20, 36, 0.08);
+    border-color: rgba(12, 20, 36, 0.55);
+  }
+}
+
+.share-button--copied {
+  background: #047857 !important;
+  border-color: #047857 !important;
+  color: #ffffff !important;
+}
+
+.share-button--copy-error {
+  border-color: #dc2626 !important;
+  color: #dc2626 !important;
+}
+
+.share-toolbar__feedback {
+  min-height: 1.2rem;
+  font-size: 0.85rem;
+  color: #065f46;
+}
+
+.share-toolbar__error {
+  color: #b91c1c;
+}
+
+@media (max-width: 640px) {
+  .share-toolbar {
+    padding: 1.25rem;
+  }
+
+  .share-button {
+    width: 100%;
+  }
+}

@@ -16,12 +16,18 @@ import { SeoService } from '../../../shared/services/seo.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { BreadcrumbNavComponent, BreadcrumbItem } from '../../../shared/components/breadcrumb-nav/breadcrumb-nav.component';
 import { ReadingProgressComponent } from '../../../shared/components/reading-progress/reading-progress.component';
+import { SocialShareComponent } from '../social-share/social-share.component';
 import { BlogPostResolverResult } from './blog-post.resolver';
-
+interface ShareMetadata {
+  readonly title: string;
+  readonly summary: string;
+  readonly url: string;
+  readonly tags: readonly string[];
+}
 @Component({
   selector: 'app-blog-post',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgFor, NgIf, LoadingSpinnerComponent, BreadcrumbNavComponent, ReadingProgressComponent],
+  imports: [CommonModule, RouterLink, NgFor, NgIf, LoadingSpinnerComponent, BreadcrumbNavComponent, ReadingProgressComponent, SocialShareComponent],
   templateUrl: './blog-post.component.html',
   styleUrl: './blog-post.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,7 +80,7 @@ export class BlogPostComponent implements OnDestroy {
       { label: currentPost.title, isActive: true },
     ];
   });
-
+  private readonly _blogBaseUrl = 'https://gitplumbers.com/blog';
   // SEO metadata is now applied in the resolver during route resolution (server-side)
   // This ensures metadata appears in the initial HTML response
 
@@ -96,6 +102,31 @@ export class BlogPostComponent implements OnDestroy {
     const slug = this.slug();
     return this._content.renderCTA(cta, slug);
   }
+
+  protected readonly shareMetadata = computed<ShareMetadata | null>(() => {
+    const currentPost = this.post();
+    if (!currentPost) {
+      return null;
+    }
+
+    const slug = this.slug();
+    const canonical = `${this._blogBaseUrl}/${slug}`;
+    const canonicalMatchesSlug =
+      typeof canonical === 'string' &&
+      canonical.startsWith(this._blogBaseUrl) &&
+      canonical.endsWith(`/${slug}`);
+
+    const shareUrl = canonicalMatchesSlug
+      ? canonical
+      : `${this._blogBaseUrl}/${slug}`;
+
+    return {
+      title: currentPost.title,
+      summary: currentPost.summary || currentPost.deck,
+      url: shareUrl,
+      tags: currentPost.keywords ?? [],
+    };
+  });
 
   ngOnDestroy(): void {
     // Clean up structured data when component is destroyed

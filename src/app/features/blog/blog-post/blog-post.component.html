@@ -31,7 +31,14 @@
     <blockquote *ngIf="currentPost.heroQuote" class="blog-post__quote">{{ currentPost.heroQuote }}</blockquote>
     <a routerLink="/blog" class="blog-post__back">Back to all posts</a>
   </header>
-
+  @if (shareMetadata(); as share) {
+    <app-social-share
+      [title]="share.title"
+      [summary]="share.summary"
+      [shareUrl]="share.url"
+      [tags]="share.tags"
+    ></app-social-share>
+    }
   <section class="blog-post__body" aria-label="Article body">
     <p *ngFor="let paragraph of currentPost.body">{{ paragraph }}</p>
     

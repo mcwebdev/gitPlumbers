@@ -425,11 +425,11 @@ export const generateBlogArticleHourly = onSchedule(
       description: payload.summary,
       ogTitle: `${payload.title} | GitPlumbers`,
       ogDescription: payload.summary,
-      ogImage: 'https://gitplumbers.com/logo.png',
+      ogImage: 'https://gitplumbers.com/site-promo.png',
       ogType: 'article',
       twitterTitle: `${payload.title} | GitPlumbers`,
       twitterDescription: payload.summary,
-      twitterImage: 'https://gitplumbers.com/logo.png',
+      twitterImage: 'https://gitplumbers.com/site-promo.png',
       articleSection: payload.schemaHints.articleSection,
       structuredDataArticle: {
         '@context': 'https://schema.org',
@@ -440,7 +440,7 @@ export const generateBlogArticleHourly = onSchedule(
           '@type': 'Organization',
           name: 'GitPlumbers',
           url: 'https://gitplumbers.com/',
-          logo: 'https://gitplumbers.com/logo.png'
+          logo: 'https://gitplumbers.com/site-promo.png'
         },
         mainEntityOfPage: `https://gitplumbers.com/blog/${slug}/`,
         datePublished: publishedOn,
@@ -559,6 +559,11 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
   );
   sections.push(
     'Each checklist item must be actionable and reference tooling, metrics, or operating cadence. Key takeaways should be crisp summary statements.'
+  );
+  sections.push(
+    'SUMMARY REQUIREMENT: Write a compelling summary (60-160 characters) that ends cleanly at a sentence boundary. ' +
+    'Avoid truncation by keeping it under 160 characters and ending with proper punctuation. ' +
+    'Make it scannable and action-oriented for senior engineering leaders.'
   );
 
   // Use recent articles for context, but don't constrain creativity
@@ -742,7 +747,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
       summary: {
         type: 'string',
         minLength: 60,
-        maxLength: 240,
+        maxLength: 160,
       },
       keywords: {
         type: 'array',

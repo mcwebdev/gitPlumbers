@@ -1,5 +1,5 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { Meta, Title } from '@angular/platform-browser';
+import { Meta, Title, type MetaDefinition } from '@angular/platform-browser';
 import { DOCUMENT } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
@@ -49,13 +49,13 @@ export class SeoService {
     ogTitle: 'GitPlumbers - AI Code Optimization & Enterprise Modernization',
     ogDescription:
       'Expert network transforming AI-generated codebases into scalable, production-ready applications. Specialized in React, Vue, Angular, Node.js, and Python optimization.',
-    ogImage: 'https://gitplumbers.com/logo.png',
+    ogImage: 'https://gitplumbers.com/site-promo.png',
     ogUrl: 'https://gitplumbers.com/',
     twitterCard: 'summary_large_image',
     twitterTitle: 'GitPlumbers - Transform AI Code Chaos into Clean Applications',
     twitterDescription:
       'Stop shipping fragile AI-generated code. Our expert network optimizes React, Angular, Vue, Node.js & Python applications for enterprise scale.',
-    twitterImage: 'https://gitplumbers.com/logo.png',
+    twitterImage: 'https://gitplumbers.com/site-promo.png',
     robotsIndex: true,
     robotsFollow: true,
   };
@@ -81,144 +81,92 @@ export class SeoService {
   updateMetadata(metadata: Partial<SeoMetadata>): void {
     const finalMetadata: SeoMetadata = { ...this.defaultMetadata, ...metadata };
 
+    // Ensure canonical URL and og:url are consistent
     const canonicalUrl = this.resolveCanonical(finalMetadata.canonical ?? finalMetadata.ogUrl);
-    finalMetadata.ogUrl = canonicalUrl;
     finalMetadata.canonical = canonicalUrl;
+    finalMetadata.ogUrl = canonicalUrl; // Make sure og:url matches canonical
 
     // Set title first
     this._title.setTitle(finalMetadata.title);
 
-    // Insert essential meta tags in proper order
-    this.insertMetaTagsInOrder(finalMetadata);
+    this.applyMetaTags(finalMetadata);
   }
 
-  private insertMetaTagsInOrder(finalMetadata: SeoMetadata): void {
-    // Create and position meta tags directly after the viewport meta tag
-    const head = this._document.head;
-    const viewportMeta = head.querySelector('meta[name="viewport"]');
-    
-    // Helper function to create and position meta tags immediately
-    const createAndPositionMetaTag = (attributes: Record<string, string>, content: string) => {
-      const element = this._document.createElement('meta');
-      Object.entries(attributes).forEach(([key, value]) => {
-        element.setAttribute(key, value);
-      });
-      element.setAttribute('content', content);
-      
-      // Insert after viewport meta tag if it exists, otherwise append to head
-      if (viewportMeta && viewportMeta.parentNode) {
-        viewportMeta.parentNode.insertBefore(element, viewportMeta.nextSibling);
-      } else {
-        head.appendChild(element);
-      }
-    };
-
-    // 1. Essential meta tags (before styles)
-    createAndPositionMetaTag({ name: 'description' }, finalMetadata.description);
-
-    if (finalMetadata.keywords) {
-      const keywordContent = Array.isArray(finalMetadata.keywords)
-        ? finalMetadata.keywords.join(', ')
-        : finalMetadata.keywords;
-      createAndPositionMetaTag({ name: 'keywords' }, keywordContent);
-    }
-
-    createAndPositionMetaTag({ name: 'author' }, 'GitPlumbers');
-
+  private applyMetaTags(finalMetadata: SeoMetadata): void {
     const robotsContent = this.buildRobotsContent(
       finalMetadata.robotsIndex,
       finalMetadata.robotsFollow
     );
-    createAndPositionMetaTag({ name: 'robots' }, robotsContent);
 
-    createAndPositionMetaTag({ name: 'theme-color' }, '#1976d2');
-    createAndPositionMetaTag({ name: 'msapplication-TileColor' }, '#1976d2');
-    createAndPositionMetaTag({ name: 'msapplication-config' }, '/browserconfig.xml');
-    createAndPositionMetaTag({ name: 'format-detection' }, 'telephone=no');
-    createAndPositionMetaTag({ name: 'mobile-web-app-capable' }, 'yes');
-    createAndPositionMetaTag({ name: 'apple-mobile-web-app-capable' }, 'yes');
-    createAndPositionMetaTag({ name: 'apple-mobile-web-app-status-bar-style' }, 'default');
-    createAndPositionMetaTag({ name: 'apple-mobile-web-app-title' }, 'GitPlumbers');
-    createAndPositionMetaTag({ name: 'application-name' }, 'GitPlumbers');
-    createAndPositionMetaTag({ name: 'msapplication-tooltip' }, 'GitPlumbers - AI Code Optimization');
-    createAndPositionMetaTag({ name: 'msapplication-starturl' }, '/');
+    this.upsertMeta({ name: 'description' }, finalMetadata.description);
+    this.upsertMeta({ name: 'author' }, finalMetadata.articleAuthor || 'GitPlumbers');
+    this.upsertMeta({ name: 'robots' }, robotsContent);
 
-    // 2. Open Graph tags
+    // Application & platform tags
+    this.upsertMeta({ name: 'theme-color' }, '#1976d2');
+    this.upsertMeta({ name: 'format-detection' }, 'telephone=no');
+    this.upsertMeta({ name: 'mobile-web-app-capable' }, 'yes');
+    this.upsertMeta({ name: 'apple-mobile-web-app-capable' }, 'yes');
+    this.upsertMeta({ name: 'apple-mobile-web-app-status-bar-style' }, 'default');
+    this.upsertMeta({ name: 'apple-mobile-web-app-title' }, 'GitPlumbers');
+    this.upsertMeta({ name: 'application-name' }, 'GitPlumbers');
+    this.upsertMeta({ name: 'msapplication-TileColor' }, '#1976d2');
+    this.upsertMeta({ name: 'msapplication-config' }, '/browserconfig.xml');
+    this.upsertMeta({ name: 'msapplication-tooltip' }, 'GitPlumbers - AI Code Optimization');
+    this.upsertMeta({ name: 'msapplication-starturl' }, '/');
+
+    // Open Graph tags
     const ogType = finalMetadata.ogType ?? 'website';
-    createAndPositionMetaTag({ property: 'og:type' }, ogType);
-    createAndPositionMetaTag({ property: 'og:title' }, finalMetadata.ogTitle || finalMetadata.title);
-    createAndPositionMetaTag({ property: 'og:description' }, finalMetadata.ogDescription || finalMetadata.description);
-    createAndPositionMetaTag({ property: 'og:image' }, finalMetadata.ogImage!);
-    createAndPositionMetaTag({ property: 'og:url' }, finalMetadata.ogUrl!);
-    createAndPositionMetaTag({ property: 'og:site_name' }, 'GitPlumbers');
+    this.upsertMeta({ property: 'og:type' }, ogType);
+    this.upsertMeta({ property: 'og:title' }, finalMetadata.ogTitle || finalMetadata.title);
+    this.upsertMeta(
+      { property: 'og:description' },
+      finalMetadata.ogDescription || finalMetadata.description
+    );
+    this.upsertMeta({ property: 'og:image' }, finalMetadata.ogImage || this.defaultMetadata.ogImage);
+    this.upsertMeta({ property: 'og:url' }, finalMetadata.ogUrl || finalMetadata.canonical);
+    this.upsertMeta({ property: 'og:site_name' }, 'GitPlumbers');
+    this.upsertMeta({ property: 'og:locale' }, 'en_US');
 
-    // 3. Article-specific tags (if applicable)
-    if (ogType === 'article' && finalMetadata.articleSection) {
-      createAndPositionMetaTag({ property: 'article:section' }, finalMetadata.articleSection);
-    }
-    if (ogType === 'article' && finalMetadata.articleAuthor) {
-      createAndPositionMetaTag({ property: 'article:author' }, finalMetadata.articleAuthor);
-    }
-    if (ogType === 'article' && finalMetadata.articlePublishedTime) {
-      createAndPositionMetaTag({ property: 'article:published_time' }, finalMetadata.articlePublishedTime);
-    }
-    if (ogType === 'article' && finalMetadata.articleModifiedTime) {
-      createAndPositionMetaTag({ property: 'article:modified_time' }, finalMetadata.articleModifiedTime);
-    }
+    const includeArticleTags = ogType === 'article';
+    this.upsertMeta(
+      { property: 'article:section' },
+      includeArticleTags ? finalMetadata.articleSection : undefined
+    );
+    this.upsertMeta(
+      { property: 'article:author' },
+      includeArticleTags ? finalMetadata.articleAuthor : undefined
+    );
+    this.upsertMeta(
+      { property: 'article:published_time' },
+      includeArticleTags ? finalMetadata.articlePublishedTime : undefined
+    );
+    this.upsertMeta(
+      { property: 'article:modified_time' },
+      includeArticleTags ? finalMetadata.articleModifiedTime : undefined
+    );
 
-    // 4. Twitter tags
-    createAndPositionMetaTag({ name: 'twitter:card' }, finalMetadata.twitterCard!);
-    createAndPositionMetaTag({ name: 'twitter:title' }, finalMetadata.twitterTitle || finalMetadata.title);
-    createAndPositionMetaTag({ name: 'twitter:description' }, finalMetadata.twitterDescription || finalMetadata.description);
-    createAndPositionMetaTag({ name: 'twitter:image' }, finalMetadata.twitterImage || finalMetadata.ogImage!);
-    createAndPositionMetaTag({ name: 'twitter:site' }, '@gitplumbers');
-    createAndPositionMetaTag({ name: 'twitter:creator' }, '@gitplumbers');
+    // Twitter tags
+    const twitterCard = finalMetadata.twitterCard ?? 'summary_large_image';
+    const twitterImage = finalMetadata.twitterImage || finalMetadata.ogImage;
 
-    // 5. Canonical link
+    this.upsertMeta({ name: 'twitter:card' }, twitterCard);
+    this.upsertMeta({ name: 'twitter:title' }, finalMetadata.twitterTitle || finalMetadata.title);
+    this.upsertMeta(
+      { name: 'twitter:description' },
+      finalMetadata.twitterDescription || finalMetadata.description
+    );
+    this.upsertMeta({ name: 'twitter:image' }, twitterImage || this.defaultMetadata.twitterImage);
+    this.upsertMeta({ name: 'twitter:site' }, '@gitplumbers');
+    this.upsertMeta({ name: 'twitter:creator' }, '@gitplumbers');
+
     this.setCanonicalLink(finalMetadata.canonical!);
-
-    // Add HTML comments for better organization
-    this.addOrganizationComments();
-  }
-
-
-  private addOrganizationComments(): void {
-    if (!this._isBrowser) return; // Only add comments in browser for better readability
-
-    const head = this._document.head;
-    if (!head) return;
-
-    // Find Open Graph tags and add comment before them
-    const firstOgTag = head.querySelector('meta[property="og:type"]');
-    if (firstOgTag) {
-      const comment = this._document.createComment(' Open Graph / Facebook ');
-      firstOgTag.parentNode?.insertBefore(comment, firstOgTag);
-    }
-
-    // Find Twitter tags and add comment before them
-    const firstTwitterTag = head.querySelector('meta[name="twitter:card"]');
-    if (firstTwitterTag) {
-      const comment = this._document.createComment(' Twitter ');
-      firstTwitterTag.parentNode?.insertBefore(comment, firstTwitterTag);
-    }
-
-    // Find canonical link and add comment before it
-    const canonicalLink = head.querySelector('link[rel="canonical"]');
-    if (canonicalLink) {
-      const comment = this._document.createComment(' Canonical URL ');
-      canonicalLink.parentNode?.insertBefore(comment, canonicalLink);
-    }
   }
 
   private buildRobotsContent(index?: boolean, follow?: boolean): string {
     const indexValue = index !== false ? 'index' : 'noindex';
     const followValue = follow !== false ? 'follow' : 'nofollow';
     return `${indexValue}, ${followValue}`;
-  }
-
-  private updateCanonicalUrl(url: string): void {
-    const canonicalUrl = this.resolveCanonical(url);
-    this.setCanonicalLink(canonicalUrl);
   }
 
   private resolveCanonical(target?: string): string {
@@ -283,29 +231,22 @@ export class SeoService {
     // }
 
     const head = this._document.head;
-    
-    // Remove all existing canonical links to prevent duplicates
-    const existingCanonicalLinks = head.querySelectorAll('link[rel="canonical"]');
-    existingCanonicalLinks.forEach(link => link.remove());
-    
-    // Also remove any meta tags with rel="canonical" (incorrect usage)
-    const existingCanonicalMetas = head.querySelectorAll('meta[rel="canonical"]');
-    existingCanonicalMetas.forEach(meta => meta.remove());
+    this._currentCanonical = url;
 
-    // Find the viewport meta tag to insert canonical link after it
-    const viewportMeta = head.querySelector('meta[name="viewport"]');
-    
-    // Create new canonical link
-    const linkElement = this._document.createElement('link');
-    linkElement.setAttribute('rel', 'canonical');
-    linkElement.setAttribute('href', url);
-    
-    // Insert after viewport meta tag if it exists, otherwise append to head
-    if (viewportMeta && viewportMeta.parentNode) {
-      viewportMeta.parentNode.insertBefore(linkElement, viewportMeta.nextSibling);
-    } else {
-      head.appendChild(linkElement);
+    let linkElement = head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!linkElement) {
+      const viewportMeta = head.querySelector('meta[name="viewport"]');
+      linkElement = this._document.createElement('link');
+      linkElement.setAttribute('rel', 'canonical');
+
+      if (viewportMeta?.parentNode) {
+        viewportMeta.parentNode.insertBefore(linkElement, viewportMeta.nextSibling);
+      } else {
+        head.appendChild(linkElement);
+      }
     }
+
+    linkElement.setAttribute('href', url);
   }
 
   // Predefined metadata for different pages
@@ -378,7 +319,7 @@ export class SeoService {
       ogTitle: aiOptimizedTitle,
       ogDescription: aiOptimizedDescription,
       ogUrl: canonicalUrl,
-      ogImage: 'https://gitplumbers.com/logo.png',
+      ogImage: 'https://gitplumbers.com/site-promo.png',
       twitterCard: 'summary_large_image',
       twitterTitle: aiOptimizedTitle,
       twitterDescription: aiOptimizedDescription,
@@ -389,41 +330,85 @@ export class SeoService {
   }
 
   /**
-   * Optimize title for AI search engines
+   * Optimize title for AI search engines and social media
    */
   private optimizeForAi(title: string, keywords: string[]): string {
     const primaryKeyword = keywords[0];
+    let optimizedTitle = title;
 
     // Ensure primary keyword is in title
     if (!title.toLowerCase().includes(primaryKeyword.toLowerCase())) {
-      return `${primaryKeyword}: ${title} | GitPlumbers`;
+      optimizedTitle = `${primaryKeyword}: ${title}`;
     }
 
     // Add GitPlumbers brand for authority
-    if (!title.includes('GitPlumbers')) {
-      return `${title} | GitPlumbers Expert Guide`;
+    if (!optimizedTitle.includes('GitPlumbers')) {
+      optimizedTitle = `${optimizedTitle} | GitPlumbers`;
     }
 
-    return title;
+    // Optimize for social media (Twitter limit ~100 chars, but aim for ~90 for safety)
+    if (optimizedTitle.length > 90) {
+      // Try to shorten while keeping key terms
+      const brandSuffix = ' | GitPlumbers';
+      const maxContentLength = 90 - brandSuffix.length;
+      
+      if (title.length > maxContentLength) {
+        // Truncate title and add ellipsis
+        optimizedTitle = title.substring(0, maxContentLength - 3) + '...' + brandSuffix;
+      }
+    }
+
+    return optimizedTitle;
   }
 
   /**
-   * Optimize description for AI understanding and citation
+   * Optimize description for AI understanding, citation, and social media
    */
   private optimizeDescriptionForAi(description: string, keywords: string[]): string {
     const primaryKeyword = keywords[0];
+    let optimizedDescription = description;
 
     // Ensure description starts with primary keyword for better AI understanding
     if (!description.toLowerCase().startsWith(primaryKeyword.toLowerCase())) {
-      return `${primaryKeyword}: ${description}`;
+      optimizedDescription = `${primaryKeyword}: ${description}`;
     }
 
     // Add authority signals that AI models value
-    if (!description.includes('expert') && !description.includes('proven')) {
-      return `${description} Expert insights from senior developers with proven results.`;
+    if (!optimizedDescription.includes('expert') && !optimizedDescription.includes('proven')) {
+      optimizedDescription = `${optimizedDescription} Expert insights from senior developers with proven results.`;
     }
 
-    return description;
+    // Optimize for social media and search engines
+    // Google truncates at ~160 chars, Twitter at ~200, aim for ~155 for safety
+    if (optimizedDescription.length > 155) {
+      // Find a good breaking point (end of sentence or word)
+      const targetLength = 152; // Leave room for "..."
+      let truncateAt = targetLength;
+      
+      // Try to break at end of sentence
+      const lastPeriod = optimizedDescription.lastIndexOf('.', targetLength);
+      const lastExclamation = optimizedDescription.lastIndexOf('!', targetLength);
+      const lastQuestion = optimizedDescription.lastIndexOf('?', targetLength);
+      
+      const lastSentenceEnd = Math.max(lastPeriod, lastExclamation, lastQuestion);
+      if (lastSentenceEnd > targetLength - 20) { // If sentence end is close to target
+        truncateAt = lastSentenceEnd + 1;
+      } else {
+        // Break at word boundary
+        const lastSpace = optimizedDescription.lastIndexOf(' ', targetLength);
+        if (lastSpace > targetLength - 10) {
+          truncateAt = lastSpace;
+        }
+      }
+      
+      optimizedDescription = optimizedDescription.substring(0, truncateAt).trim();
+      // Only add ellipsis if we didn't end at a sentence boundary
+      if (!optimizedDescription.endsWith('.') && !optimizedDescription.endsWith('!') && !optimizedDescription.endsWith('?')) {
+        optimizedDescription += '...';
+      }
+    }
+
+    return optimizedDescription;
   }
 
   /**
@@ -500,6 +485,32 @@ export class SeoService {
     if (existingScript) {
       existingScript.remove();
     }
+  }
+
+  private upsertMeta(
+    definition: Pick<MetaDefinition, 'name' | 'property'>,
+    value?: string | null
+  ): void {
+    const normalized = value === undefined || value === null ? undefined : `${value}`.trim();
+
+    if (!normalized) {
+      this._meta.removeTag(this.buildSelector(definition));
+      return;
+    }
+
+    this._meta.updateTag({ ...definition, content: normalized });
+  }
+
+  private buildSelector(definition: Pick<MetaDefinition, 'name' | 'property'>): string {
+    if (definition.name) {
+      return `name="${definition.name}"`;
+    }
+
+    if (definition.property) {
+      return `property="${definition.property}"`;
+    }
+
+    throw new Error('Meta definition must include a name or property.');
   }
 }
 

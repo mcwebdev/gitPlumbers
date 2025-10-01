@@ -353,7 +353,6 @@ export class AboutComponent implements OnInit {
 
   protected readonly companyStats = [
     { number: '500+', label: 'Projects Completed' },
-    { number: '89%', label: 'Client Satisfaction Rate' },
     { number: '67%', label: 'Average Performance Improvement' },
     { number: '24/7', label: 'Expert Support' },
   ];

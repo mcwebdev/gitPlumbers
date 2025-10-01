@@ -370,7 +370,7 @@ export const generateBlogArticleHourly = onSchedule(
 
     const response = await client.responses.create({
       //  model: 'gpt-4o-mini',
-      model: 'gpt-5-nano',
+      model: 'gpt-5',
       input: [
         {
           role: 'system',
@@ -535,8 +535,8 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
   );
 
   sections.push(
-    'FORMATTING: Use clear markdown headers (##) for each section. Keep paragraphs under 4 lines. ' +
-    'Use bullet points and numbered lists for skimmability. Make content scannable and actionable. ' +
+    'FORMATTING: Use clear markdown headers (##) for each section. Write detailed, comprehensive paragraphs of 200-400 words each for main content. ' +
+    'Use bullet points and numbered lists for skimmability where appropriate. Make content scannable and actionable. ' +
     'CRITICAL: The body array must contain markdown-formatted strings, not plain text. ' +
     'Use **bold**, *italic*, `code`, ## headers, - bullet points, 1. numbered lists, and [links](url) as appropriate. ' +
     'PARAGRAPH COMPLETION: Each paragraph must be complete and end with proper punctuation. ' +

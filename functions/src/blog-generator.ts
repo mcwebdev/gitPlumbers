@@ -388,10 +388,10 @@ export const generateBlogArticleHourly = onSchedule(
           strict: true,
           schema: buildArticleSchema(theme.slug),
           description:
-            'Structured blog article data for GitPlumbers including summary, body paragraphs, checklist, and FAQs.',
+            'Structured blog article data for GitPlumbers including summary, body paragraphs, checklist, and FAQs. CRITICAL: All content paragraphs must be complete and end with proper punctuation.',
         },
       },
-      max_output_tokens: 20000,
+      max_output_tokens: 50000,
     });
 
     const payload = extractPayload(response);
@@ -521,12 +521,14 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
   );
 
   sections.push(
-    'FORMATTING: Use clear markdown headers (##) for each section. Write detailed, comprehensive paragraphs of 200-400 words each for main content. ' +
+    'FORMATTING: Use clear markdown headers (##) for each section. Write detailed, comprehensive paragraphs of 150-300 words each for main content. ' +
     'Use bullet points and numbered lists for skimmability where appropriate. Make content scannable and actionable. ' +
     'CRITICAL: The body array must contain markdown-formatted strings, not plain text. ' +
     'Use **bold**, *italic*, `code`, ## headers, - bullet points, 1. numbered lists, and [links](url) as appropriate. ' +
-    'PARAGRAPH COMPLETION: Each paragraph must be complete and end with proper punctuation. ' +
-    'Never truncate sentences mid-word or mid-thought. Ensure each paragraph tells a complete idea.'
+    'PARAGRAPH COMPLETION REQUIREMENT - CRITICAL: Every single paragraph MUST end with proper punctuation (period, exclamation point, or question mark). ' +
+    'Never truncate sentences mid-word or mid-thought. Each paragraph must be a complete, self-contained idea with a clear ending. ' +
+    'If you are running low on output tokens, write shorter but COMPLETE paragraphs rather than cutting off mid-sentence. ' +
+    'VALIDATION: Before finishing, verify that every content string ends with punctuation and completes its thought.'
   );
 
   sections.push(
@@ -633,8 +635,10 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
     'Example: "content": ["This is a paragraph with \\"quotes\\" that are properly escaped."] ' +
     'MARKDOWN IN JSON: When including markdown in JSON strings, escape quotes properly: ' +
     '"body": ["Most teams inherit **AI-assisted React codebases** that got them through demos, but begin to buckle once real usage arrives."] ' +
-    'PARAGRAPH COMPLETION IN JSON: Each string in content arrays must be a complete paragraph ending with proper punctuation. ' +
-    'Never truncate content to fit character limits - write complete thoughts that end naturally. ' +
+    'PARAGRAPH COMPLETION IN JSON - ABSOLUTE REQUIREMENT: Each string in content arrays must be a complete paragraph ending with proper punctuation (., !, or ?). ' +
+    'NEVER truncate content mid-sentence. If you are approaching token limits, write SHORTER but COMPLETE paragraphs. ' +
+    'It is better to have 3 complete 200-word paragraphs than 5 incomplete 300-word paragraphs. ' +
+    'VALIDATION STEP: Before returning the JSON, verify that EVERY paragraph in body and structuredSections.content ends with punctuation. ' +
     'Do not include any text before or after the JSON object.'
   );
 
@@ -787,11 +791,11 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         type: 'array',
         minItems: 5,
         maxItems: 7,
-        description: 'Array of markdown-formatted paragraphs. Each string should contain proper markdown formatting including **bold**, *italic*, `code`, ## headers, - bullet points, 1. numbered lists, and [links](url) as appropriate.',
+        description: 'Array of markdown-formatted paragraphs. Each string should contain proper markdown formatting including **bold**, *italic*, `code`, ## headers, - bullet points, 1. numbered lists, and [links](url) as appropriate. CRITICAL: Every paragraph MUST end with proper punctuation and be a complete thought.',
         items: {
           type: 'string',
           minLength: 120,
-          maxLength: 20000,
+          maxLength: 2000,
         },
       },
       structuredSections: {
@@ -808,10 +812,11 @@ function buildArticleSchema(categorySlug: CategorySlug) {
               type: 'array',
               minItems: 2,
               maxItems: 4,
+              description: 'Array of complete paragraphs. CRITICAL: Each paragraph MUST end with proper punctuation (period, exclamation point, or question mark) and be a complete thought. Never truncate mid-sentence.',
               items: {
                 type: 'string',
                 minLength: 80,
-                maxLength: 5000,
+                maxLength: 1800,
               },
             },
             type: {
@@ -918,8 +923,9 @@ function extractPayload(response: OpenAI.Responses.Response): GeneratedArticlePa
     cleanedJson = cleanedJson.substring(firstBrace, lastBrace + 1);
   }
 
+  let payload: GeneratedArticlePayload;
   try {
-    return JSON.parse(cleanedJson) as GeneratedArticlePayload;
+    payload = JSON.parse(cleanedJson) as GeneratedArticlePayload;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Failed to parse OpenAI response as JSON', {
@@ -932,6 +938,46 @@ function extractPayload(response: OpenAI.Responses.Response): GeneratedArticlePa
       cleanedEnd: cleanedJson.substring(Math.max(0, cleanedJson.length - 500)),
     });
     throw new Error(`Invalid JSON response from OpenAI: ${errorMessage}`);
+  }
+
+  // Validate paragraph completion
+  validateParagraphCompletion(payload);
+
+  return payload;
+}
+
+function validateParagraphCompletion(payload: GeneratedArticlePayload): void {
+  const incompleteParagraphs: string[] = [];
+  const validEndingPunctuation = /[.!?]$/;
+
+  // Check body paragraphs
+  payload.body.forEach((paragraph, index) => {
+    const trimmed = paragraph.trim();
+    if (!validEndingPunctuation.test(trimmed)) {
+      incompleteParagraphs.push(`body[${index}]: "${trimmed.slice(-50)}"`);
+    }
+  });
+
+  // Check structuredSections content
+  payload.structuredSections.forEach((section, sectionIndex) => {
+    section.content.forEach((paragraph, paragraphIndex) => {
+      const trimmed = paragraph.trim();
+      if (!validEndingPunctuation.test(trimmed)) {
+        incompleteParagraphs.push(
+          `structuredSections[${sectionIndex}].content[${paragraphIndex}] (${section.header}): "${trimmed.slice(-50)}"`
+        );
+      }
+    });
+  });
+
+  if (incompleteParagraphs.length > 0) {
+    logger.warn('Generated article contains incomplete paragraphs', {
+      count: incompleteParagraphs.length,
+      examples: incompleteParagraphs.slice(0, 5),
+    });
+    throw new Error(
+      `Generated article contains ${incompleteParagraphs.length} incomplete paragraph(s). AI must complete all paragraphs with proper punctuation.`
+    );
   }
 }
 

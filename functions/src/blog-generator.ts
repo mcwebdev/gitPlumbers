@@ -534,7 +534,9 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
 
   sections.push(
     'FORMATTING: Use clear markdown headers (##) for each section. Keep paragraphs under 4 lines. ' +
-    'Use bullet points and numbered lists for skimmability. Make content scannable and actionable.'
+    'Use bullet points and numbered lists for skimmability. Make content scannable and actionable. ' +
+    'CRITICAL: The body array must contain markdown-formatted strings, not plain text. ' +
+    'Use **bold**, *italic*, `code`, ## headers, - bullet points, 1. numbered lists, and [links](url) as appropriate.'
   );
 
   sections.push(
@@ -543,6 +545,13 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
     '{"header": "Why This Matters", "type": "why-matters", "content": ["For engineering leaders..."]}, ' +
     '{"header": "How to Implement It", "type": "implementation", "content": ["Step 1: Set up evaluation..."]}, ' +
     '{"header": "Key Takeaways", "type": "takeaways", "content": ["Always validate AI outputs..."]}]'
+  );
+
+  sections.push(
+    'MARKDOWN EXAMPLES: Your body paragraphs should use markdown formatting like: ' +
+    '"Most teams inherit **AI-assisted React codebases** that got them through demos, but begin to buckle once real usage arrives. The instinct is to pause roadmap delivery and rebuild from scratch." ' +
+    'or "We treat modernization as a parallel stream that earns trust sprint by sprint. Step one is stabilizing the perimeter: automated smoke tests around the most critical journeys, baseline performance telemetry, and a shared incident rubric." ' +
+    'Use **bold** for emphasis, `code` for technical terms, - bullet points for lists, and ## headers for section breaks.'
   );
 
   sections.push(
@@ -632,6 +641,8 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
     'JSON FORMATTING: Return only valid JSON that matches the provided schema. ' +
     'CRITICAL: Escape all quotes in strings using \\" and avoid newlines in string values. ' +
     'Example: "content": ["This is a paragraph with \\"quotes\\" that are properly escaped."] ' +
+    'MARKDOWN IN JSON: When including markdown in JSON strings, escape quotes properly: ' +
+    '"body": ["Most teams inherit **AI-assisted React codebases** that got them through demos, but begin to buckle once real usage arrives."] ' +
     'Do not include any text before or after the JSON object.'
   );
 
@@ -738,7 +749,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
       deck: {
         type: 'string',
         minLength: 20,
-        maxLength: 180,
+        maxLength: 580,
       },
       categorySlug: {
         type: 'string',
@@ -747,7 +758,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
       summary: {
         type: 'string',
         minLength: 60,
-        maxLength: 160,
+        maxLength: 260,
       },
       keywords: {
         type: 'array',
@@ -767,7 +778,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         items: {
           type: 'string',
           minLength: 12,
-          maxLength: 160,
+          maxLength: 360,
         },
       },
       checklist: {
@@ -777,17 +788,18 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         items: {
           type: 'string',
           minLength: 15,
-          maxLength: 200,
+          maxLength: 300,
         },
       },
       body: {
         type: 'array',
         minItems: 5,
         maxItems: 7,
+        description: 'Array of markdown-formatted paragraphs. Each string should contain proper markdown formatting including **bold**, *italic*, `code`, ## headers, - bullet points, 1. numbered lists, and [links](url) as appropriate.',
         items: {
           type: 'string',
           minLength: 120,
-          maxLength: 320,
+          maxLength: 2320,
         },
       },
       structuredSections: {
@@ -807,7 +819,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
               items: {
                 type: 'string',
                 minLength: 80,
-                maxLength: 280,
+                maxLength: 2280,
               },
             },
             type: {
@@ -831,8 +843,8 @@ function buildArticleSchema(categorySlug: CategorySlug) {
           required: ['question', 'answer'],
           additionalProperties: false,
           properties: {
-            question: { type: 'string', minLength: 12, maxLength: 120 },
-            answer: { type: 'string', minLength: 60, maxLength: 260 },
+            question: { type: 'string', minLength: 12, maxLength: 320 },
+            answer: { type: 'string', minLength: 60, maxLength: 360 },
           },
         },
       },
@@ -880,7 +892,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         required: ['name', 'title', 'bio', 'url'],
         additionalProperties: false,
         properties: {
-          name: { type: 'string', minLength: 5, maxLength: 60 },
+          name: { type: 'string', minLength: 5, maxLength: 120 },
           title: { type: 'string', maxLength: 80 },
           bio: { type: 'string', maxLength: 200 },
           url: { type: 'string', maxLength: 200 },
@@ -891,7 +903,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         required: ['aboutEntity', 'articleSection', 'faqIsFAQPage'],
         additionalProperties: false,
         properties: {
-          articleSection: { type: 'string', maxLength: 100 },
+          articleSection: { type: 'string', maxLength: 190 },
           aboutEntity: { type: 'string', enum: ['GitPlumbers'] },
           faqIsFAQPage: { type: 'boolean' },
         },

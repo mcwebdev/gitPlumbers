@@ -8,6 +8,7 @@ import {
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { marked } from 'marked';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BlogContentService } from '../blog-content.service';
 import { BlogStore } from '../blog.store';
@@ -126,6 +127,23 @@ export class BlogPostComponent implements OnDestroy {
       url: shareUrl,
       tags: currentPost.keywords ?? [],
     };
+  });
+
+  protected readonly renderedBody = computed<string>(() => {
+    const currentPost = this.post();
+    if (!currentPost || !currentPost.body.length) {
+      return '';
+    }
+
+    // Configure marked with formatting options
+    marked.setOptions({
+      breaks: true,
+      gfm: true,
+    });
+
+    // Join all body paragraphs and render as markdown
+    const markdownContent = currentPost.body.join('\n\n');
+    return marked.parse(markdownContent) as string;
   });
 
   ngOnDestroy(): void {

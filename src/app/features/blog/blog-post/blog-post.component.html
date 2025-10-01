@@ -40,7 +40,7 @@
     ></app-social-share>
     }
   <section class="blog-post__body" aria-label="Article body">
-    <p *ngFor="let paragraph of currentPost.body">{{ paragraph }}</p>
+    <div [innerHTML]="renderedBody()"></div>
     
     <!-- Internal Links -->
     <div *ngIf="currentPost.internalLinks?.length" class="blog-post__internal-links">

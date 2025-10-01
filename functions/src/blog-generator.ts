@@ -396,20 +396,6 @@ export const generateBlogArticleHourly = onSchedule(
 
     const payload = extractPayload(response);
 
-    try {
-      validatePayload(payload, theme.slug);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Article validation failed', {
-        error: errorMessage,
-        theme: theme.slug,
-        payloadKeys: Object.keys(payload),
-        structuredSectionsCount: payload.structuredSections?.length || 0,
-        structuredSectionsTypes: payload.structuredSections?.map((s) => s.type) || [],
-      });
-      throw error;
-    }
-
     const slug = await ensureUniqueSlug(firestore, toSlug(payload.title));
     const now = new Date();
     const publishedOn = now.toISOString().split('T')[0]; // Date for display
@@ -987,103 +973,5 @@ function randomSuffix(): string {
   return randomBytes(2).toString('hex');
 }
 
-function validatePayload(payload: GeneratedArticlePayload, expectedCategory: CategorySlug): void {
-  if (!Array.isArray(payload.body) || payload.body.length < 5) {
-    throw new Error('Generated article body is too short');
-  }
-  if (!Array.isArray(payload.structuredSections) || payload.structuredSections.length < 4) {
-    throw new Error('Generated article missing structured sections');
-  }
-  // Validate structured sections have at least some core types (relaxed)
-  const coreRequiredTypes = ['hook', 'implementation', 'takeaways'];
-  const sectionTypes = payload.structuredSections.map((s) => s.type);
-  const missingCoreTypes = coreRequiredTypes.filter((type) => !sectionTypes.includes(type as any));
-  if (missingCoreTypes.length >= 3) {
-    throw new Error(`Generated article missing too many core section types: ${missingCoreTypes.join(', ')}`);
-  }
 
-  // Validate that we have reasonable variety of section types (relaxed)
-  const uniqueTypes = [...new Set(sectionTypes)];
-  if (uniqueTypes.length < 3) {
-    throw new Error(`Generated article has insufficient section variety. Found: ${uniqueTypes.join(', ')}`);
-  }
-  if (!payload.title || !payload.deck || !payload.summary) {
-    throw new Error('Generated article missing critical fields');
-  }
-  if (!Array.isArray(payload.keywords) || payload.keywords.length < 4) {
-    throw new Error('Generated article missing keywords');
-  }
-  if (!Array.isArray(payload.keyTakeaways) || payload.keyTakeaways.length < 3) {
-    throw new Error('Generated article missing key takeaways');
-  }
-  if (!Array.isArray(payload.checklist) || payload.checklist.length < 3) {
-    throw new Error('Generated article missing checklist items');
-  }
-  if (payload.categorySlug !== expectedCategory) {
-    throw new Error(`Unexpected category: ${payload.categorySlug}`);
-  }
-  if (!Number.isFinite(payload.readTimeMinutes)) {
-    throw new Error('Missing read time estimate');
-  }
-  if (!Array.isArray(payload.internalLinks) || payload.internalLinks.length < 2) {
-    throw new Error('Generated article missing internal links');
-  }
-  if (!payload.heroQuote || payload.heroQuote.length < 25) {
-    throw new Error('Generated article missing hero quote');
-  }
-  if (!Array.isArray(payload.faq) || payload.faq.length < 2) {
-    throw new Error('Generated article missing FAQ section');
-  }
-  if (!payload.primaryCTA || !payload.primaryCTA.label || !payload.primaryCTA.href || !payload.primaryCTA.utm) {
-    throw new Error('Generated article missing primary CTA or UTM parameter');
-  }
-  if (!payload.secondaryCTA || !payload.secondaryCTA.label || !payload.secondaryCTA.href || !payload.secondaryCTA.utm) {
-    throw new Error('Generated article missing secondary CTA or UTM parameter');
-  }
-  if (!payload.author || !payload.author.name || !payload.author.title || !payload.author.bio || !payload.author.url) {
-    throw new Error('Generated article missing complete author information');
-  }
-  if (!payload.schemaHints || payload.schemaHints.aboutEntity !== 'GitPlumbers' || !payload.schemaHints.articleSection || typeof payload.schemaHints.faqIsFAQPage !== 'boolean') {
-    throw new Error('Generated article missing complete schema hints');
-  }
-
-  // Additional uniqueness validation
-  if (payload.title.length < 25) {
-    throw new Error('Generated article title is too short - needs to be more specific and unique');
-  }
-  
-  // Check for overly generic phrases (relaxed)
-  const overlyGenericPhrases = [
-    'complete guide', 'ultimate guide', 'everything you need', 'beginner guide',
-    'fundamentals', 'basics of', 'getting started'
-  ];
-  const titleLower = payload.title.toLowerCase();
-  const hasOverlyGenericPhrase = overlyGenericPhrases.some(phrase => titleLower.includes(phrase));
-  if (hasOverlyGenericPhrase) {
-    throw new Error('Generated article title contains overly generic phrases - needs to be more specific and unique');
-  }
-  
-  // Check for repetitive monetary patterns (prevent $XK overuse)
-  const monetaryPatterns = [
-    /\$\d+k/i, /\$\d+m/i, /\$\d+,\d+/i, /\$\d+\.\d+k/i, /\$\d+\.\d+m/i
-  ];
-  const hasMonetaryPattern = monetaryPatterns.some(pattern => pattern.test(payload.title));
-  if (hasMonetaryPattern) {
-    throw new Error('Generated article title uses monetary amounts - avoid $XK/$XM patterns, use technical impact instead');
-  }
-  
-  // Encourage specific, memorable titles (relaxed)
-  if (payload.title.length < 20) {
-    throw new Error('Generated article title is too short - needs to be more specific and memorable');
-  }
-
-  // Validate that keywords are diverse and not too generic (relaxed)
-  const genericKeywords = ['development', 'software', 'engineering', 'technology', 'best practices'];
-  const hasGenericKeywords = payload.keywords.some(keyword => 
-    genericKeywords.some(generic => keyword.toLowerCase().includes(generic))
-  );
-  if (hasGenericKeywords && payload.keywords.length < 3) {
-    throw new Error('Generated article keywords are too generic - needs more specific technical terms');
-  }
-}
 

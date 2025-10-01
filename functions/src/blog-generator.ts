@@ -529,14 +529,18 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
     '3) "takeaways" - Key insights and action items (REQUIRED). ' +
     'Additionally, choose 1-3 from: "why-matters" (why this problem is critical), ' +
     '"example" (real-world case study), "questions" (common questions teams ask). ' +
-    'Each section must have a clear header and 2-4 content paragraphs.'
+    'Each section must have a clear header and 2-4 content paragraphs. ' +
+    'CRITICAL: Each content paragraph must be complete and end with proper punctuation. ' +
+    'Never cut off mid-sentence or mid-thought. Each paragraph should tell a complete idea.'
   );
 
   sections.push(
     'FORMATTING: Use clear markdown headers (##) for each section. Keep paragraphs under 4 lines. ' +
     'Use bullet points and numbered lists for skimmability. Make content scannable and actionable. ' +
     'CRITICAL: The body array must contain markdown-formatted strings, not plain text. ' +
-    'Use **bold**, *italic*, `code`, ## headers, - bullet points, 1. numbered lists, and [links](url) as appropriate.'
+    'Use **bold**, *italic*, `code`, ## headers, - bullet points, 1. numbered lists, and [links](url) as appropriate. ' +
+    'PARAGRAPH COMPLETION: Each paragraph must be complete and end with proper punctuation. ' +
+    'Never truncate sentences mid-word or mid-thought. Ensure each paragraph tells a complete idea.'
   );
 
   sections.push(
@@ -643,6 +647,8 @@ function buildPrompt(theme: CategoryTheme, recent: string[]): string {
     'Example: "content": ["This is a paragraph with \\"quotes\\" that are properly escaped."] ' +
     'MARKDOWN IN JSON: When including markdown in JSON strings, escape quotes properly: ' +
     '"body": ["Most teams inherit **AI-assisted React codebases** that got them through demos, but begin to buckle once real usage arrives."] ' +
+    'PARAGRAPH COMPLETION IN JSON: Each string in content arrays must be a complete paragraph ending with proper punctuation. ' +
+    'Never truncate content to fit character limits - write complete thoughts that end naturally. ' +
     'Do not include any text before or after the JSON object.'
   );
 
@@ -799,7 +805,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         items: {
           type: 'string',
           minLength: 120,
-          maxLength: 12320,
+          maxLength: 20000,
         },
       },
       structuredSections: {
@@ -819,7 +825,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
               items: {
                 type: 'string',
                 minLength: 80,
-                maxLength: 2280,
+                maxLength: 5000,
               },
             },
             type: {

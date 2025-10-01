@@ -909,7 +909,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         required: ['aboutEntity', 'articleSection', 'faqIsFAQPage'],
         additionalProperties: false,
         properties: {
-          articleSection: { type: 'string', maxLength: 190 },
+          articleSection: { type: 'string', maxLength: 52190 },
           aboutEntity: { type: 'string', enum: ['GitPlumbers'] },
           faqIsFAQPage: { type: 'boolean' },
         },

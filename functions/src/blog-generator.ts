@@ -492,10 +492,13 @@ Keep it tight and scannable. Write 5-8 well-structured sections with concrete ex
 CRITICAL FORMATTING: Use markdown throughout:
 - Use ## for section headers
 - Use **bold** for emphasis on key terms
-- Use \`code\` for technical terms, tools, commands
+- Use \`code\` for inline technical terms, tools, commands
+- Use code blocks with triple backticks for multi-line code examples (specify language like \`\`\`typescript, \`\`\`yaml, \`\`\`bash)
 - Use bullet lists with - for scannable points
 - Use 1. 2. 3. for numbered steps
 - Use > for callouts/quotes if needed
+
+Include relevant code examples where appropriate (config snippets, command examples, etc). Use proper language tags for syntax highlighting.
 
 Do NOT include section type labels like "Hook:" or "Implementation:" in the content. Just write naturally with proper markdown formatting.
 

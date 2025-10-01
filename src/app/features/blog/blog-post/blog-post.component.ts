@@ -10,6 +10,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { marked } from 'marked';
 import { toSignal } from '@angular/core/rxjs-interop';
+import hljs from 'highlight.js';
 import { BlogContentService } from '../blog-content.service';
 import { BlogStore } from '../blog.store';
 import { BlogPost, InternalLink, CTA } from '../blog-content';
@@ -135,10 +136,36 @@ export class BlogPostComponent implements OnDestroy {
       return '';
     }
 
-    // Configure marked with formatting options
+    // Configure marked with custom renderer for syntax highlighting
+    const renderer = new marked.Renderer();
+    
+    renderer.code = ({ text, lang }: { text: string; lang?: string }): string => {
+      // Try to highlight with specified language
+      if (lang && hljs.getLanguage(lang)) {
+        try {
+          const highlighted = hljs.highlight(text, { language: lang }).value;
+          return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+        } catch (err) {
+          console.warn('Highlight.js error:', err);
+        }
+      }
+      
+      // Auto-detect language if not specified or highlighting failed
+      try {
+        const result = hljs.highlightAuto(text);
+        return `<pre><code class="hljs ${result.language ? `language-${result.language}` : ''}">${result.value}</code></pre>`;
+      } catch (err) {
+        console.warn('Highlight.js auto-detect error:', err);
+      }
+      
+      // Fall back to plain code block
+      return `<pre><code>${text}</code></pre>`;
+    };
+
     marked.setOptions({
       breaks: true,
       gfm: true,
+      renderer,
     });
 
     // Join all body paragraphs and render as markdown

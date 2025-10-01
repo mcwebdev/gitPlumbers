@@ -27,7 +27,7 @@ export class AboutComponent implements OnInit {
 
   protected readonly teamMembers = [
     {
-      name: 'Matt Charlton',
+      name: 'Matthew Charlton',
       title: 'Senior Frontend Developer & Cloud Solutions Architect',
       experience: '10+ years',
       expertise: ['Angular', 'Cloud-Native Full Stack', 'CI/CD Automation'],

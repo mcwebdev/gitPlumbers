@@ -387,14 +387,13 @@ export const generateBlogArticleHourly = onSchedule(
           name: 'GitPlumbersBlogArticle',
           strict: true,
           schema: buildArticleSchema(theme.slug),
-          description: 'Structured blog article with complete, well-formed content.',
         },
       },
-      max_output_tokens: 16000,
+      max_output_tokens: 30000,
     });
 
     const payload = extractPayload(response);
-
+    console.log(payload);
     const slug = await ensureUniqueSlug(firestore, toSlug(payload.title));
     const now = new Date();
     const publishedOn = now.toISOString().split('T')[0]; // Date for display
@@ -484,36 +483,23 @@ export const generateBlogArticleHourly = onSchedule(
 );
 
 function buildPrompt(theme: CategoryTheme, recent: string[]): string {
-  const prompt = `Write a compelling ${theme.label} article for the GitPlumbers blog.
+  return `Write a focused ${theme.label} article (1000-1500 words) for the GitPlumbers blog about: ${pick(theme.angles)}
 
-Primary angle: ${pick(theme.angles)}
-Editorial focus: ${theme.emphasis.join(' ')}
+${theme.emphasis.join(' ')}
 
-Create a unique, engaging title with a specific scenario that engineering leaders will relate to. Start with a high-stakes opening that grabs attention.
+Keep it tight and scannable. Write 5-8 well-structured sections with concrete examples and actionable guidance.
 
-Structure your article with 4-6 sections including:
-- A hook that presents the problem
-- Why this matters to engineering teams
-- Implementation guidance with concrete steps
-- Key takeaways
+CRITICAL FORMATTING: Use markdown throughout:
+- Use ## for section headers
+- Use **bold** for emphasis on key terms
+- Use \`code\` for technical terms, tools, commands
+- Use bullet lists with - for scannable points
+- Use 1. 2. 3. for numbered steps
+- Use > for callouts/quotes if needed
 
-Write naturally in markdown. Use **bold** for emphasis, \`code\` for technical terms, and proper structure. Each paragraph should be complete and well-formed.
+Do NOT include section type labels like "Hook:" or "Implementation:" in the content. Just write naturally with proper markdown formatting.
 
-Include:
-- 4-6 technical keywords (specific tools/methodologies, not generic terms)
-- 3-5 key takeaways
-- 3-6 actionable checklist items
-- 2-3 FAQ questions with answers
-- A compelling hero quote
-- 2-4 internal links to GitPlumbers services/content
-- Primary and secondary CTAs with utm tracking
-- Author credentials (name, title, bio, url)
-
-${recent.length > 0 ? `Recent topics for context (create something fresh): ${recent.slice(0, 5).join(' | ')}` : ''}
-
-Return valid JSON matching the schema. Write complete paragraphs that end naturally with proper punctuation.`;
-
-  return prompt;
+Return as JSON. Keep paragraphs focused and complete.`;
 }
 
 async function pickTheme(firestore: Firestore): Promise<CategoryTheme> {
@@ -608,86 +594,37 @@ function buildArticleSchema(categorySlug: CategorySlug) {
       'schemaHints',
     ],
     properties: {
-      title: {
-        type: 'string',
-        minLength: 10,
-        maxLength: 120,
-      },
-      deck: {
-        type: 'string',
-        minLength: 20,
-        maxLength: 580,
-      },
-      categorySlug: {
-        type: 'string',
-        enum: [categorySlug],
-      },
-      summary: {
-        type: 'string',
-        minLength: 60,
-        maxLength: 260,
-      },
+      title: { type: 'string' },
+      deck: { type: 'string' },
+      categorySlug: { type: 'string', enum: [categorySlug] },
+      summary: { type: 'string' },
       keywords: {
         type: 'array',
-        minItems: 4,
-        maxItems: 6,
-        description: 'Specific technical keywords that senior engineers would search for. Avoid generic terms like "development" or "software". Use specific tools, frameworks, methodologies (e.g., "feature flags", "canary deployments", "observability stack").',
-        items: {
-          type: 'string',
-          minLength: 3,
-          maxLength: 60,
-        },
+        items: { type: 'string' },
       },
       keyTakeaways: {
         type: 'array',
-        minItems: 3,
-        maxItems: 5,
-        items: {
-          type: 'string',
-          minLength: 12,
-          maxLength: 360,
-        },
+        items: { type: 'string' },
       },
       checklist: {
         type: 'array',
-        minItems: 3,
-        maxItems: 6,
-        items: {
-          type: 'string',
-          minLength: 15,
-          maxLength: 300,
-        },
+        items: { type: 'string' },
       },
       body: {
         type: 'array',
-        minItems: 5,
-        maxItems: 7,
-        description: 'Array of markdown-formatted paragraphs with proper formatting.',
-        items: {
-          type: 'string',
-          minLength: 100,
-          maxLength: 1500,
-        },
+        items: { type: 'string' },
       },
       structuredSections: {
         type: 'array',
-        minItems: 4,
-        maxItems: 6,
         items: {
           type: 'object',
           required: ['header', 'content', 'type'],
           additionalProperties: false,
           properties: {
-            header: { type: 'string', minLength: 10, maxLength: 80 },
+            header: { type: 'string' },
             content: {
               type: 'array',
-              minItems: 2,
-              maxItems: 4,
-              items: {
-                type: 'string',
-                minLength: 80,
-                maxLength: 1200,
-              },
+              items: { type: 'string' },
             },
             type: {
               type: 'string',
@@ -696,41 +633,29 @@ function buildArticleSchema(categorySlug: CategorySlug) {
           },
         },
       },
-      heroQuote: {
-        type: 'string',
-        minLength: 25,
-        maxLength: 160,
-      },
+      heroQuote: { type: 'string' },
       faq: {
         type: 'array',
-        minItems: 2,
-        maxItems: 3,
         items: {
           type: 'object',
           required: ['question', 'answer'],
           additionalProperties: false,
           properties: {
-            question: { type: 'string', minLength: 12, maxLength: 320 },
-            answer: { type: 'string', minLength: 60, maxLength: 360 },
+            question: { type: 'string' },
+            answer: { type: 'string' },
           },
         },
       },
-      readTimeMinutes: {
-        type: 'integer',
-        minimum: 5,
-        maximum: 9,
-      },
+      readTimeMinutes: { type: 'integer' },
       internalLinks: {
         type: 'array',
-        minItems: 2,
-        maxItems: 4,
         items: {
           type: 'object',
           required: ['href', 'anchor'],
           additionalProperties: false,
           properties: {
-            href: { type: 'string', minLength: 1, maxLength: 200 },
-            anchor: { type: 'string', minLength: 5, maxLength: 100 },
+            href: { type: 'string' },
+            anchor: { type: 'string' },
           },
         },
       },
@@ -739,9 +664,9 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         required: ['label', 'href', 'utm'],
         additionalProperties: false,
         properties: {
-          label: { type: 'string', minLength: 10, maxLength: 80 },
-          href: { type: 'string', minLength: 1, maxLength: 200 },
-          utm: { type: 'string', maxLength: 100 },
+          label: { type: 'string' },
+          href: { type: 'string' },
+          utm: { type: 'string' },
         },
       },
       secondaryCTA: {
@@ -749,9 +674,9 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         required: ['label', 'href', 'utm'],
         additionalProperties: false,
         properties: {
-          label: { type: 'string', minLength: 10, maxLength: 80 },
-          href: { type: 'string', minLength: 1, maxLength: 200 },
-          utm: { type: 'string', maxLength: 100 },
+          label: { type: 'string' },
+          href: { type: 'string' },
+          utm: { type: 'string' },
         },
       },
       author: {
@@ -759,10 +684,10 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         required: ['name', 'title', 'bio', 'url'],
         additionalProperties: false,
         properties: {
-          name: { type: 'string', minLength: 5, maxLength: 120 },
-          title: { type: 'string', maxLength: 80 },
-          bio: { type: 'string', maxLength: 200 },
-          url: { type: 'string', maxLength: 200 },
+          name: { type: 'string' },
+          title: { type: 'string' },
+          bio: { type: 'string' },
+          url: { type: 'string' },
         },
       },
       schemaHints: {
@@ -770,7 +695,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         required: ['aboutEntity', 'articleSection', 'faqIsFAQPage'],
         additionalProperties: false,
         properties: {
-          articleSection: { type: 'string', maxLength: 52190 },
+          articleSection: { type: 'string' },
           aboutEntity: { type: 'string', enum: ['GitPlumbers'] },
           faqIsFAQPage: { type: 'boolean' },
         },
@@ -847,6 +772,8 @@ function toSlug(input: string): string {
 function randomSuffix(): string {
   return randomBytes(2).toString('hex');
 }
+
+
 
 
 

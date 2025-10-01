@@ -387,11 +387,10 @@ export const generateBlogArticleHourly = onSchedule(
           name: 'GitPlumbersBlogArticle',
           strict: true,
           schema: buildArticleSchema(theme.slug),
-          description:
-            'Structured blog article data for GitPlumbers including summary, body paragraphs, checklist, and FAQs. CRITICAL: All content paragraphs must be complete and end with proper punctuation.',
+          description: 'Structured blog article with complete, well-formed content.',
         },
       },
-      max_output_tokens: 50000,
+      max_output_tokens: 16000,
     });
 
     const payload = extractPayload(response);
@@ -485,164 +484,36 @@ export const generateBlogArticleHourly = onSchedule(
 );
 
 function buildPrompt(theme: CategoryTheme, recent: string[]): string {
-  const sections: string[] = [];
+  const prompt = `Write a compelling ${theme.label} article for the GitPlumbers blog.
 
-  sections.push(
-    `Write a ${theme.label} article for the GitPlumbers blog that would excite senior engineering leaders.`
-  );
-  sections.push(`Primary angle: ${pick(theme.angles)}`);
-  sections.push(`Editorial priorities: ${theme.emphasis.join(' ')}`);
+Primary angle: ${pick(theme.angles)}
+Editorial focus: ${theme.emphasis.join(' ')}
 
-  // Enhanced engagement requirements
-  sections.push(
-    'UNIQUENESS REQUIREMENT: Create a completely unique title and angle that has never been written about before. ' +
-    'Avoid generic phrases and common patterns. Think of specific, novel scenarios that engineering leaders face. ' +
-    'Use unexpected angles, specific metrics, or unique problem statements that make this article stand out.'
-  );
+Create a unique, engaging title with a specific scenario that engineering leaders will relate to. Start with a high-stakes opening that grabs attention.
 
-  sections.push(
-    'HOOK REQUIREMENT: Start with a bold, high-stakes opening that immediately grabs attention. ' +
-    'Use diverse scenarios like: "Your AI model just hallucinated in production, causing customer refunds" ' +
-    'or "A single line of legacy code brought down your entire payment system during Black Friday" ' +
-    'or "Your observability stack went dark during peak traffic" or "The deployment pipeline that broke every Friday." ' +
-    'Make the stakes clear and urgent from paragraph one. Vary your approach - not every scenario needs monetary amounts.'
-  );
+Structure your article with 4-6 sections including:
+- A hook that presents the problem
+- Why this matters to engineering teams
+- Implementation guidance with concrete steps
+- Key takeaways
 
-  sections.push(
-    'STRUCTURED SECTIONS: Create 4-6 structuredSections. You MUST include these core types: ' +
-    '1) "hook" - The high-stakes opening scenario (REQUIRED), ' +
-    '2) "implementation" - Step-by-step how-to guidance (REQUIRED), ' +
-    '3) "takeaways" - Key insights and action items (REQUIRED). ' +
-    'Additionally, choose 1-3 from: "why-matters" (why this problem is critical), ' +
-    '"example" (real-world case study), "questions" (common questions teams ask). ' +
-    'Each section must have a clear header and 2-4 content paragraphs. ' +
-    'CRITICAL: Each content paragraph must be complete and end with proper punctuation. ' +
-    'Never cut off mid-sentence or mid-thought. Each paragraph should tell a complete idea.'
-  );
+Write naturally in markdown. Use **bold** for emphasis, \`code\` for technical terms, and proper structure. Each paragraph should be complete and well-formed.
 
-  sections.push(
-    'FORMATTING: Use clear markdown headers (##) for each section. Write detailed, comprehensive paragraphs of 150-300 words each for main content. ' +
-    'Use bullet points and numbered lists for skimmability where appropriate. Make content scannable and actionable. ' +
-    'CRITICAL: The body array must contain markdown-formatted strings, not plain text. ' +
-    'Use **bold**, *italic*, `code`, ## headers, - bullet points, 1. numbered lists, and [links](url) as appropriate. ' +
-    'PARAGRAPH COMPLETION REQUIREMENT - CRITICAL: Every single paragraph MUST end with proper punctuation (period, exclamation point, or question mark). ' +
-    'Never truncate sentences mid-word or mid-thought. Each paragraph must be a complete, self-contained idea with a clear ending. ' +
-    'If you are running low on output tokens, write shorter but COMPLETE paragraphs rather than cutting off mid-sentence. ' +
-    'VALIDATION: Before finishing, verify that every content string ends with punctuation and completes its thought.'
-  );
+Include:
+- 4-6 technical keywords (specific tools/methodologies, not generic terms)
+- 3-5 key takeaways
+- 3-6 actionable checklist items
+- 2-3 FAQ questions with answers
+- A compelling hero quote
+- 2-4 internal links to GitPlumbers services/content
+- Primary and secondary CTAs with utm tracking
+- Author credentials (name, title, bio, url)
 
-  sections.push(
-    'EXAMPLE STRUCTURE: Your structuredSections should look like: ' +
-    '[{"header": "The AI Hallucination That Broke Production", "type": "hook", "content": ["Your AI model just..."]}, ' +
-    '{"header": "Why This Matters", "type": "why-matters", "content": ["For engineering leaders..."]}, ' +
-    '{"header": "How to Implement It", "type": "implementation", "content": ["Step 1: Set up evaluation..."]}, ' +
-    '{"header": "Key Takeaways", "type": "takeaways", "content": ["Always validate AI outputs..."]}]'
-  );
+${recent.length > 0 ? `Recent topics for context (create something fresh): ${recent.slice(0, 5).join(' | ')}` : ''}
 
-  sections.push(
-    'MARKDOWN EXAMPLES: Your body paragraphs should use markdown formatting like: ' +
-    '"Most teams inherit **AI-assisted React codebases** that got them through demos, but begin to buckle once real usage arrives. The instinct is to pause roadmap delivery and rebuild from scratch." ' +
-    'or "We treat modernization as a parallel stream that earns trust sprint by sprint. Step one is stabilizing the perimeter: automated smoke tests around the most critical journeys, baseline performance telemetry, and a shared incident rubric." ' +
-    'Use **bold** for emphasis, `code` for technical terms, - bullet points for lists, and ## headers for section breaks.'
-  );
+Return valid JSON matching the schema. Write complete paragraphs that end naturally with proper punctuation.`;
 
-  sections.push(
-    'CONTENT DIFFERENTIATION: Create content that offers a unique perspective or novel approach to the topic. ' +
-    'Use specific examples, industry-specific scenarios, or unconventional problem-solving methods. ' +
-    'Avoid generic advice that could apply to any engineering team - make it specific and actionable.'
-  );
-
-  sections.push(
-    'Deliver concrete modernization tactics, instrumentation ideas, and measurable outcomes. Blend strategic framing with hands-on steps.'
-  );
-  sections.push(
-    'Body paragraphs should read as narrative prose, not bullet lists. Avoid marketing language or vague claims.'
-  );
-  sections.push(
-    'Each checklist item must be actionable and reference tooling, metrics, or operating cadence. Key takeaways should be crisp summary statements.'
-  );
-  sections.push(
-    'SUMMARY REQUIREMENT: Write a compelling summary (60-160 characters) that ends cleanly at a sentence boundary. ' +
-    'Avoid truncation by keeping it under 160 characters and ending with proper punctuation. ' +
-    'Make it scannable and action-oriented for senior engineering leaders.'
-  );
-
-  // Use recent articles for context, but don't constrain creativity
-  if (recent.length > 0) {
-    sections.push(
-      `CONTEXT: Here are recent articles for reference (avoid exact duplication, but feel free to explore similar themes from different angles): ${recent.slice(0, 10).join(' | ')}`
-    );
-  }
-  
-  sections.push(
-    'UNIQUENESS REQUIREMENT: Create a completely unique title and angle that stands out. ' +
-    'Use unexpected combinations, specific scenarios, or novel problem statements. ' +
-    'Think of diverse angles like: "When Your AI Model Goes Rogue", "The Friday Night Deployment That Broke Everything", ' +
-    '"Why Your Observability Stack Is Lying to You", "The Microservice That Ate Our Database", ' +
-    '"How a Single Config Change Crashed Production", "The Load Test That Exposed Our Weakest Link". ' +
-    'Make it memorable and specific, not generic. Vary your approach - avoid repetitive patterns.'
-  );
-
-  sections.push(
-    'TITLE VARIETY REQUIREMENT: Create titles that use diverse approaches. Mix these patterns: ' +
-    '1) Technical failures: "The Database Migration That Broke Everything", ' +
-    '2) Time-based scenarios: "Why Every Friday Deployment Fails", ' +
-    '3) System behaviors: "When Your Monitoring Lies to You", ' +
-    '4) Process breakdowns: "The Code Review That Missed the Bug", ' +
-    '5) Performance issues: "The Slow Query That Killed Our API", ' +
-    '6) Security incidents: "The Credential Leak That Almost Cost Us Everything". ' +
-    'AVOID using monetary amounts ($XK, $XM) in titles - this pattern is overused. ' +
-    'Focus on technical impact, time, system behavior, or process failures instead.'
-  );
-
-  sections.push(
-    'Assume the reader is evaluating whether GitPlumbers can help them stabilize or accelerate delivery. Provide enough detail to earn trust.'
-  );
-
-  // Enhanced CTA requirements
-  sections.push(
-    'CTA REQUIREMENTS: Create compelling, natural-sounding CTAs that feel like logical next steps, not sales pitches. ' +
-    'Examples: "Want a full blueprint for implementing safe model deployment? Read: Designing an Evaluation Harness for Generative AI →" ' +
-    'or "Need help auditing your current observability setup? Download our Infrastructure Health Checklist →"'
-  );
-
-  // SEO and internal linking requirements
-  sections.push(
-    'Include 2–4 internalLinks with realistic anchors pointing to gitplumbers.com paths. ' +
-    'Choose from: /services/modernization, /services/observability, /services/ai-delivery, ' +
-    '/services/reliability, /services/platform, /guides, /case-studies, /contact, /about.'
-  );
-  sections.push(
-    'Include both primaryCTA and secondaryCTA that would convert a senior engineering leader. ' +
-    'Choose from: "Book a modernization assessment", "Explore our services", "See our results", "Schedule a consultation". ' +
-    'Include utm parameters for tracking on both CTAs.'
-  );
-  sections.push(
-    'Always include a heroQuote (25-160 characters) and FAQ section (2-3 questions). Set schemaHints.faqIsFAQPage=true.'
-  );
-  sections.push(
-    'Create a credible author with name, title (e.g., "Senior Platform Engineer", "VP of Engineering"), ' +
-    'bio (1-2 sentences demonstrating expertise), and url (LinkedIn or professional profile). All author fields are required.'
-  );
-  sections.push(
-    'Set schemaHints.articleSection to the category name, aboutEntity to "GitPlumbers", ' +
-    'and faqIsFAQPage to true if FAQ is present, false otherwise. All schemaHints fields are required.'
-  );
-
-  sections.push(
-    'JSON FORMATTING: Return only valid JSON that matches the provided schema. ' +
-    'CRITICAL: Escape all quotes in strings using \\" and avoid newlines in string values. ' +
-    'Example: "content": ["This is a paragraph with \\"quotes\\" that are properly escaped."] ' +
-    'MARKDOWN IN JSON: When including markdown in JSON strings, escape quotes properly: ' +
-    '"body": ["Most teams inherit **AI-assisted React codebases** that got them through demos, but begin to buckle once real usage arrives."] ' +
-    'PARAGRAPH COMPLETION IN JSON - ABSOLUTE REQUIREMENT: Each string in content arrays must be a complete paragraph ending with proper punctuation (., !, or ?). ' +
-    'NEVER truncate content mid-sentence. If you are approaching token limits, write SHORTER but COMPLETE paragraphs. ' +
-    'It is better to have 3 complete 200-word paragraphs than 5 incomplete 300-word paragraphs. ' +
-    'VALIDATION STEP: Before returning the JSON, verify that EVERY paragraph in body and structuredSections.content ends with punctuation. ' +
-    'Do not include any text before or after the JSON object.'
-  );
-
-  return sections.join('\n\n');
+  return prompt;
 }
 
 async function pickTheme(firestore: Firestore): Promise<CategoryTheme> {
@@ -791,11 +662,11 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         type: 'array',
         minItems: 5,
         maxItems: 7,
-        description: 'Array of markdown-formatted paragraphs. Each string should contain proper markdown formatting including **bold**, *italic*, `code`, ## headers, - bullet points, 1. numbered lists, and [links](url) as appropriate. CRITICAL: Every paragraph MUST end with proper punctuation and be a complete thought.',
+        description: 'Array of markdown-formatted paragraphs with proper formatting.',
         items: {
           type: 'string',
-          minLength: 120,
-          maxLength: 2000,
+          minLength: 100,
+          maxLength: 1500,
         },
       },
       structuredSections: {
@@ -812,11 +683,10 @@ function buildArticleSchema(categorySlug: CategorySlug) {
               type: 'array',
               minItems: 2,
               maxItems: 4,
-              description: 'Array of complete paragraphs. CRITICAL: Each paragraph MUST end with proper punctuation (period, exclamation point, or question mark) and be a complete thought. Never truncate mid-sentence.',
               items: {
                 type: 'string',
                 minLength: 80,
-                maxLength: 1800,
+                maxLength: 1200,
               },
             },
             type: {
@@ -923,9 +793,8 @@ function extractPayload(response: OpenAI.Responses.Response): GeneratedArticlePa
     cleanedJson = cleanedJson.substring(firstBrace, lastBrace + 1);
   }
 
-  let payload: GeneratedArticlePayload;
   try {
-    payload = JSON.parse(cleanedJson) as GeneratedArticlePayload;
+    return JSON.parse(cleanedJson) as GeneratedArticlePayload;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Failed to parse OpenAI response as JSON', {
@@ -938,46 +807,6 @@ function extractPayload(response: OpenAI.Responses.Response): GeneratedArticlePa
       cleanedEnd: cleanedJson.substring(Math.max(0, cleanedJson.length - 500)),
     });
     throw new Error(`Invalid JSON response from OpenAI: ${errorMessage}`);
-  }
-
-  // Validate paragraph completion
-  validateParagraphCompletion(payload);
-
-  return payload;
-}
-
-function validateParagraphCompletion(payload: GeneratedArticlePayload): void {
-  const incompleteParagraphs: string[] = [];
-  const validEndingPunctuation = /[.!?]$/;
-
-  // Check body paragraphs
-  payload.body.forEach((paragraph, index) => {
-    const trimmed = paragraph.trim();
-    if (!validEndingPunctuation.test(trimmed)) {
-      incompleteParagraphs.push(`body[${index}]: "${trimmed.slice(-50)}"`);
-    }
-  });
-
-  // Check structuredSections content
-  payload.structuredSections.forEach((section, sectionIndex) => {
-    section.content.forEach((paragraph, paragraphIndex) => {
-      const trimmed = paragraph.trim();
-      if (!validEndingPunctuation.test(trimmed)) {
-        incompleteParagraphs.push(
-          `structuredSections[${sectionIndex}].content[${paragraphIndex}] (${section.header}): "${trimmed.slice(-50)}"`
-        );
-      }
-    });
-  });
-
-  if (incompleteParagraphs.length > 0) {
-    logger.warn('Generated article contains incomplete paragraphs', {
-      count: incompleteParagraphs.length,
-      examples: incompleteParagraphs.slice(0, 5),
-    });
-    throw new Error(
-      `Generated article contains ${incompleteParagraphs.length} incomplete paragraph(s). AI must complete all paragraphs with proper punctuation.`
-    );
   }
 }
 

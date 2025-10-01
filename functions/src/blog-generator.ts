@@ -799,7 +799,7 @@ function buildArticleSchema(categorySlug: CategorySlug) {
         items: {
           type: 'string',
           minLength: 120,
-          maxLength: 2320,
+          maxLength: 12320,
         },
       },
       structuredSections: {

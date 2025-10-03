@@ -98,17 +98,102 @@
         </div>
       </ng-template>
 
-      <p-table 
-        [value]="userInvoices()" 
-        [columns]="selectedColumns"
-        [paginator]="true"
-        [rows]="10"
-        [showCurrentPageReport]="true"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} invoices"
-        [tableStyle]="{'min-width': '50rem'}"
-        [loading]="isLoading()"
-        loadingIcon="pi pi-spin pi-spinner"
-        styleClass="p-datatable-striped">
+      <!-- Universal Controls (for both desktop and mobile) -->
+      <div class="invoice-controls" *ngIf="userInvoices().length > 0">
+        <!-- Search -->
+        <div class="search-section">
+          <label for="invoice-search">Search invoices:</label>
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input 
+              id="invoice-search"
+              name="invoiceSearch"
+              type="text" 
+              pInputText 
+              placeholder="Search invoices..." 
+              [(ngModel)]="searchTermValue"
+              (input)="onSearchChange()"
+              class="search-input"
+              aria-label="Search invoices by number, description, or customer">
+          </span>
+        </div>
+
+        <!-- Filter and Sort Row -->
+        <div class="filter-sort-row">
+          <!-- Status Filter -->
+          <div class="control-group">
+            <label for="status-filter">Status:</label>
+            <p-select 
+              id="status-filter"
+              name="statusFilter"
+              [options]="statusFilterOptions" 
+              [(ngModel)]="selectedStatusValue"
+              (onChange)="onStatusFilterChange()"
+              optionLabel="label" 
+              optionValue="value"
+              placeholder="All"
+              class="compact-select"
+              aria-label="Filter invoices by status">
+            </p-select>
+          </div>
+
+          <!-- Sort -->
+          <div class="control-group">
+            <label for="sort-select">Sort:</label>
+            <p-select 
+              id="sort-select"
+              name="sortField"
+              [options]="sortOptions" 
+              [(ngModel)]="selectedSortValue"
+              (onChange)="onSortChange()"
+              optionLabel="label" 
+              optionValue="value"
+              placeholder="Date"
+              class="compact-select"
+              aria-label="Sort invoices by field">
+            </p-select>
+          </div>
+
+          <!-- Sort Order Toggle -->
+          <button 
+            type="button" 
+            class="sort-order-btn"
+            (click)="toggleSortOrder()"
+            [attr.aria-label]="'Sort ' + (sortOrder() === 'asc' ? 'ascending' : 'descending')"
+            pTooltip="Toggle sort order">
+            <i [class]="'pi ' + (sortOrder() === 'asc' ? 'pi-sort-up' : 'pi-sort-down')"></i>
+          </button>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="results-summary">
+          <span class="results-count">
+            {{ filteredInvoices().length }} of {{ userInvoices().length }} invoices
+          </span>
+          <button 
+            type="button" 
+            class="clear-filters-btn"
+            *ngIf="hasActiveFilters()"
+            (click)="clearAllFilters()">
+            <i class="pi pi-times"></i>
+            Clear filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Desktop Table View -->
+      <div class="desktop-table-view">
+        <p-table 
+          [value]="filteredInvoices()" 
+          [columns]="selectedColumns"
+          [paginator]="true"
+          [rows]="10"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} invoices"
+          [tableStyle]="{'min-width': '50rem'}"
+          [loading]="isLoading()"
+          loadingIcon="pi pi-spin pi-spinner"
+          styleClass="p-datatable-striped">
         
         <ng-template pTemplate="header">
           <tr>
@@ -195,14 +280,130 @@
           <tr>
             <td [attr.colspan]="selectedColumns.length" class="text-center">
               <div class="empty-state">
-                <i class="pi pi-inbox" style="font-size: 3rem; color: var(--surface-500);"></i>
-                <h3>No invoices yet</h3>
-                <p>When gitPlumbers creates invoices for your work, they'll appear here.</p>
+                <i [class]="userInvoices().length === 0 ? 'pi pi-inbox' : 'pi pi-filter-slash'" 
+                   style="font-size: 3rem; color: var(--surface-500);"></i>
+                <h3>{{ userInvoices().length === 0 ? 'No invoices yet' : 'No matching invoices' }}</h3>
+                <p *ngIf="userInvoices().length === 0">
+                  When gitPlumbers creates invoices for your work, they'll appear here.
+                </p>
+                <p *ngIf="userInvoices().length > 0">
+                  Try adjusting your search or filter criteria.
+                </p>
+                <button 
+                  type="button" 
+                  class="clear-filters-btn"
+                  *ngIf="userInvoices().length > 0 && hasActiveFilters()"
+                  (click)="clearAllFilters()">
+                  <i class="pi pi-times"></i>
+                  Clear all filters
+                </button>
               </div>
             </td>
           </tr>
         </ng-template>
-      </p-table>
+        </p-table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="mobile-card-view">
+        <div class="invoice-cards" *ngIf="filteredInvoices().length > 0; else mobileEmptyState">
+          @for (invoice of filteredInvoices(); track invoice.id) {
+            <div class="invoice-card" [class.overdue]="isOverdue(invoice)">
+              <div class="card-header">
+                <div class="invoice-info">
+                  <h4 class="invoice-number">{{ invoice.number || invoice.id }}</h4>
+                  <p-tag 
+                    [value]="invoice.status | titlecase"
+                    [severity]="getStatusSeverity(invoice.status)">
+                  </p-tag>
+                </div>
+                <div class="invoice-amount">
+                  <span class="amount">{{ formatAmount(invoice.total, invoice.currency) }}</span>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <div class="description">
+                  <span class="main-description">{{ invoice.description || getInvoiceItemsSummary(invoice) }}</span>
+                  <small class="item-count" *ngIf="invoice.lines.data.length > 1">
+                    {{ invoice.lines.data.length }} items
+                  </small>
+                </div>
+
+                <div class="dates-info">
+                  <div class="date-item">
+                    <small class="label">Created:</small>
+                    <span class="date">{{ formatDate(invoice.created) }}</span>
+                  </div>
+                  <div class="date-item" *ngIf="invoice.due_date">
+                    <small class="label">Due:</small>
+                    <span class="date" [class]="isOverdue(invoice) ? 'overdue-text' : ''">
+                      {{ formatDate(invoice.due_date) }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="due-info" *ngIf="invoice.status === 'open' && invoice.due_date">
+                  <small [class]="isOverdue(invoice) ? 'overdue-text' : 'due-text'">
+                    {{ getDaysUntilDue(invoice) }}
+                  </small>
+                </div>
+              </div>
+
+              <div class="card-actions">
+                <p-button 
+                  icon="pi pi-eye" 
+                  severity="info"
+                  size="small"
+                  (onClick)="onViewInvoice(invoice)"
+                  pTooltip="View Details">
+                </p-button>
+                
+                <p-button 
+                  icon="pi pi-credit-card" 
+                  severity="success"
+                  size="small"
+                  (onClick)="onPayInvoice(invoice)"
+                  [disabled]="invoice.status !== 'open'"
+                  pTooltip="Pay Invoice">
+                </p-button>
+                
+                <p-button 
+                  icon="pi pi-download" 
+                  severity="secondary"
+                  size="small"
+                  (onClick)="onDownloadInvoice(invoice)"
+                  [disabled]="!invoice.invoice_pdf"
+                  pTooltip="Download PDF">
+                </p-button>
+              </div>
+            </div>
+          }
+        </div>
+
+
+        <ng-template #mobileEmptyState>
+          <div class="empty-state">
+            <i [class]="userInvoices().length === 0 ? 'pi pi-inbox' : 'pi pi-filter-slash'" 
+               style="font-size: 3rem; color: var(--surface-500);"></i>
+            <h3>{{ userInvoices().length === 0 ? 'No invoices yet' : 'No matching invoices' }}</h3>
+            <p *ngIf="userInvoices().length === 0">
+              When gitPlumbers creates invoices for your work, they'll appear here.
+            </p>
+            <p *ngIf="userInvoices().length > 0">
+              Try adjusting your search or filter criteria.
+            </p>
+            <button 
+              type="button" 
+              class="clear-filters-btn"
+              *ngIf="userInvoices().length > 0 && hasActiveFilters()"
+              (click)="clearAllFilters()">
+              <i class="pi pi-times"></i>
+              Clear all filters
+            </button>
+          </div>
+        </ng-template>
+      </div>
     </p-card>
   </div>
 </div>

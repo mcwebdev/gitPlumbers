@@ -1,6 +1,7 @@
-import { Component, inject, effect, computed } from '@angular/core';
+import { Component, inject, effect, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -13,6 +14,9 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PanelModule } from 'primeng/panel';
 import { MessageService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { PaginatorModule } from 'primeng/paginator';
 
 // Store and Services
 import { InvoiceStore } from '../store/invoice.store';
@@ -31,6 +35,7 @@ import { StripeInvoice } from '../../../shared/models/stripe.interface';
   imports: [
     CommonModule,
     RouterModule,
+    FormsModule,
     CardModule,
     ButtonModule,
     TableModule,
@@ -40,6 +45,9 @@ import { StripeInvoice } from '../../../shared/models/stripe.interface';
     ProgressSpinnerModule,
     PanelModule,
     DialogModule,
+    InputTextModule,
+    SelectModule,
+    PaginatorModule,
   ],
   providers: [MessageService],
   templateUrl: './user-invoice-view.component.html',
@@ -86,6 +94,73 @@ export class UserInvoiceViewComponent {
     this.paidInvoices().reduce((sum, invoice) => sum + invoice.amount_paid, 0)
   );
 
+  // Filtered and sorted invoices for both desktop and mobile
+  readonly filteredInvoices = computed(() => {
+    let invoices = this.userInvoices();
+
+    // Apply search filter
+    const searchTerm = this.searchTerm();
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
+      invoices = invoices.filter(invoice => 
+        (invoice.number?.toLowerCase().includes(searchLower)) ||
+        (invoice.description?.toLowerCase().includes(searchLower)) ||
+        (this.getInvoiceItemsSummary(invoice).toLowerCase().includes(searchLower)) ||
+        (invoice.customer_email?.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Apply status filter
+    const selectedStatus = this.selectedStatus();
+    if (selectedStatus !== 'all') {
+      invoices = invoices.filter(invoice => invoice.status === selectedStatus);
+    }
+
+    // Apply sorting
+    const selectedSort = this.selectedSort();
+    const sortOrder = this.sortOrder();
+    
+    invoices = [...invoices].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (selectedSort) {
+        case 'created':
+          aValue = a.created;
+          bValue = b.created;
+          break;
+        case 'due_date':
+          aValue = a.due_date || 0;
+          bValue = b.due_date || 0;
+          break;
+        case 'total':
+          aValue = a.total;
+          bValue = b.total;
+          break;
+        case 'status':
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        case 'number':
+          aValue = a.number || a.id;
+          bValue = b.number || b.id;
+          break;
+        default:
+          aValue = a.created;
+          bValue = b.created;
+      }
+
+      let comparison = 0;
+      if (aValue < bValue) comparison = -1;
+      else if (aValue > bValue) comparison = 1;
+
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    return invoices;
+  });
+
+
   // UI state
   showInvoiceDetail = false;
   selectedColumns = [
@@ -97,6 +172,55 @@ export class UserInvoiceViewComponent {
     { field: 'due_date', header: 'Due Date' },
     { field: 'actions', header: 'Actions' }
   ];
+
+  // Filter and sort state (using signals for reactivity)
+  readonly searchTerm = signal('');
+  readonly selectedStatus = signal<string>('all');
+  readonly selectedSort = signal<string>('created');
+  readonly sortOrder = signal<'asc' | 'desc'>('desc');
+
+  // Filter and sort options
+  statusFilterOptions = [
+    { label: 'All Statuses', value: 'all' },
+    { label: 'Open', value: 'open' },
+    { label: 'Paid', value: 'paid' },
+    { label: 'Draft', value: 'draft' },
+    { label: 'Uncollectible', value: 'uncollectible' },
+    { label: 'Void', value: 'void' }
+  ];
+
+  sortOptions = [
+    { label: 'Date Created', value: 'created' },
+    { label: 'Due Date', value: 'due_date' },
+    { label: 'Amount', value: 'total' },
+    { label: 'Status', value: 'status' },
+    { label: 'Invoice Number', value: 'number' }
+  ];
+
+  // Getter/setter properties for ngModel compatibility
+  get searchTermValue(): string {
+    return this.searchTerm();
+  }
+  
+  set searchTermValue(value: string) {
+    this.searchTerm.set(value);
+  }
+
+  get selectedStatusValue(): string {
+    return this.selectedStatus();
+  }
+  
+  set selectedStatusValue(value: string) {
+    this.selectedStatus.set(value);
+  }
+
+  get selectedSortValue(): string {
+    return this.selectedSort();
+  }
+  
+  set selectedSortValue(value: string) {
+    this.selectedSort.set(value);
+  }
 
   constructor() {
     this.setupEffects();
@@ -265,5 +389,54 @@ export class UserInvoiceViewComponent {
    */
   hasOpenInvoices(): boolean {
     return this.openInvoices().length > 0;
+  }
+
+  // Mobile filter, sort, and pagination methods
+
+  /**
+   * Handle search input change
+   */
+  onSearchChange(): void {
+    // Search filtering handled automatically by computed property
+  }
+
+  /**
+   * Handle status filter change
+   */
+  onStatusFilterChange(): void {
+    // Status filtering handled automatically by computed property
+  }
+
+  /**
+   * Handle sort change
+   */
+  onSortChange(): void {
+    // Sorting handled automatically by computed property
+  }
+
+  /**
+   * Toggle sort order between asc and desc
+   */
+  toggleSortOrder(): void {
+    const currentOrder = this.sortOrder();
+    this.sortOrder.set(currentOrder === 'asc' ? 'desc' : 'asc');
+  }
+
+
+  /**
+   * Check if there are active filters
+   */
+  hasActiveFilters(): boolean {
+    return this.searchTerm().trim() !== '' || this.selectedStatus() !== 'all';
+  }
+
+  /**
+   * Clear all filters and sorting
+   */
+  clearAllFilters(): void {
+    this.searchTerm.set('');
+    this.selectedStatus.set('all');
+    this.selectedSort.set('created');
+    this.sortOrder.set('desc');
   }
 }

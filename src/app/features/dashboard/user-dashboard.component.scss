@@ -427,13 +427,94 @@ textarea {
   }
 }
 
-// Main Requests Section
-.requests-section {
+// Main Content Section with Tabs
+.main-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  min-height: calc(100vh - 200px);
   animation: requestsSectionFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.6s both;
+}
+
+// Tab Navigation
+.tab-navigation {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid rgba(0, 76, 137, 0.1);
+  overflow-x: auto;
+  
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 76, 137, 0.05);
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 76, 137, 0.2);
+    border-radius: 2px;
+  }
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  border-bottom: 3px solid transparent;
+  color: rgba(11, 31, 46, 0.6);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  position: relative;
+  
+  &:hover {
+    color: var(--color-primary);
+    background: rgba(0, 76, 137, 0.05);
+  }
+  
+  &.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    background: rgba(0, 76, 137, 0.08);
+  }
+  
+  i {
+    font-size: 1rem;
+  }
+  
+  span:not(.tab-badge) {
+    font-size: 0.95rem;
+  }
+}
+
+.tab-badge {
+  background: var(--color-primary);
+  color: white;
+  border-radius: 12px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.tab-content {
+  min-height: 400px;
+}
+
+// Requests Section (now inside tab content)
+.requests-section {
+  min-height: calc(100vh - 200px);
+}
+
+// Invoices Section (now inside tab content)
+.invoices-section {
+  min-height: calc(100vh - 200px);
 }
 
 @keyframes requestsSectionFadeIn {
@@ -999,8 +1080,8 @@ textarea {
   }
 
   .hero-settings {
-    top: 0.75rem;
-    right: 1.5rem;
+    top: -9px;
+    right: 5px;
   }
 
   .settings-btn {
@@ -1036,11 +1117,15 @@ textarea {
   .hero-actions {
     justify-content: center;
     flex-wrap: wrap;
+    width: 100%;
   }
 
   .new-request-btn {
     padding: 0.7rem 1.3rem;
     font-size: 0.95rem;
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
   }
 
   .form-container {
@@ -1056,8 +1141,31 @@ textarea {
     grid-column: 1;
   }
 
-  .requests-section {
+  .main-content {
     padding: 1.5rem;
+  }
+  
+  .tab-navigation {
+    margin-bottom: 1.5rem;
+    gap: 0.25rem;
+  }
+  
+  .tab-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    
+    i {
+      font-size: 0.9rem;
+    }
+    
+    span:not(.tab-badge) {
+      font-size: 0.85rem;
+    }
+  }
+  
+  .tab-badge {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.7rem;
   }
 
   .requests-header {
@@ -1100,11 +1208,12 @@ textarea {
     margin: 20px 20px 0 20px;
     padding: clamp(1.2rem, 3vw, 2rem) 0;
     border-radius: 12px;
+    height: 250px;
   }
 
   .dashboard-hero::after {
     background-size: 60px;
-    background-position: right 15px bottom 15px;
+    background-position: center 190px;
   }
 
   .hero-content {
@@ -1137,8 +1246,13 @@ textarea {
     padding: 1rem;
   }
 
-  .requests-section {
+  .main-content {
     padding: 1rem;
+  }
+  
+  .tab-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
   }
 }
 

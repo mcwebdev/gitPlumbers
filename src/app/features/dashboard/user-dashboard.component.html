@@ -9,8 +9,7 @@
         <p class="hero-eyebrow">Welcome back</p>
         <h1>Hey {{ user.displayName || 'there' }}, let's keep shipping.</h1>
         <p class="hero-body">
-          Raise requests, track progress, and keep in sync with the gitPlumbers support crew. We've
-          got your back when releases get wild.
+          Manage your support requests and track your invoices all in one place.
         </p>
         <div class="hero-actions">
           <button
@@ -21,14 +20,6 @@
           >
             <i class="pi pi-plus"></i>
             {{ showForm() ? 'Cancel' : 'New Request' }}
-          </button>
-          <button
-            type="button"
-            class="invoice-btn"
-            (click)="navigateToInvoices()"
-          >
-            <i class="pi pi-file-invoice"></i>
-            Manage Invoices
           </button>
         </div>
       </div>
@@ -109,13 +100,36 @@
   </section>
   }
 
-  <!-- Invoices Section -->
-  <section class="invoices-section">
-    <app-user-invoice-view></app-user-invoice-view>
-  </section>
+  <!-- Main Content with Tabs -->
+  <section class="main-content">
+    <div class="tab-navigation">
+      <button 
+        type="button" 
+        class="tab-btn"
+        [class.active]="activeTab() === 'requests'"
+        (click)="setActiveTab('requests')"
+      >
+        <i class="pi pi-list"></i>
+        <span>Support Requests</span>
+        @if (hasRequests()) {
+          <span class="tab-badge">{{ allItems().length }}</span>
+        }
+      </button>
+      <button 
+        type="button" 
+        class="tab-btn"
+        [class.active]="activeTab() === 'invoices'"
+        (click)="setActiveTab('invoices')"
+      >
+        <i class="pi pi-file-text"></i>
+        <span>Invoices</span>
+      </button>
+    </div>
 
-  <!-- Main Content: Request History -->
-  <section class="requests-section">
+    <div class="tab-content">
+      <!-- Requests Tab -->
+      @if (activeTab() === 'requests') {
+      <div class="requests-section">
     <div class="requests-header">
       <div class="requests-title">
         <h2>Your request history</h2>
@@ -274,6 +288,16 @@
       </button>
     </div>
     }
+      </div>
+      }
+
+      <!-- Invoices Tab -->
+      @if (activeTab() === 'invoices') {
+      <div class="invoices-section">
+        <app-user-invoice-view></app-user-invoice-view>
+      </div>
+      }
+    </div>
   </section>
 </div>
 } @else {

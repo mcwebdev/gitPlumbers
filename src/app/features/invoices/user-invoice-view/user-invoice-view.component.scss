@@ -466,8 +466,557 @@
     }
   }
 
+  // Universal Controls (for both desktop and mobile)
+  .invoice-controls {
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    
+    .search-section {
+      margin-bottom: 1.5rem;
+      
+      label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+      }
+      
+      .p-input-icon-left {
+        position: relative;
+        display: block;
+        width: 100%;
+        
+        > i {
+          position: absolute;
+          left: 0.75rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-color-secondary);
+          z-index: 2;
+          pointer-events: none;
+        }
+        
+        > .search-input {
+          width: 100%;
+          padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+          font-size: 1rem;
+          border: 1px solid var(--surface-border);
+          border-radius: 6px;
+          background: var(--surface-card);
+          color: var(--text-color);
+          
+          &:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+          }
+        }
+      }
+    }
+    
+    .filter-sort-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 1rem;
+      align-items: end;
+      margin-bottom: 1.5rem;
+      
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        
+        label {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--text-color);
+        }
+      }
+      
+      .sort-order-btn {
+        background: var(--surface-100);
+        border: 1px solid var(--surface-border);
+        border-radius: 6px;
+        width: 2.75rem;
+        height: 2.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-color);
+        
+        &:hover {
+          background: var(--primary-color);
+          border-color: var(--primary-color);
+          color: var(--primary-color-text);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+        
+        i {
+          font-size: 1.1rem;
+        }
+      }
+    }
+    
+    .results-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .results-count {
+        color: var(--text-color-secondary);
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      
+      .clear-filters-btn {
+        background: transparent;
+        border: 1px solid var(--surface-border);
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        color: var(--text-color-secondary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        
+        &:hover {
+          background: var(--red-50);
+          color: var(--red-600);
+          border-color: var(--red-200);
+          transform: translateY(-1px);
+        }
+        
+        i {
+          font-size: 0.875rem;
+        }
+      }
+    }
+    
+    // Compact select styling for universal controls
+    .compact-select {
+      width: 100%;
+      
+      ::ng-deep .p-select {
+        min-height: 2.75rem;
+        width: 100%;
+        
+        .p-select-label {
+          padding: 0.6rem 0.875rem;
+          font-size: 0.95rem;
+        }
+        
+        .p-select-dropdown {
+          width: 2.5rem;
+        }
+      }
+    }
+  }
+
+  // Mobile and Desktop Views
+  .desktop-table-view {
+    display: block;
+  }
+
+  .mobile-card-view {
+    display: none;
+    
+    // Mobile controls styling
+    .mobile-controls {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      
+      .search-section {
+        margin-bottom: 1rem;
+        
+        .search-input {
+          width: 100%;
+          padding: 0.75rem;
+          font-size: 1rem;
+        }
+        
+        .p-input-icon-left > i {
+          left: 0.75rem;
+          color: var(--text-color-secondary);
+        }
+        
+        .p-input-icon-left > input {
+          padding-left: 2.5rem;
+        }
+      }
+      
+      .filter-sort-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 0.75rem;
+        align-items: end;
+        margin-bottom: 1rem;
+        
+        .control-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          
+          label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-color-secondary);
+          }
+        }
+        
+        .sort-order-btn {
+          background: var(--surface-100);
+          border: 1px solid var(--surface-border);
+          border-radius: 6px;
+          width: 2.5rem;
+          height: 2.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          color: var(--text-color);
+          
+          &:hover {
+            background: var(--surface-200);
+            transform: translateY(-1px);
+          }
+          
+          &:active {
+            transform: translateY(0);
+          }
+          
+          i {
+            font-size: 1rem;
+          }
+        }
+      }
+      
+      .results-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        .results-count {
+          color: var(--text-color-secondary);
+          font-size: 0.875rem;
+          font-weight: 500;
+        }
+        
+        .clear-filters-btn {
+          background: transparent;
+          border: 1px solid var(--surface-border);
+          border-radius: 6px;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+          color: var(--text-color-secondary);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+          
+          &:hover {
+            background: var(--surface-100);
+            color: var(--text-color);
+            border-color: var(--primary-color);
+          }
+          
+          i {
+            font-size: 0.75rem;
+          }
+        }
+      }
+    }
+    
+    // Compact select styling
+    :host ::ng-deep .compact-select {
+      .p-select {
+        min-height: 2.5rem;
+        
+        .p-select-label {
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+        }
+        
+        .p-select-dropdown {
+          width: 2rem;
+        }
+      }
+    }
+    
+    .invoice-cards {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .invoice-card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      padding: 1rem;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      
+      &.overdue {
+        border-left: 4px solid var(--red-500);
+        background: rgba(244, 67, 54, 0.02);
+      }
+      
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        
+        .invoice-info {
+          flex: 1;
+          
+          .invoice-number {
+            margin: 0 0 0.5rem 0;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1rem;
+          }
+        }
+        
+        .invoice-amount {
+          text-align: right;
+          
+          .amount {
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: var(--text-color);
+          }
+        }
+      }
+      
+      .card-body {
+        margin-bottom: 1rem;
+        
+        .description {
+          margin-bottom: 0.75rem;
+          
+          .main-description {
+            display: block;
+            font-weight: 500;
+            color: var(--text-color);
+            line-height: 1.4;
+            margin-bottom: 0.25rem;
+          }
+          
+          .item-count {
+            color: var(--text-color-secondary);
+            font-size: 0.75rem;
+          }
+        }
+        
+        .dates-info {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.75rem;
+          margin-bottom: 0.75rem;
+          
+          .date-item {
+            .label {
+              display: block;
+              color: var(--text-color-secondary);
+              font-size: 0.75rem;
+              font-weight: 500;
+              margin-bottom: 0.125rem;
+            }
+            
+            .date {
+              color: var(--text-color);
+              font-size: 0.875rem;
+              
+              &.overdue-text {
+                color: var(--red-500);
+                font-weight: 500;
+              }
+            }
+          }
+        }
+        
+        .due-info {
+          .due-text {
+            color: var(--text-color-secondary);
+            font-size: 0.75rem;
+          }
+          
+          .overdue-text {
+            color: var(--red-500);
+            font-weight: 500;
+            font-size: 0.75rem;
+          }
+        }
+      }
+      
+      .card-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+        
+        .p-button {
+          flex: 1;
+          max-width: 80px;
+        }
+      }
+    }
+    
+    // Mobile pagination styling
+    .mobile-pagination {
+      margin-top: 1.5rem;
+      
+      :host ::ng-deep .mobile-paginator {
+        .p-paginator {
+          background: var(--surface-card);
+          border: 1px solid var(--surface-border);
+          border-radius: 8px;
+          padding: 0.75rem;
+          
+          .p-paginator-current {
+            background: transparent;
+            color: var(--text-color-secondary);
+            font-size: 0.875rem;
+            margin: 0;
+          }
+          
+          .p-dropdown {
+            .p-dropdown-trigger {
+              background: var(--surface-100);
+              border-left: 1px solid var(--surface-border);
+            }
+          }
+          
+          .p-paginator-pages {
+            display: none; // Hide page numbers on mobile
+          }
+          
+          .p-paginator-prev,
+          .p-paginator-next {
+            background: var(--surface-100);
+            border: 1px solid var(--surface-border);
+            border-radius: 6px;
+            color: var(--text-color);
+            margin: 0 0.25rem;
+            
+            &:enabled:hover {
+              background: var(--primary-color);
+              border-color: var(--primary-color);
+              color: var(--primary-color-text);
+            }
+            
+            &:disabled {
+              opacity: 0.5;
+            }
+          }
+        }
+      }
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      
+      h3 {
+        margin: 1rem 0 0.5rem 0;
+        color: var(--text-color);
+        font-size: 1.25rem;
+      }
+      
+      p {
+        margin: 0;
+        color: var(--text-color-secondary);
+        line-height: 1.5;
+      }
+    }
+  }
+
   // Responsive design
   @media (max-width: 768px) {
+    // Hide desktop table and show mobile cards
+    .desktop-table-view {
+      display: none;
+    }
+    
+    .mobile-card-view {
+      display: block;
+    }
+    
+    // Mobile responsive styles for universal controls
+    .invoice-controls {
+      padding: 1rem;
+      
+      .search-section {
+        margin-bottom: 1rem;
+        
+        .p-input-icon-left > .search-input {
+          font-size: 0.95rem;
+          padding: 0.7rem 0.7rem 0.7rem 2.3rem;
+        }
+        
+        .p-input-icon-left > i {
+          left: 0.7rem;
+        }
+      }
+      
+      .filter-sort-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        
+        .control-group {
+          &:last-child {
+            grid-column: 1;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            
+            .sort-order-btn {
+              margin-left: 0.75rem;
+              width: 2.5rem;
+              height: 2.5rem;
+            }
+          }
+        }
+      }
+      
+      .results-summary {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        
+        .results-count {
+          text-align: center;
+        }
+        
+        .clear-filters-btn {
+          justify-content: center;
+        }
+      }
+    }
+    
     padding: 0.75rem;
 
     .stats-section .stats-grid {

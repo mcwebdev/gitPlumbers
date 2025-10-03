@@ -107,6 +107,9 @@ export class UserDashboardComponent {
   // Form visibility state
   protected readonly showForm = signal(false);
 
+  // Tab state
+  protected readonly activeTab = signal<'requests' | 'invoices'>('requests');
+
   // Filtering and sorting state
   protected readonly statusFilter = signal<RequestStatus | 'all'>('all');
   protected readonly sortBy = signal<'date' | 'status'>('date');
@@ -558,5 +561,9 @@ export class UserDashboardComponent {
 
   navigateToInvoices(): void {
     this.router.navigate(['/invoices']);
+  }
+
+  protected setActiveTab(tab: 'requests' | 'invoices'): void {
+    this.activeTab.set(tab);
   }
 }

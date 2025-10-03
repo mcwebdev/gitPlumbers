@@ -5,7 +5,9 @@
 <article class="blog-post" aria-labelledby="blogPostTitle">
   <!-- SEO Structured Data -->
   <script type="application/ld+json" [innerHTML]="getArticleSchema(currentPost) | json"></script>
-  <script type="application/ld+json" *ngIf="getFAQSchema(currentPost)" [innerHTML]="getFAQSchema(currentPost) | json"></script>
+  @if (getFAQSchema(currentPost)) {
+    <script type="application/ld+json" [innerHTML]="getFAQSchema(currentPost) | json"></script>
+  }
 
   <!-- Breadcrumb Navigation -->
   <app-breadcrumb-nav [items]="breadcrumbItems()"></app-breadcrumb-nav>
@@ -19,18 +21,29 @@
     <p class="blog-post__deck">{{ currentPost.deck }}</p>
     
     <!-- Author Information -->
-    <div *ngIf="currentPost.author" class="blog-post__author">
-      <p class="blog-post__author-name">{{ currentPost.author.name }}</p>
-      <p *ngIf="currentPost.author.title" class="blog-post__author-title">{{ currentPost.author.title }}</p>
-      <p *ngIf="currentPost.author.bio" class="blog-post__author-bio">{{ currentPost.author.bio }}</p>
-    </div>
+    @if (currentPost.author) {
+      <div class="blog-post__author">
+        <p class="blog-post__author-name">{{ currentPost.author.name }}</p>
+        @if (currentPost.author.title) {
+          <p class="blog-post__author-title">{{ currentPost.author.title }}</p>
+        }
+        @if (currentPost.author.bio) {
+          <p class="blog-post__author-bio">{{ currentPost.author.bio }}</p>
+        }
+      </div>
+    }
 
-    <p *ngIf="unknownPost()" class="blog-post__alert">
-      The post you were looking for is unavailable. We picked a related briefing instead.
-    </p>
-    <blockquote *ngIf="currentPost.heroQuote" class="blog-post__quote">{{ currentPost.heroQuote }}</blockquote>
+    @if (unknownPost()) {
+      <p class="blog-post__alert">
+        The post you were looking for is unavailable. We picked a related briefing instead.
+      </p>
+    }
+    @if (currentPost.heroQuote) {
+      <blockquote class="blog-post__quote">{{ currentPost.heroQuote }}</blockquote>
+    }
     <a routerLink="/blog" class="blog-post__back">Back to all posts</a>
   </header>
+  
   @if (shareMetadata(); as share) {
     <app-social-share
       [title]="share.title"
@@ -38,80 +51,103 @@
       [shareUrl]="share.url"
       [tags]="share.tags"
     ></app-social-share>
-    }
+  }
+  
   <section class="blog-post__body" aria-label="Article body">
     <div [innerHTML]="renderedBody()"></div>
     
     <!-- Internal Links -->
-    <div *ngIf="currentPost.internalLinks?.length" class="blog-post__internal-links">
-      <h3>Related Resources</h3>
-      <ul>
-        <li *ngFor="let link of currentPost.internalLinks">
-          <a [href]="getInternalLinkUrl(link)" [attr.aria-label]="link.anchor">
-            {{ link.anchor }}
-          </a>
-        </li>
-      </ul>
-    </div>
+    @if (currentPost.internalLinks?.length) {
+      <div class="blog-post__internal-links">
+        <h3>Related Resources</h3>
+        <ul>
+          @for (link of currentPost.internalLinks; track link.anchor) {
+            <li>
+              <a [href]="getInternalLinkUrl(link)" [attr.aria-label]="link.anchor">
+                {{ link.anchor }}
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
   </section>
 
   <section class="blog-post__takeaways" aria-label="Key takeaways">
     <h2>Key takeaways</h2>
     <ul>
-      <li *ngFor="let item of currentPost.keyTakeaways">{{ item }}</li>
+      @for (item of currentPost.keyTakeaways; track item) {
+        <li>{{ item }}</li>
+      }
     </ul>
   </section>
 
   <section class="blog-post__checklist" aria-label="Implementation checklist">
     <h2>Implementation checklist</h2>
     <ul>
-      <li *ngFor="let item of currentPost.checklist">{{ item }}</li>
+      @for (item of currentPost.checklist; track item) {
+        <li>{{ item }}</li>
+      }
     </ul>
   </section>
 
-  <section class="blog-post__faq" *ngIf="currentPost.faq?.length" aria-label="Frequently asked questions">
-    <h2>Questions we hear from teams</h2>
-    <dl>
-      <div *ngFor="let item of currentPost.faq">
-        <dt>{{ item.question }}</dt>
-        <dd>{{ item.answer }}</dd>
-      </div>
-    </dl>
-  </section>
+  @if (currentPost.faq?.length) {
+    <section class="blog-post__faq" aria-label="Frequently asked questions">
+      <h2>Questions we hear from teams</h2>
+      <dl>
+        @for (item of currentPost.faq; track item.question) {
+          <div>
+            <dt>{{ item.question }}</dt>
+            <dd>{{ item.answer }}</dd>
+          </div>
+        }
+      </dl>
+    </section>
+  }
 
   <!-- Call-to-Action Section -->
-  <section *ngIf="currentPost.primaryCTA || currentPost.secondaryCTA" class="blog-post__cta" aria-label="Call to action">
-    <div class="blog-post__cta-content">
-      <h2>Ready to modernize your codebase?</h2>
-      <p>Let GitPlumbers help you transform AI-generated chaos into clean, scalable applications.</p>
-      <div class="blog-post__cta-buttons">
-        <a *ngIf="currentPost.primaryCTA" 
-           [href]="getCTAUrl(currentPost.primaryCTA)" 
-           class="blog-post__cta-primary"
-           [attr.aria-label]="currentPost.primaryCTA.label">
-          {{ currentPost.primaryCTA.label }}
-        </a>
-        <a *ngIf="currentPost.secondaryCTA" 
-           [href]="getCTAUrl(currentPost.secondaryCTA)" 
-           class="blog-post__cta-secondary"
-           [attr.aria-label]="currentPost.secondaryCTA.label">
-          {{ currentPost.secondaryCTA.label }}
-        </a>
+  @if (currentPost.primaryCTA || currentPost.secondaryCTA) {
+    <section class="blog-post__cta" aria-label="Call to action">
+      <div class="blog-post__cta-content">
+        <h2>Ready to modernize your codebase?</h2>
+        <p>Let GitPlumbers help you transform AI-generated chaos into clean, scalable applications.</p>
+        <div class="blog-post__cta-buttons">
+          @if (currentPost.primaryCTA) {
+            <a 
+               [href]="getCTAUrl(currentPost.primaryCTA)" 
+               class="blog-post__cta-primary"
+               [attr.aria-label]="currentPost.primaryCTA.label">
+              {{ currentPost.primaryCTA.label }}
+            </a>
+          }
+          @if (currentPost.secondaryCTA) {
+            <a 
+               [href]="getCTAUrl(currentPost.secondaryCTA)" 
+               class="blog-post__cta-secondary"
+               [attr.aria-label]="currentPost.secondaryCTA.label">
+              {{ currentPost.secondaryCTA.label }}
+            </a>
+          }
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  }
 
-  <section class="blog-post__related" *ngIf="relatedPosts().length" aria-label="Related resources">
-    <h2>Related resources</h2>
-    <ul>
-      <li *ngFor="let item of relatedPosts()">
-        <a [routerLink]="['/blog', item.slug]">
-          <span class="blog-post__related-title">{{ item.title }}</span>
-          <span class="blog-post__related-summary">{{ item.summary }}</span>
-        </a>
-      </li>
-    </ul>
-  </section>
+  @if (relatedPosts().length) {
+    <section class="blog-post__related" aria-label="Related resources">
+      <h2>Related resources</h2>
+      <ul>
+        @for (item of relatedPosts(); track item.slug) {
+          <li>
+            <a [routerLink]="['/blog', item.slug]">
+              <span class="blog-post__related-title">{{ item.title }}</span>
+              <span class="blog-post__related-summary">{{ item.summary }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
 </article>
 } @else {
   <app-loading-spinner [active]="isLoading()" message="Loading post..."></app-loading-spinner>

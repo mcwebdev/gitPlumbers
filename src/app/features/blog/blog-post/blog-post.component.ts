@@ -5,7 +5,7 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { marked } from 'marked';
@@ -29,7 +29,7 @@ interface ShareMetadata {
 @Component({
   selector: 'app-blog-post',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgFor, NgIf, LoadingSpinnerComponent, BreadcrumbNavComponent, ReadingProgressComponent, SocialShareComponent],
+  imports: [CommonModule, RouterLink, LoadingSpinnerComponent, BreadcrumbNavComponent, ReadingProgressComponent, SocialShareComponent],
   templateUrl: './blog-post.component.html',
   styleUrl: './blog-post.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -144,7 +144,7 @@ export class BlogPostComponent implements OnDestroy {
       if (lang && hljs.getLanguage(lang)) {
         try {
           const highlighted = hljs.highlight(text, { language: lang }).value;
-          return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+          return `<pre data-code="${this.escapeHtml(text)}"><code class="hljs language-${lang}">${highlighted}</code></pre>`;
         } catch (err) {
           console.warn('Highlight.js error:', err);
         }
@@ -153,13 +153,13 @@ export class BlogPostComponent implements OnDestroy {
       // Auto-detect language if not specified or highlighting failed
       try {
         const result = hljs.highlightAuto(text);
-        return `<pre><code class="hljs ${result.language ? `language-${result.language}` : ''}">${result.value}</code></pre>`;
+        return `<pre data-code="${this.escapeHtml(text)}"><code class="hljs ${result.language ? `language-${result.language}` : ''}">${result.value}</code></pre>`;
       } catch (err) {
         console.warn('Highlight.js auto-detect error:', err);
       }
       
       // Fall back to plain code block
-      return `<pre><code>${text}</code></pre>`;
+      return `<pre data-code="${this.escapeHtml(text)}"><code>${text}</code></pre>`;
     };
 
     marked.setOptions({
@@ -170,8 +170,81 @@ export class BlogPostComponent implements OnDestroy {
 
     // Join all body paragraphs and render as markdown
     const markdownContent = currentPost.body.join('\n\n');
-    return marked.parse(markdownContent) as string;
+    const html = marked.parse(markdownContent) as string;
+    
+    // Add copy functionality after rendering
+    setTimeout(() => this.addCopyFunctionality(), 0);
+    
+    return html;
   });
+
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  private addCopyFunctionality(): void {
+    const codeBlocks = document.querySelectorAll('.blog-post__body pre[data-code]');
+    
+    codeBlocks.forEach((block) => {
+      const preElement = block as HTMLElement;
+      
+      // Remove existing click listeners to prevent duplicates
+      preElement.removeEventListener('click', this.handleCopyClick);
+      
+      // Add click listener for copy functionality
+      preElement.addEventListener('click', this.handleCopyClick.bind(this));
+    });
+  }
+
+  private handleCopyClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    const preElement = target.closest('pre[data-code]') as HTMLElement;
+    
+    if (!preElement) return;
+    
+    const codeText = preElement.getAttribute('data-code');
+    if (!codeText) return;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(codeText).then(() => {
+      // Add copied class for visual feedback
+      preElement.classList.add('copied');
+      
+      // Remove copied class after 2 seconds
+      setTimeout(() => {
+        preElement.classList.remove('copied');
+      }, 2000);
+    }).catch((err) => {
+      console.error('Failed to copy code:', err);
+      // Fallback for older browsers
+      this.fallbackCopyToClipboard(codeText, preElement);
+    });
+  }
+
+  private fallbackCopyToClipboard(text: string, element: HTMLElement): void {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
+      element.classList.add('copied');
+      setTimeout(() => {
+        element.classList.remove('copied');
+      }, 2000);
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+    }
+    
+    document.body.removeChild(textArea);
+  }
 
   ngOnDestroy(): void {
     // Clean up structured data when component is destroyed

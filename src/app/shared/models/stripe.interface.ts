@@ -344,7 +344,11 @@ export interface CreateInvoiceRequest {
 
 export interface CreateInvoiceItemRequest {
   customer: string;
-  price: string;
+  price_data: {
+    currency: string;
+    product: string;
+    unit_amount: number;
+  };
   invoice: string;
   quantity?: number;
   description?: string;

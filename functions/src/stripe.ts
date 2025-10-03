@@ -38,7 +38,11 @@ interface CreateInvoiceData {
 
 interface AddInvoiceItemData {
   customer: string;
-  price: string;
+  price_data: {
+    currency: string;
+    product: string;
+    unit_amount: number;
+  };
   invoice: string;
   quantity?: number;
 }
@@ -299,13 +303,17 @@ export const addStripeInvoiceItem = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
 
   const data = request.data as AddInvoiceItemData;
-  const { customer, price, invoice, quantity = 1 } = data;
-  if (!customer || !price || !invoice) throw new HttpsError('invalid-argument', 'Customer, price, and invoice ID required');
+  const { customer, price_data, invoice, quantity = 1 } = data;
+  if (!customer || !price_data || !invoice) throw new HttpsError('invalid-argument', 'Customer, price_data, and invoice ID required');
 
   try {
     const stripe = new Stripe(STRIPE_SECRET_KEY.value());
-    // @ts-ignore - Type error in Stripe types for 'price'
-    const invoiceItem = await stripe.invoiceItems.create({ customer, price, invoice, quantity });
+    await stripe.invoiceItems.create({ 
+      customer, 
+      price_data, 
+      invoice, 
+      quantity 
+    });
 
     const updatedInvoice = await stripe.invoices.retrieve(invoice);
     await db.collection('invoices').doc(invoice).update({

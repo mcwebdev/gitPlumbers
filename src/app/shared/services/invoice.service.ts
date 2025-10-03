@@ -137,7 +137,10 @@ export class InvoiceService {
 
   transformInvoiceItemData(data: CreateInvoiceItemRequest): CreateInvoiceItemRequest {
     this.validateRequired(data.customer, 'customer');
-    this.validateRequired(data.price, 'price');
+    this.validateRequired(data.price_data, 'price_data');
+    this.validateRequired(data.price_data.currency, 'price_data.currency');
+    this.validateRequired(data.price_data.product, 'price_data.product');
+    this.validateRequired(data.price_data.unit_amount, 'price_data.unit_amount');
     this.validateRequired(data.invoice, 'invoice');
     return data;
   }
@@ -229,7 +232,7 @@ export class InvoiceService {
         });
         console.log('InvoiceService: Created price', { price });
         
-        return { priceId: price.id, quantity: item.quantity };
+        return { priceId: price.id, productId: product.id, quantity: item.quantity };
       })
     );
       
@@ -242,11 +245,17 @@ export class InvoiceService {
     console.log('InvoiceService: Created draft invoice', { draftInvoice });
     
     // 4. Add items to the invoice
-    for (const item of priceIds) {
+    for (let i = 0; i < priceIds.length; i++) {
+      const item = priceIds[i];
+      const formItem = formData.items[i];
       await this.createInvoiceItem({
         customer: customerId,
         invoice: draftInvoice.id,
-        price: item.priceId,
+        price_data: {
+          currency: formItem.currency,
+          product: item.productId,
+          unit_amount: formItem.unitAmount * 100, // Convert to cents
+        },
         quantity: item.quantity,
       });
     }
@@ -299,7 +308,7 @@ export class InvoiceService {
     }
   }
 
-  async createInvoiceItem(params: { customer: string; price: string; invoice: string; quantity?: number }): Promise<StripeInvoice> {
+  async createInvoiceItem(params: { customer: string; price_data: { currency: string; product: string; unit_amount: number }; invoice: string; quantity?: number }): Promise<StripeInvoice> {
     const addItemCallable = httpsCallable<typeof params, { success: boolean, updatedInvoice: StripeInvoice }>(this.functions, 'addStripeInvoiceItem');
     try {
       const result = await addItemCallable(params);

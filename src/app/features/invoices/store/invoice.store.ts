@@ -545,7 +545,7 @@ export const InvoiceStore = signalStore(
           return from(
             store._invoiceService.createInvoiceItem({
               customer: transformedData.customer,
-              price: transformedData.price,
+              price_data: transformedData.price_data,
               invoice: transformedData.invoice,
               quantity: transformedData.quantity
             })

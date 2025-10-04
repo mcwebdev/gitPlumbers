@@ -52,6 +52,11 @@ interface FinalizeInvoiceResponse {
   invoice: StripeInvoice;
 }
 
+interface DeleteInvoiceResponse {
+  success: boolean;
+  deleted: boolean;
+}
+
 // For list responses, assuming they return arrays directly
 interface ListInvoicesResponse {
   data: StripeInvoice[];
@@ -176,6 +181,23 @@ export class InvoiceService {
     } catch (error: any) {
       console.error('InvoiceService: Failed to list customers', error);
       throw new Error(`Failed to load customers: ${error.message}`);
+    }
+  }
+
+  async retrieveCustomer(customerId: string): Promise<StripeCustomer | null> {
+    console.log('InvoiceService: retrieveCustomer called with:', customerId);
+    try {
+      const url = `${this.baseUrl}/retrieveStripeCustomer`;
+      const result = await lastValueFrom(this.http.post<StripeCustomer>(url, { customerId }));
+      console.log('InvoiceService: retrieveCustomer received:', result);
+      return result;
+    } catch (error: any) {
+      if (error.status === 404) {
+        console.warn('InvoiceService: Customer not found:', customerId);
+        return null;
+      }
+      console.error('InvoiceService: Failed to retrieve customer', error);
+      throw new Error(`Failed to retrieve customer: ${error.message}`);
     }
   }
 
@@ -328,6 +350,16 @@ export class InvoiceService {
       return result.data.invoice;
     } catch (error: any) {
       throw new Error(`Failed to finalize invoice: ${error.message}`);
+    }
+  }
+
+  async deleteInvoice(invoiceId: string): Promise<boolean> {
+    const deleteCallable = httpsCallable<{ invoiceId: string }, DeleteInvoiceResponse>(this.functions, 'deleteStripeInvoice');
+    try {
+      const result = await deleteCallable({ invoiceId });
+      return result.data.success && result.data.deleted;
+    } catch (error: any) {
+      throw new Error(`Failed to delete invoice: ${error.message}`);
     }
   }
 

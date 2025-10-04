@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/workspace/gitPlumbers/src/app/features/invoices/customer-form-panel/**)",
+      "Read(//e/workspace/gitPlumbers/src/app/features/invoices/invoice-detail-panel/**)",
+      "Read(//e/workspace/gitPlumbers/src/app/features/invoices/invoice-form-panel/**)",
+      "Read(//e/workspace/gitPlumbers/src/app/features/support-requests/support-request-detail-panel/**)",
+      "Read(//e/workspace/gitPlumbers/src/app/features/dashboard/**)",
+      "Read(//e/workspace/gitPlumbers/src/app/features/invoices/admin-invoice-management/**)",
+      "Read(//e/workspace/gitPlumbers/src/app/features/invoices/user-invoice-view/**)",
+      "Read(//e/workspace/gitPlumbers/src/app/features/support-requests/support-requests-list/**)",
+      "Read(//e/workspace/gitPlumbers/src/app/features/invoices/store/**)",
+      "Read(//e/workspace/gitPlumbers/src/app/shared/services/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -574,10 +574,52 @@ export const InvoiceStore = signalStore(
       )
     ),
 
+    deleteInvoice: rxMethod<string>(
+      pipe(
+        tap(() => patchState(store, {
+          isLoading: true,
+          error: null,
+          lastOperation: 'Deleting invoice'
+        })),
+        switchMap((invoiceId) => {
+          return from(
+            store._invoiceService.deleteInvoice(invoiceId)
+          ).pipe(
+            tap((success) => {
+              if (success) {
+                // Remove invoice from local state regardless of whether it was deleted or voided
+                const updatedInvoices = store.invoices().filter(inv => inv.id !== invoiceId);
+                patchState(store, {
+                  invoices: updatedInvoices,
+                  selectedInvoice: null,
+                  isLoading: false,
+                  lastOperation: 'Invoice removed successfully'
+                });
+              } else {
+                patchState(store, {
+                  isLoading: false,
+                  error: 'Failed to remove invoice',
+                  lastOperation: 'Failed to remove invoice'
+                });
+              }
+            }),
+            catchError((error) => {
+              patchState(store, {
+                isLoading: false,
+                error: `Failed to remove invoice: ${error.message || 'Unknown error'}`,
+                lastOperation: 'Failed to remove invoice'
+              });
+              return of(false);
+            })
+          );
+        })
+      )
+    ),
+
     finalizeInvoice: rxMethod<string>(
       pipe(
-        tap(() => patchState(store, { 
-          isFinalizing: true, 
+        tap(() => patchState(store, {
+          isFinalizing: true,
           error: null,
           lastOperation: 'Finalizing invoice'
         })),
@@ -589,10 +631,10 @@ export const InvoiceStore = signalStore(
             })
           ).pipe(
             tap((finalizedInvoice) => {
-              const updatedInvoices = store.invoices().map(inv => 
+              const updatedInvoices = store.invoices().map(inv =>
                 inv.id === finalizedInvoice.id ? finalizedInvoice : inv
               );
-              patchState(store, { 
+              patchState(store, {
                 invoices: updatedInvoices,
                 selectedInvoice: finalizedInvoice,
                 isFinalizing: false,

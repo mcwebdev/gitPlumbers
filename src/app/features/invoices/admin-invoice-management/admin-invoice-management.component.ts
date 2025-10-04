@@ -173,6 +173,8 @@ export class AdminInvoiceManagementComponent implements OnInit {
 
   ngOnInit(): void {
     void this.loadUsers();
+    this._invoiceStore.loadCustomers();
+    this._invoiceStore.loadInvoices();
   }
 
   /**
@@ -370,36 +372,30 @@ export class AdminInvoiceManagementComponent implements OnInit {
   }
 
   /**
-   * Create payment link for invoice
+   * Delete invoice
    */
-  canOpenPayment(invoice: StripeInvoice): boolean {
-    if (!invoice) {
-      console.warn('AdminInvoiceManagementComponent: canOpenPayment called without invoice');
-      return false;
-    }
+  onDeleteInvoice(invoice: StripeInvoice): void {
+    const isDraft = invoice.status === 'draft';
+    const action = isDraft ? 'delete' : 'void';
+    const message = isDraft
+      ? `Delete draft invoice ${invoice.number || invoice.id}? This will permanently remove it.`
+      : `Void invoice ${invoice.number || invoice.id}? This will mark it as uncollectible and remove it from the list. The invoice will still exist in Stripe as voided.`;
 
-    const hostedUrl = invoice.hosted_invoice_url || invoice.invoice_pdf;
-    const reasons: string[] = [];
-    if (invoice.status !== 'open') {
-      reasons.push('status=' + (invoice.status ?? 'unknown'));
-    }
-    if (!hostedUrl) {
-      reasons.push('missing hosted URL');
-    }
-
-    const canPay = reasons.length === 0;
-    console.debug('AdminInvoiceManagementComponent: canOpenPayment check', {
-      invoiceId: invoice.id,
-      status: invoice.status,
-      hostedInvoiceUrl: invoice.hosted_invoice_url,
-      invoicePdf: invoice.invoice_pdf,
-      result: canPay,
-      blockers: reasons,
+    this._confirmationService.confirm({
+      message,
+      header: isDraft ? 'Delete Invoice' : 'Void Invoice',
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger',
+      acceptLabel: isDraft ? 'Delete' : 'Void',
+      accept: () => {
+        this._invoiceStore.deleteInvoice(invoice.id);
+      }
     });
-
-    return canPay;
   }
 
+  /**
+   * Create payment link for invoice
+   */
   onCreatePaymentLink(invoice: StripeInvoice): void {
     console.log('AdminInvoiceManagementComponent: onCreatePaymentLink click', { invoiceId: invoice.id, status: invoice.status, hostedUrl: invoice.hosted_invoice_url, invoicePdf: invoice.invoice_pdf });
     if (invoice.status !== 'open') {
@@ -525,9 +521,16 @@ export class AdminInvoiceManagementComponent implements OnInit {
    * Filter users for autocomplete
    */
   onFilterUsers(event: { query: string }): void {
-    const query = event.query.toLowerCase();
-    const users = this.availableUsers().filter(user => 
-      user.name?.toLowerCase().includes(query) || 
+    const query = event.query?.toLowerCase().trim() || '';
+
+    // Show all users if query is empty (dropdown click)
+    if (!query) {
+      this.filteredUsers.set(this.availableUsers());
+      return;
+    }
+
+    const users = this.availableUsers().filter(user =>
+      user.name?.toLowerCase().includes(query) ||
       user.email?.toLowerCase().includes(query)
     );
     this.filteredUsers.set(users);
@@ -545,25 +548,8 @@ export class AdminInvoiceManagementComponent implements OnInit {
 
     try {
       let customerId = user.stripeCustomerId;
-      const existingCustomers = this.customers();
-      const customerExists = customerId
-        ? existingCustomers.some(customer => customer.id === customerId)
-        : false;
 
-      if (customerId && !customerExists) {
-        console.warn('AdminInvoiceManagementComponent: Stale Stripe customer ID detected. Creating a new customer.', {
-          user,
-          customerId,
-        });
-        this._messageService.add({
-          severity: 'warn',
-          summary: 'Refreshing Stripe Customer',
-          detail: 'Existing Stripe customer record was not found. Creating a new one.',
-          life: 4000,
-        });
-        customerId = undefined;
-      }
-
+      // If user doesn't have a Stripe customer ID, create one
       if (!customerId) {
         const customerData: CreateCustomerRequest = {
           name: user.name ?? user.displayName,

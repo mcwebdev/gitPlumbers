@@ -159,6 +159,138 @@
       }
     }
 
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+
+      h3 {
+        margin: 1rem 0 0.5rem 0;
+        color: var(--text-color);
+      }
+
+      p {
+        margin: 0 0 1.5rem 0;
+        color: var(--text-color-secondary);
+      }
+    }
+
+    // Mobile card view
+    .mobile-invoice-list {
+      display: none;
+    }
+
+    // Desktop table view - visible by default
+    .desktop-invoice-table {
+      display: block;
+    }
+
+    // Mobile responsive: show cards, hide table
+    @media (max-width: 768px) {
+      .mobile-invoice-list {
+        display: block;
+      }
+
+      .desktop-invoice-table {
+        display: none;
+      }
+
+      .invoice-card-mobile {
+        background: var(--surface-card);
+        border: 1px solid var(--surface-border);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .invoice-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 1rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid var(--surface-border);
+
+          .invoice-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .invoice-number {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.875rem;
+          }
+
+          .invoice-amount {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-color);
+          }
+        }
+
+        .invoice-card-body {
+          margin-bottom: 1rem;
+
+          .customer-info {
+            margin-bottom: 0.75rem;
+
+            strong {
+              display: block;
+              color: var(--text-color);
+              margin-bottom: 0.25rem;
+            }
+
+            .customer-email {
+              font-size: 0.875rem;
+              color: var(--text-color-secondary);
+              margin-top: 0.25rem;
+            }
+
+            .customer-meta {
+              margin-top: 0.25rem;
+
+              .user-id {
+                font-size: 0.75rem;
+                color: var(--text-color-secondary);
+                background: var(--surface-100);
+                padding: 0.125rem 0.25rem;
+                border-radius: 4px;
+              }
+            }
+          }
+
+          .invoice-date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-color-secondary);
+            font-size: 0.875rem;
+
+            i {
+              font-size: 0.875rem;
+            }
+          }
+        }
+
+        .invoice-card-actions {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.5rem;
+
+          ::ng-deep .p-button {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      }
+    }
+
     // Table customizations
     ::ng-deep .p-datatable {
       .p-datatable-thead > tr > th {
@@ -219,21 +351,11 @@
         gap: 0.5rem;
         flex-wrap: wrap;
       }
+    }
 
-      .empty-state {
-        text-align: center;
-        padding: 3rem 1rem;
-
-        h3 {
-          margin: 1rem 0 0.5rem 0;
-          color: var(--text-color);
-        }
-
-        p {
-          margin: 0 0 1.5rem 0;
-          color: var(--text-color-secondary);
-        }
-      }
+    .load-more-container {
+      margin-top: 1rem;
+      text-align: center;
     }
   }
 

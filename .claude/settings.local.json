@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ng generate component:*)",
+      "Bash(ng build:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

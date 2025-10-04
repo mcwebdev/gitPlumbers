@@ -101,6 +101,39 @@ export const listStripeCustomers = onRequest({ secrets: [STRIPE_SECRET_KEY] }, (
   });
 });
 
+// HTTP Request: Retrieve Single Customer
+export const retrieveStripeCustomer = onRequest({ secrets: [STRIPE_SECRET_KEY] }, (req, res) => {
+  corsHandler(req, res, async () => {
+    logger.info('retrieveStripeCustomer: Received request', { body: req.body });
+    try {
+      const { customerId } = req.body;
+      if (!customerId) {
+        logger.warn('retrieveStripeCustomer: Bad request - Customer ID is required.');
+        res.status(400).send('Customer ID is required');
+        return;
+      }
+      const stripe = new Stripe(STRIPE_SECRET_KEY.value());
+      const customer = await stripe.customers.retrieve(customerId as string);
+      if (customer.deleted) {
+        logger.info(`retrieveStripeCustomer: Customer ${customerId} was deleted.`);
+        res.status(404).send('Customer not found or deleted');
+        return;
+      }
+      logger.info(`retrieveStripeCustomer: Retrieved customer ${customerId}.`);
+      res.status(200).json(customer);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('No such customer')) {
+        logger.warn(`retrieveStripeCustomer: Customer not found - ${message}`);
+        res.status(404).send(`Customer not found: ${message}`);
+      } else {
+        logger.error('retrieveStripeCustomer: Error retrieving customer', { error: message });
+        res.status(500).send(`Failed to retrieve customer: ${message}`);
+      }
+    }
+  });
+});
+
 // HTTP Request: List Products
 export const listStripeProducts = onRequest({ secrets: [STRIPE_SECRET_KEY] }, (req, res) => {
   corsHandler(req, res, async () => {
@@ -325,6 +358,37 @@ export const addStripeInvoiceItem = onCall(async (request) => {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     throw new HttpsError('internal', `Failed to add invoice item: ${message}`);
+  }
+});
+
+// Callable: Delete Invoice
+export const deleteStripeInvoice = onCall({ secrets: [STRIPE_SECRET_KEY] }, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
+
+  const data = request.data as { invoiceId: string };
+  const { invoiceId } = data;
+  if (!invoiceId) throw new HttpsError('invalid-argument', 'Invoice ID required');
+
+  try {
+    const stripe = new Stripe(STRIPE_SECRET_KEY.value());
+
+    // First, get the invoice to check its status
+    const invoice = await stripe.invoices.retrieve(invoiceId);
+
+    // If it's a draft, we can delete it directly
+    if (invoice.status === 'draft') {
+      const deleted = await stripe.invoices.del(invoiceId);
+      return { success: true, deleted: deleted.deleted };
+    }
+
+    // For non-draft invoices, void them instead
+    // Voiding marks the invoice as uncollectible and closes it
+    const voided = await stripe.invoices.voidInvoice(invoiceId);
+    return { success: true, deleted: true, voided: true, invoice: voided };
+
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new HttpsError('internal', `Failed to delete invoice: ${message}`);
   }
 });
 

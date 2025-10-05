@@ -1,0 +1,256 @@
+.user-proposal-dashboard {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-section {
+  margin-bottom: 2rem;
+
+  .header-content {
+    h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--text-color-secondary);
+    }
+  }
+}
+
+// Stats Grid
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 1rem;
+
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    color: var(--text-color-secondary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &.pending {
+    .stat-value {
+      color: var(--orange-500);
+    }
+  }
+
+  &.accepted {
+    .stat-value {
+      color: var(--green-500);
+    }
+  }
+
+  &.rejected {
+    .stat-value {
+      color: var(--red-500);
+    }
+  }
+}
+
+// Table
+.proposal-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .new-badge {
+    background: var(--orange-500);
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.empty-state {
+  padding: 3rem;
+  text-align: center;
+
+  p {
+    margin-top: 1rem;
+    color: var(--text-color-secondary);
+  }
+}
+
+// Proposal Details Dialog
+.proposal-details {
+  .status-banner {
+    text-align: center;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: var(--border-radius);
+    background: var(--surface-50);
+
+    &.sent {
+      background: var(--orange-50);
+    }
+
+    &.accepted {
+      background: var(--green-50);
+    }
+
+    &.rejected {
+      background: var(--red-50);
+    }
+
+    ::ng-deep .status-tag-large {
+      font-size: 1.25rem;
+      padding: 0.5rem 1rem;
+    }
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+
+    strong {
+      min-width: 140px;
+    }
+
+    span, p {
+      flex: 1;
+      text-align: right;
+      margin: 0;
+    }
+  }
+
+  h3 {
+    margin: 1rem 0;
+    font-size: 1.25rem;
+  }
+
+  .line-item {
+    background: var(--surface-50);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.75rem;
+    border-left: 4px solid var(--primary-500);
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+
+      strong {
+        font-size: 1.1rem;
+      }
+
+      .item-total {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-600);
+      }
+    }
+
+    .item-description {
+      color: var(--text-color-secondary);
+      margin: 0.5rem 0;
+      line-height: 1.5;
+    }
+
+    .item-footer {
+      font-size: 0.875rem;
+      color: var(--text-color-secondary);
+      margin-top: 0.5rem;
+    }
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.5rem;
+    padding: 1.5rem;
+    background: var(--primary-50);
+    border-radius: var(--border-radius);
+    border: 2px solid var(--primary-200);
+
+    .total-amount {
+      color: var(--primary-700);
+    }
+  }
+
+  .note-item {
+    background: var(--surface-100);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+
+    .note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+
+      .note-date {
+        font-size: 0.875rem;
+        color: var(--text-color-secondary);
+      }
+    }
+
+    .note-message {
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .user-proposal-dashboard {
+    padding: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dialog-footer {
+    flex-direction: column;
+
+    ::ng-deep button {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

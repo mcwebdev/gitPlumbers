@@ -1,0 +1,376 @@
+<div class="admin-proposal-management">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1>Proposal Management</h1>
+      <p class="subtitle">Create and manage proposals for users</p>
+    </div>
+    <div class="header-actions">
+      <p-button
+        label="New Proposal"
+        icon="pi pi-plus"
+        (onClick)="onCreateProposal()"
+        severity="success">
+      </p-button>
+      <p-button
+        label="Refresh"
+        icon="pi pi-refresh"
+        (onClick)="onRefresh()"
+        [outlined]="true">
+      </p-button>
+    </div>
+  </div>
+
+  <!-- Proposals Table -->
+  <p-card>
+    <p-table
+      [value]="proposals()"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} proposals"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [loading]="isLoading()"
+      styleClass="p-datatable-gridlines">
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="title">
+            Title
+            <p-sortIcon field="title"></p-sortIcon>
+          </th>
+          <th pSortableColumn="userName">
+            User
+            <p-sortIcon field="userName"></p-sortIcon>
+          </th>
+          <th pSortableColumn="totalAmount">
+            Amount
+            <p-sortIcon field="totalAmount"></p-sortIcon>
+          </th>
+          <th pSortableColumn="status">
+            Status
+            <p-sortIcon field="status"></p-sortIcon>
+          </th>
+          <th pSortableColumn="createdAt">
+            Created
+            <p-sortIcon field="createdAt"></p-sortIcon>
+          </th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-proposal>
+        <tr>
+          <td>{{ proposal.title }}</td>
+          <td>
+            <div>{{ proposal.userName }}</div>
+            <small class="text-muted">{{ proposal.userEmail }}</small>
+          </td>
+          <td>{{ formatAmount(proposal.totalAmount, proposal.currency) }}</td>
+          <td>
+            <p-tag
+              [value]="proposal.status | titlecase"
+              [severity]="getStatusSeverity(proposal.status)">
+            </p-tag>
+          </td>
+          <td>{{ formatDate(proposal.createdAt) }}</td>
+          <td>
+            <div class="action-buttons">
+              <p-button
+                icon="pi pi-eye"
+                [rounded]="true"
+                [text]="true"
+                severity="info"
+                (onClick)="onViewProposal(proposal)"
+                pTooltip="View details">
+              </p-button>
+              @if (proposal.status === 'draft') {
+                <p-button
+                  icon="pi pi-send"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="success"
+                  (onClick)="onSendProposal(proposal)"
+                  pTooltip="Send to user">
+                </p-button>
+              }
+              <p-button
+                icon="pi pi-trash"
+                [rounded]="true"
+                [text]="true"
+                severity="danger"
+                (onClick)="onDeleteProposal(proposal)"
+                pTooltip="Delete">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center">
+            <div class="empty-state">
+              <i class="pi pi-file" style="font-size: 3rem; color: var(--surface-400);"></i>
+              <p>No proposals yet. Create your first proposal to get started.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <!-- Create/Edit Proposal Dialog -->
+  <p-dialog
+    [(visible)]="showProposalForm"
+    [modal]="true"
+    [style]="{width: '50vw'}"
+    [breakpoints]="{'960px': '75vw', '640px': '90vw'}"
+    header="Create Proposal"
+    (onHide)="onDialogVisibilityChange(false)">
+    <form [formGroup]="proposalForm" (ngSubmit)="onSubmitProposal()">
+      <!-- User Selection -->
+      <div class="form-field">
+        <label for="user">Select User *</label>
+        <p-autocomplete
+          [(ngModel)]="selectedUser"
+          [ngModelOptions]="{standalone: true}"
+          [suggestions]="filteredUsers"
+          (completeMethod)="filterUsers($event)"
+          (onSelect)="onUserSelect($event)"
+          optionLabel="name"
+          [dropdown]="true"
+          placeholder="Search users..."
+          fluid>
+        </p-autocomplete>
+      </div>
+
+      <!-- Title -->
+      <div class="form-field">
+        <label for="title">Proposal Title *</label>
+        <input
+          pInputText
+          id="title"
+          formControlName="title"
+          placeholder="e.g., Code Review & Optimization Project"
+          class="w-full" />
+        @if (proposalForm.get('title')?.invalid && proposalForm.get('title')?.touched) {
+          <small class="p-error">Title is required</small>
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="form-field">
+        <label for="description">Description</label>
+        <textarea
+          pTextarea
+          id="description"
+          formControlName="description"
+          rows="3"
+          placeholder="Additional details about this proposal..."
+          class="w-full">
+        </textarea>
+      </div>
+
+      <!-- Currency -->
+      <div class="form-field">
+        <label for="currency">Currency *</label>
+        <p-select
+          id="currency"
+          formControlName="currency"
+          [options]="currencyOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select currency"
+          styleClass="w-full">
+        </p-select>
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- Line Items -->
+      <div class="line-items-section">
+        <div class="section-header">
+          <h3>Line Items</h3>
+          <p-button
+            label="Add Item"
+            icon="pi pi-plus"
+            (onClick)="onAddProposalItem()"
+            [outlined]="true"
+            size="small">
+          </p-button>
+        </div>
+
+        <div formArrayName="items">
+          @for (item of proposalItems.controls; track $index) {
+            <p-panel [header]="'Item ' + ($index + 1)" [toggleable]="true">
+              <div [formGroupName]="$index" class="item-form">
+                <!-- Service Templates -->
+                <div class="form-field">
+                  <label>Quick Select</label>
+                  <p-select
+                    [options]="serviceTemplates"
+                    (onChange)="onApplyServiceTemplate($event.value, $index)"
+                    optionLabel="name"
+                    placeholder="Choose a template..."
+                    styleClass="w-full">
+                  </p-select>
+                </div>
+
+                <!-- Product Name -->
+                <div class="form-field">
+                  <label>Service Name *</label>
+                  <input
+                    pInputText
+                    formControlName="productName"
+                    placeholder="e.g., Code Review"
+                    class="w-full" />
+                </div>
+
+                <!-- Description -->
+                <div class="form-field">
+                  <label>Description</label>
+                  <textarea
+                    pTextarea
+                    formControlName="description"
+                    rows="2"
+                    placeholder="Service details..."
+                    class="w-full">
+                  </textarea>
+                </div>
+
+                <div class="form-row">
+                  <!-- Unit Amount -->
+                  <div class="form-field">
+                    <label>Unit Price ($) *</label>
+                    <p-inputNumber
+                      formControlName="unitAmount"
+                      mode="currency"
+                      currency="USD"
+                      locale="en-US"
+                      [minFractionDigits]="2"
+                      styleClass="w-full">
+                    </p-inputNumber>
+                  </div>
+
+                  <!-- Quantity -->
+                  <div class="form-field">
+                    <label>Quantity *</label>
+                    <p-inputNumber
+                      formControlName="quantity"
+                      [min]="1"
+                      [showButtons]="true"
+                      styleClass="w-full">
+                    </p-inputNumber>
+                  </div>
+                </div>
+
+                @if (proposalItems.length > 1) {
+                  <p-button
+                    label="Remove Item"
+                    icon="pi pi-trash"
+                    (onClick)="onRemoveProposalItem($index)"
+                    severity="danger"
+                    [outlined]="true"
+                    size="small"
+                    styleClass="mt-2">
+                  </p-button>
+                }
+              </div>
+            </p-panel>
+          }
+        </div>
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- Total -->
+      <div class="total-section">
+        <h3>Total: {{ getProposalTotal() }}</h3>
+      </div>
+
+      <!-- Actions -->
+      <div class="dialog-actions">
+        <p-button
+          label="Cancel"
+          (onClick)="onCancelForm()"
+          [outlined]="true"
+          severity="secondary">
+        </p-button>
+        <p-button
+          label="Create Proposal"
+          type="submit"
+          [loading]="isLoading()"
+          severity="success">
+        </p-button>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- View Proposal Dialog -->
+  @if (selectedProposal(); as proposal) {
+    <p-dialog
+      [(visible)]="showProposalDetail"
+      [modal]="true"
+      [style]="{width: '50vw'}"
+      [breakpoints]="{'960px': '75vw', '640px': '90vw'}"
+      [header]="proposal.title">
+      <div class="proposal-details">
+        <div class="detail-row">
+          <strong>User:</strong>
+          <span>{{ proposal.userName }} ({{ proposal.userEmail }})</span>
+        </div>
+        <div class="detail-row">
+          <strong>Status:</strong>
+          <p-tag
+            [value]="proposal.status | titlecase"
+            [severity]="getStatusSeverity(proposal.status)">
+          </p-tag>
+        </div>
+        <div class="detail-row">
+          <strong>Created:</strong>
+          <span>{{ formatDate(proposal.createdAt) }}</span>
+        </div>
+        @if (proposal.description) {
+          <div class="detail-row">
+            <strong>Description:</strong>
+            <p>{{ proposal.description }}</p>
+          </div>
+        }
+
+        <p-divider></p-divider>
+
+        <h3>Line Items</h3>
+        @for (item of proposal.items; track $index) {
+          <div class="line-item">
+            <div class="item-header">
+              <strong>{{ item.productName }}</strong>
+              <span>{{ formatAmount(item.unitAmount * item.quantity, item.currency) }}</span>
+            </div>
+            @if (item.description) {
+              <p class="item-description">{{ item.description }}</p>
+            }
+            <div class="item-footer">
+              <span>{{ formatAmount(item.unitAmount, item.currency) }} × {{ item.quantity }}</span>
+            </div>
+          </div>
+        }
+
+        <p-divider></p-divider>
+
+        <div class="total-row">
+          <strong>Total:</strong>
+          <strong>{{ formatAmount(proposal.totalAmount, proposal.currency) }}</strong>
+        </div>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <p-button
+          label="Close"
+          (onClick)="onCloseProposalDetail()"
+          severity="secondary">
+        </p-button>
+      </ng-template>
+    </p-dialog>
+  }
+</div>

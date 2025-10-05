@@ -1,0 +1,186 @@
+.admin-proposal-management {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+
+  .header-content {
+    h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--text-color-secondary);
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.empty-state {
+  padding: 3rem;
+  text-align: center;
+
+  p {
+    margin-top: 1rem;
+    color: var(--text-color-secondary);
+  }
+}
+
+.text-muted {
+  color: var(--text-color-secondary);
+  font-size: 0.875rem;
+}
+
+// Form styles
+.form-field {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .p-error {
+    display: block;
+    margin-top: 0.25rem;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.line-items-section {
+  margin: 1rem 0;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    h3 {
+      margin: 0;
+    }
+  }
+
+  .item-form {
+    padding: 1rem;
+  }
+
+  ::ng-deep .p-panel {
+    margin-bottom: 1rem;
+  }
+}
+
+.total-section {
+  text-align: right;
+  padding: 1rem;
+  background: var(--surface-50);
+  border-radius: var(--border-radius);
+
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+// Proposal details
+.proposal-details {
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+
+    strong {
+      min-width: 120px;
+    }
+
+    span, p {
+      flex: 1;
+      text-align: right;
+      margin: 0;
+    }
+  }
+
+  .line-item {
+    background: var(--surface-50);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .item-description {
+      color: var(--text-color-secondary);
+      margin: 0.5rem 0;
+    }
+
+    .item-footer {
+      font-size: 0.875rem;
+      color: var(--text-color-secondary);
+    }
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.25rem;
+    padding: 1rem;
+    background: var(--surface-100);
+    border-radius: var(--border-radius);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .admin-proposal-management {
+    padding: 1rem;
+  }
+
+  .header-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

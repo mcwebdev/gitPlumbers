@@ -103,8 +103,8 @@
   <!-- Main Content with Tabs -->
   <section class="main-content">
     <div class="tab-navigation">
-      <button 
-        type="button" 
+      <button
+        type="button"
         class="tab-btn"
         [class.active]="activeTab() === 'requests'"
         (click)="setActiveTab('requests')"
@@ -115,8 +115,8 @@
           <span class="tab-badge">{{ allItems().length }}</span>
         }
       </button>
-      <button 
-        type="button" 
+      <button
+        type="button"
         class="tab-btn"
         [class.active]="activeTab() === 'invoices'"
         (click)="setActiveTab('invoices')"
@@ -124,6 +124,13 @@
         <i class="pi pi-file-text"></i>
         <span>Invoices</span>
       </button>
+      <a
+        routerLink="/proposals"
+        class="tab-btn tab-link"
+      >
+        <i class="pi pi-file-edit"></i>
+        <span>Proposals</span>
+      </a>
     </div>
 
     <div class="tab-content">

@@ -1,0 +1,233 @@
+<div class="user-proposal-dashboard">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1>My Proposals</h1>
+      <p class="subtitle">Review proposals sent to you by GitPlumbers</p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <p-card>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats().total }}</div>
+        <div class="stat-label">Total Proposals</div>
+      </div>
+    </p-card>
+    <p-card>
+      <div class="stat-card pending">
+        <div class="stat-value">{{ stats().pending }}</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+    </p-card>
+    <p-card>
+      <div class="stat-card accepted">
+        <div class="stat-value">{{ stats().accepted }}</div>
+        <div class="stat-label">Accepted</div>
+      </div>
+    </p-card>
+    <p-card>
+      <div class="stat-card rejected">
+        <div class="stat-value">{{ stats().rejected }}</div>
+        <div class="stat-label">Rejected</div>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Proposals Table -->
+  <p-card>
+    <p-table
+      [value]="proposals()"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} proposals"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [loading]="isLoading()"
+      styleClass="p-datatable-gridlines">
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="title">
+            Title
+            <p-sortIcon field="title"></p-sortIcon>
+          </th>
+          <th pSortableColumn="totalAmount">
+            Amount
+            <p-sortIcon field="totalAmount"></p-sortIcon>
+          </th>
+          <th pSortableColumn="status">
+            Status
+            <p-sortIcon field="status"></p-sortIcon>
+          </th>
+          <th pSortableColumn="createdAt">
+            Date Received
+            <p-sortIcon field="createdAt"></p-sortIcon>
+          </th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-proposal>
+        <tr>
+          <td>
+            <div class="proposal-title">
+              {{ proposal.title }}
+              @if (proposal.status === 'sent') {
+                <span class="new-badge">NEW</span>
+              }
+            </div>
+          </td>
+          <td>{{ formatAmount(proposal.totalAmount, proposal.currency) }}</td>
+          <td>
+            <p-tag
+              [value]="proposal.status | titlecase"
+              [severity]="getStatusSeverity(proposal.status)">
+            </p-tag>
+          </td>
+          <td>{{ formatDate(proposal.createdAt) }}</td>
+          <td>
+            <div class="action-buttons">
+              <p-button
+                label="View"
+                icon="pi pi-eye"
+                (onClick)="onViewProposal(proposal)"
+                [outlined]="true"
+                size="small">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center">
+            <div class="empty-state">
+              <i class="pi pi-inbox" style="font-size: 3rem; color: var(--surface-400);"></i>
+              <p>No proposals yet. When GitPlumbers sends you a proposal, it will appear here.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <!-- View Proposal Dialog -->
+  @if (selectedProposal(); as proposal) {
+    <p-dialog
+      [(visible)]="showProposalDetail"
+      [modal]="true"
+      [style]="{width: '50vw'}"
+      [breakpoints]="{'960px': '75vw', '640px': '90vw'}"
+      [header]="proposal.title">
+      <div class="proposal-details">
+        <!-- Status Badge -->
+        <div class="status-banner" [class]="proposal.status">
+          <p-tag
+            [value]="proposal.status | titlecase"
+            [severity]="getStatusSeverity(proposal.status)"
+            styleClass="status-tag-large">
+          </p-tag>
+        </div>
+
+        <!-- Metadata -->
+        <div class="detail-row">
+          <strong>Date Received:</strong>
+          <span>{{ formatDate(proposal.createdAt) }}</span>
+        </div>
+        @if (proposal.sentAt) {
+          <div class="detail-row">
+            <strong>Date Sent:</strong>
+            <span>{{ formatDate(proposal.sentAt) }}</span>
+          </div>
+        }
+        @if (proposal.description) {
+          <div class="detail-row">
+            <strong>Description:</strong>
+            <p>{{ proposal.description }}</p>
+          </div>
+        }
+
+        <p-divider></p-divider>
+
+        <!-- Line Items -->
+        <h3>Proposed Services</h3>
+        @for (item of proposal.items; track $index) {
+          <div class="line-item">
+            <div class="item-header">
+              <strong>{{ item.productName }}</strong>
+              <span class="item-total">{{ formatAmount(item.unitAmount * item.quantity, item.currency) }}</span>
+            </div>
+            @if (item.description) {
+              <p class="item-description">{{ item.description }}</p>
+            }
+            <div class="item-footer">
+              <span>{{ formatAmount(item.unitAmount, item.currency) }} × {{ item.quantity }}</span>
+            </div>
+          </div>
+        }
+
+        <p-divider></p-divider>
+
+        <!-- Total -->
+        <div class="total-row">
+          <strong>Total Amount:</strong>
+          <strong class="total-amount">{{ formatAmount(proposal.totalAmount, proposal.currency) }}</strong>
+        </div>
+
+        <!-- Notes Section -->
+        @if (proposal.notes && proposal.notes.length > 0) {
+          <p-divider></p-divider>
+          <h3>Notes</h3>
+          @for (note of proposal.notes; track note.id) {
+            <div class="note-item">
+              <div class="note-header">
+                <strong>{{ note.authorName }}</strong>
+                <span class="note-date">{{ formatDate(note.createdAt) }}</span>
+              </div>
+              <p class="note-message">{{ note.message }}</p>
+            </div>
+          }
+        }
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="dialog-footer">
+          @if (canRequestRevision(proposal)) {
+            <p-button
+              label="Request Changes"
+              icon="pi pi-pencil"
+              (onClick)="onRequestRevision(proposal)"
+              [outlined]="true"
+              severity="secondary">
+            </p-button>
+          }
+          @if (canReject(proposal)) {
+            <p-button
+              label="Reject"
+              icon="pi pi-times"
+              (onClick)="onRejectProposal(proposal)"
+              severity="danger"
+              [outlined]="true">
+            </p-button>
+          }
+          @if (canAccept(proposal)) {
+            <p-button
+              label="Accept Proposal"
+              icon="pi pi-check"
+              (onClick)="onAcceptProposal(proposal)"
+              severity="success">
+            </p-button>
+          }
+          <p-button
+            label="Close"
+            (onClick)="onCloseProposalDetail()"
+            [outlined]="true">
+          </p-button>
+        </div>
+      </ng-template>
+    </p-dialog>
+  }
+</div>

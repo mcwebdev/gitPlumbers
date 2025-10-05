@@ -148,6 +148,33 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'admin/proposals',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/proposals/admin-proposal-management/admin-proposal-management.component').then(
+        (m) => m.AdminProposalManagementComponent
+      ),
+    data: {
+      ssr: false, // Disable SSR for this admin route
+    },
+  },
+  {
+    path: 'proposals',
+    canActivate: [userGuard],
+    loadComponent: () =>
+      import('./features/proposals/user-proposal-dashboard/user-proposal-dashboard.component').then(
+        (m) => m.UserProposalDashboardComponent
+      ),
+    data: {
+      ssr: false, // Disable SSR for authenticated routes
+      seo: {
+        title: 'Proposals - GitPlumbers',
+        description: 'Review and manage proposals sent to you by GitPlumbers.',
+        keywords: ['proposals', 'project proposals', 'GitPlumbers proposals'],
+      },
+    },
+  },
+  {
     path: 'ai-analytics',
     canActivate: [adminGuard],
     loadComponent: () =>

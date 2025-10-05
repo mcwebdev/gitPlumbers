@@ -79,12 +79,17 @@ export class SignupComponent {
         // Continue with user creation even if Stripe fails
       }
 
-      await this.userService.ensureUserDocument(credential.user, {
+      // Only include stripeCustomerId if it was successfully created
+      const userOverrides: Partial<{ displayName: string; email: string; role: 'user'; stripeCustomerId: string }> = {
         displayName: fullName.trim(),
         email,
         role: 'user',
-        stripeCustomerId,
-      });
+      };
+      if (stripeCustomerId) {
+        userOverrides.stripeCustomerId = stripeCustomerId;
+      }
+
+      await this.userService.ensureUserDocument(credential.user, userOverrides);
 
       await this.router.navigate(['/dashboard']);
     } catch (error: unknown) {

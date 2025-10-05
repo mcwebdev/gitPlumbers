@@ -142,12 +142,9 @@ export class AuthUserService {
         updatedAt: serverTimestamp(),
       };
 
-      // Only include optional fields if they're defined
+      // Only include stripeCustomerId if defined
       if (overrides?.stripeCustomerId !== undefined) {
         payload.stripeCustomerId = overrides.stripeCustomerId;
-      }
-      if (overrides?.githubInstallationId !== undefined) {
-        payload.githubInstallationId = overrides.githubInstallationId;
       }
 
       // Validate payload before creating document
@@ -168,7 +165,6 @@ export class AuthUserService {
         displayName: payload.displayName ?? '',
         role: payload.role ?? 'user',
         stripeCustomerId: payload.stripeCustomerId,
-        githubInstallationId: payload.githubInstallationId,
         createdAt: payload.createdAt,
         updatedAt: payload.updatedAt,
       };
@@ -179,11 +175,21 @@ export class AuthUserService {
       email: overrides?.email ?? currentData.email ?? user.email ?? '',
       displayName: overrides?.displayName ?? currentData.displayName ?? user.displayName ?? '',
       role: overrides?.role ?? currentData.role ?? 'user',
-      stripeCustomerId: overrides?.stripeCustomerId ?? currentData.stripeCustomerId,
-      githubInstallationId: overrides?.githubInstallationId ?? currentData.githubInstallationId,
       createdAt: currentData.createdAt,
       updatedAt: currentData.updatedAt,
     };
+
+    // Only include optional fields if they exist in overrides or currentData
+    if (overrides?.stripeCustomerId !== undefined) {
+      merged.stripeCustomerId = overrides.stripeCustomerId;
+    } else if (currentData.stripeCustomerId !== undefined) {
+      merged.stripeCustomerId = currentData.stripeCustomerId;
+    }
+
+    // Keep existing githubInstallationId from currentData, never from overrides during ensureUserDocument
+    if (currentData.githubInstallationId !== undefined) {
+      merged.githubInstallationId = currentData.githubInstallationId;
+    }
 
     // Validate merged data before processing
     if (!merged.email || !merged.displayName) {
@@ -195,21 +201,24 @@ export class AuthUserService {
       overrides?.displayName ||
       overrides?.role ||
       overrides?.stripeCustomerId ||
-      overrides?.githubInstallationId ||
       merged.email !== currentData.email ||
       merged.displayName !== currentData.displayName ||
-      merged.stripeCustomerId !== currentData.stripeCustomerId ||
-      merged.githubInstallationId !== currentData.githubInstallationId
+      merged.stripeCustomerId !== currentData.stripeCustomerId
     ) {
       try {
-        await updateDoc(userDocRef, {
+        const updatePayload: Partial<UserDocument> & { updatedAt: unknown } = {
           email: merged.email,
           displayName: merged.displayName,
           role: merged.role,
-          stripeCustomerId: merged.stripeCustomerId,
-          githubInstallationId: merged.githubInstallationId,
           updatedAt: serverTimestamp(),
-        });
+        };
+
+        // Only include stripeCustomerId if defined
+        if (merged.stripeCustomerId !== undefined) {
+          updatePayload.stripeCustomerId = merged.stripeCustomerId;
+        }
+
+        await updateDoc(userDocRef, updatePayload);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         throw new Error(`Failed to update user document: ${errorMessage}`);
@@ -286,17 +295,25 @@ export class AuthUserService {
     if (!userId) {
       throw new Error('User ID is required to update profile');
     }
-    
+
     const userDocRef = doc(this.firestore, 'users', userId);
-    
+
     // Validate updates
     if (updates.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updates.email)) {
       throw new Error('Invalid email format');
     }
-    
+
     try {
+      // Filter out undefined values to avoid Firestore errors
+      const cleanedUpdates: Partial<UserDocument> = {};
+      if (updates.email !== undefined) cleanedUpdates.email = updates.email;
+      if (updates.displayName !== undefined) cleanedUpdates.displayName = updates.displayName;
+      if (updates.role !== undefined) cleanedUpdates.role = updates.role;
+      if (updates.stripeCustomerId !== undefined) cleanedUpdates.stripeCustomerId = updates.stripeCustomerId;
+      if (updates.githubInstallationId !== undefined) cleanedUpdates.githubInstallationId = updates.githubInstallationId;
+
       await updateDoc(userDocRef, {
-        ...updates,
+        ...cleanedUpdates,
         updatedAt: serverTimestamp(),
       });
     } catch (error) {

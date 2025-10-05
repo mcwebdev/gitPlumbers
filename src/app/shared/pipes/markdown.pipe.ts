@@ -23,8 +23,22 @@ export class MarkdownPipe implements PipeTransform {
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       // Horizontal rules
       .replace(/^---$/gm, '<hr>')
-      // Line breaks
+      // Paragraphs (double line breaks)
+      .replace(/\n\n/g, '</p><p>')
+      // Single line breaks within paragraphs
       .replace(/\n/g, '<br>');
+
+    // Wrap in paragraph tags
+    html = '<p>' + html + '</p>';
+
+    // Clean up empty paragraphs and fix paragraph around block elements
+    html = html
+      .replace(/<p><\/p>/g, '')
+      .replace(/<p>(<h[1-6]>)/g, '$1')
+      .replace(/(<\/h[1-6]>)<\/p>/g, '$1')
+      .replace(/<p>(<hr>)/g, '$1')
+      .replace(/(<hr>)<\/p>/g, '$1')
+      .replace(/<br><\/p>/g, '</p>');
 
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }

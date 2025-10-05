@@ -84,6 +84,7 @@ export class UserProposalDashboardComponent {
       pending: props.filter(p => p.status === 'sent').length,
       accepted: props.filter(p => p.status === 'accepted').length,
       rejected: props.filter(p => p.status === 'rejected').length,
+      revisionRequested: props.filter(p => p.status === 'revision_requested').length,
     };
   });
 

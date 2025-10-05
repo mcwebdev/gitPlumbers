@@ -55,7 +55,12 @@ select {
 
 // Targeted CLS optimizations without excessive space
 // Prevent layout shifts from font loading
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-display: swap;
 }
 
@@ -72,7 +77,7 @@ body {
 }
 @media (max-width: 680px) {
   code {
-    display: none!important;
+    display: none !important;
   }
 }
 
@@ -276,7 +281,7 @@ body {
 // Code block copy button styling
 .blog-post__body pre {
   position: relative !important;
-  
+
   &::after {
     content: 'Copy' !important;
     position: absolute !important;
@@ -294,14 +299,14 @@ body {
     font-family: 'Inter', sans-serif !important;
     user-select: none !important;
     z-index: 10 !important;
-    
+
     @media (max-width: 768px) {
       top: 0.5rem !important;
       right: 0.5rem !important;
       padding: 0.25rem 0.5rem !important;
       font-size: 0.7rem !important;
     }
-    
+
     @media (max-width: 480px) {
       top: 0.375rem !important;
       right: 0.375rem !important;
@@ -309,13 +314,13 @@ body {
       font-size: 0.65rem !important;
     }
   }
-  
+
   &:hover::after {
     background: rgba(255, 255, 255, 0.2) !important;
     color: white !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
   }
-  
+
   &.copied::after {
     content: 'Copied!' !important;
     background: rgba(34, 197, 94, 0.8) !important;
@@ -324,12 +329,20 @@ body {
   }
 }
 
-app-contact,app-forgot-password,app-signup{
-  height:100%;
+app-contact,
+app-forgot-password,
+app-signup {
+  height: 100%;
 }
 
 svg.p-icon {
   width: 24px;
   padding-left: 10px;
-  color : #004c89;
+  color: #004c89;
+}
+
+hr {
+  height: 5px;
+  background: #a0c7e9;
+  border: none;
 }

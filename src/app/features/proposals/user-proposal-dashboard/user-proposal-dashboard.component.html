@@ -5,7 +5,7 @@
   <!-- Header -->
   <div class="header-section">
     <div class="header-content">
-      <h1>My Proposals</h1>
+      <h1>{{ currentUser()?.displayName || 'My' }} Proposals</h1>
       <p class="subtitle">Review proposals sent to you by GitPlumbers</p>
     </div>
   </div>
@@ -22,6 +22,12 @@
       <div class="stat-card pending">
         <div class="stat-value">{{ stats().pending }}</div>
         <div class="stat-label">Pending Review</div>
+      </div>
+    </p-card>
+    <p-card>
+      <div class="stat-card revision">
+        <div class="stat-value">{{ stats().revisionRequested }}</div>
+        <div class="stat-label">Revision Requested</div>
       </div>
     </p-card>
     <p-card>
@@ -187,8 +193,8 @@
     </div>
   }
 
-  <!-- Proposals Table -->
-  <p-card>
+  <!-- Proposals Table (Desktop) -->
+  <p-card class="proposals-table-desktop">
     <p-table
       [value]="proposals()"
       [paginator]="true"
@@ -262,6 +268,53 @@
       </ng-template>
     </p-table>
   </p-card>
+
+  <!-- Proposals Cards (Mobile) -->
+  <div class="proposals-cards-mobile">
+    @if (proposals().length === 0) {
+      <div class="empty-state">
+        <i class="pi pi-inbox" style="font-size: 3rem; color: var(--surface-400);"></i>
+        <p>No proposals yet. When GitPlumbers sends you a proposal, it will appear here.</p>
+      </div>
+    } @else {
+      @for (proposal of proposals(); track proposal.id) {
+        <p-card class="proposal-card-mobile">
+          <div class="mobile-card-header">
+            <div class="mobile-card-title">
+              <h3>{{ proposal.title }}</h3>
+              @if (proposal.status === 'sent') {
+                <span class="new-badge">NEW</span>
+              }
+            </div>
+            <p-tag
+              [value]="proposal.status | titlecase"
+              [severity]="getStatusSeverity(proposal.status)">
+            </p-tag>
+          </div>
+          <div class="mobile-card-content">
+            <div class="mobile-card-row">
+              <span class="mobile-label">Amount:</span>
+              <span class="mobile-value">{{ formatAmount(proposal.totalAmount, proposal.currency) }}</span>
+            </div>
+            <div class="mobile-card-row">
+              <span class="mobile-label">Date Received:</span>
+              <span class="mobile-value">{{ formatDate(proposal.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="mobile-card-footer">
+            <p-button
+              label="View Details"
+              icon="pi pi-eye"
+              (onClick)="onViewProposal(proposal)"
+              [outlined]="true"
+              size="small"
+              styleClass="w-full">
+            </p-button>
+          </div>
+        </p-card>
+      }
+    }
+  </div>
 
 
   <!-- Revision Request Dialog -->

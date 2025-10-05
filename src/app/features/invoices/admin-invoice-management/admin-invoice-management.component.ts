@@ -17,7 +17,6 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PanelModule } from 'primeng/panel';
 import { DividerModule } from 'primeng/divider';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -31,12 +30,13 @@ import { InvoiceService } from '../../../shared/services/invoice.service';
 import { AuthUserService } from '../../../shared/services/auth-user.service';
 import { UserService } from '../../../shared/services/user.service';
 import { UserProfile } from '../../../shared/services/auth-user.service';
-import { 
-  StripeInvoice, 
-  StripeCustomer, 
+import {
+  StripeInvoice,
+  StripeCustomer,
   InvoiceFormData,
   CreateCustomerRequest,
 } from '../../../shared/models/stripe.interface';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 // Update UserOption
 interface UserOption extends UserProfile {
@@ -62,7 +62,6 @@ const primeNgModules = [
   TooltipModule,
   ConfirmDialogModule,
   ToastModule,
-  ProgressSpinnerModule,
   PanelModule,
   DividerModule,
   AutoCompleteModule,
@@ -72,7 +71,7 @@ const primeNgModules = [
 @Component({
   selector: 'app-admin-invoice-management',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, RouterModule, TitleCasePipe, ...primeNgModules],
+  imports: [ReactiveFormsModule, FormsModule, RouterModule, TitleCasePipe, LoadingSpinnerComponent, ...primeNgModules],
   providers: [MessageService, ConfirmationService],
   templateUrl: './admin-invoice-management.component.html',
   styleUrl: './admin-invoice-management.component.scss'

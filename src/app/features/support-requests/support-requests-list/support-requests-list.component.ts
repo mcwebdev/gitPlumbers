@@ -7,7 +7,6 @@ import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageModule } from 'primeng/message';
 import { ToolbarModule } from 'primeng/toolbar';
 import { DialogModule } from 'primeng/dialog';
@@ -17,6 +16,7 @@ import {
   SupportRequest,
   RequestStatus,
 } from '../../../shared/services/requests.service';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-support-requests-list',
@@ -29,11 +29,11 @@ import {
     TableModule,
     TagModule,
     InputTextModule,
-    ProgressSpinnerModule,
     MessageModule,
     ToolbarModule,
     DialogModule,
     TextareaModule,
+    LoadingSpinnerComponent,
   ],
   templateUrl: './support-requests-list.component.html',
   styleUrls: ['./support-requests-list.component.scss'],

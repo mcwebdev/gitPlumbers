@@ -5,11 +5,7 @@
 <p-confirmDialog></p-confirmDialog>
 
 <!-- Loading Overlay -->
-@if (isLoading()) {
-  <div class="loading-overlay">
-    <p-progressSpinner></p-progressSpinner>
-  </div>
-}
+<app-loading-spinner [active]="isLoading()"></app-loading-spinner>
 
 <!-- Main Content -->
 <div class="invoice-dashboard">

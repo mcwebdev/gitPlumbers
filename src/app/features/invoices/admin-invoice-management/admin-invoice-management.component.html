@@ -5,11 +5,7 @@
 <p-confirmDialog></p-confirmDialog>
 
 <!-- Loading Overlay - only show when actually loading invoices/customers, not for user selection -->
-@if (isLoading() && !showInvoiceForm() && !showCustomerForm()) {
-  <div class="loading-overlay">
-    <p-progressSpinner></p-progressSpinner>
-  </div>
-}
+<app-loading-spinner [active]="isLoading() && !showInvoiceForm() && !showCustomerForm()"></app-loading-spinner>
 
 <!-- Main Content -->
 <div class="admin-invoice-dashboard">

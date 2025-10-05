@@ -13,7 +13,6 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PanelModule } from 'primeng/panel';
 import { DividerModule } from 'primeng/divider';
 import { TextareaModule } from 'primeng/textarea';
@@ -25,6 +24,7 @@ import { CommonModule } from '@angular/common';
 import { ProposalService } from '../../../shared/services/proposal.service';
 import { AuthUserService } from '../../../shared/services/auth-user.service';
 import { Proposal, ProposalStatus } from '../../../shared/models/proposal.interface';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 const primeNgModules = [
   CardModule,
@@ -35,7 +35,6 @@ const primeNgModules = [
   TooltipModule,
   ConfirmDialogModule,
   ToastModule,
-  ProgressSpinnerModule,
   PanelModule,
   DividerModule,
   TextareaModule,
@@ -44,7 +43,7 @@ const primeNgModules = [
 @Component({
   selector: 'app-user-proposal-dashboard',
   standalone: true,
-  imports: [RouterModule, CommonModule, TitleCasePipe, FormsModule, ...primeNgModules],
+  imports: [RouterModule, CommonModule, TitleCasePipe, FormsModule, LoadingSpinnerComponent, ...primeNgModules],
   providers: [MessageService, ConfirmationService],
   templateUrl: './user-proposal-dashboard.component.html',
   styleUrl: './user-proposal-dashboard.component.scss'

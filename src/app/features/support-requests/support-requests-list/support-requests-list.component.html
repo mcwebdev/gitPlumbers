@@ -138,12 +138,7 @@
       <span>Support Requests ({{ requests().length }})</span>
     </ng-template>
 
-    @if (loading()) {
-    <div class="loading-container">
-      <p-progressSpinner></p-progressSpinner>
-      <p>Loading support requests...</p>
-    </div>
-    }
+    <app-loading-spinner [active]="loading()" [message]="'Loading support requests...'"></app-loading-spinner>
 
     @if (!loading()) {
     <p-table

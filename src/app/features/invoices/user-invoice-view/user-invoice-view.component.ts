@@ -10,7 +10,6 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PanelModule } from 'primeng/panel';
 import { MessageService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
@@ -24,6 +23,7 @@ import { InvoiceStore } from '../store/invoice.store';
 import { InvoiceService } from '../../../shared/services/invoice.service';
 import { AuthUserService } from '../../../shared/services/auth-user.service';
 import { StripeInvoice } from '../../../shared/models/stripe.interface';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 /**
  * User Invoice View Component
@@ -43,13 +43,13 @@ import { StripeInvoice } from '../../../shared/models/stripe.interface';
     TagModule,
     TooltipModule,
     ToastModule,
-    ProgressSpinnerModule,
     PanelModule,
     DialogModule,
     InputTextModule,
     SelectModule,
     PaginatorModule,
     DividerModule,
+    LoadingSpinnerComponent,
   ],
   providers: [MessageService],
   templateUrl: './user-invoice-view.component.html',

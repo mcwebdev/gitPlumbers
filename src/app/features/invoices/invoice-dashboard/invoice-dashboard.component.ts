@@ -18,7 +18,6 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PanelModule } from 'primeng/panel';
 import { DividerModule } from 'primeng/divider';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -27,13 +26,14 @@ import { FormsModule } from '@angular/forms';
 // Store and Services
 import { InvoiceStore } from '../store/invoice.store';
 // InvoiceService removed - using MCP tools directly
-import { 
-  StripeInvoice, 
-  StripeCustomer, 
+import {
+  StripeInvoice,
+  StripeCustomer,
   InvoiceFormData,
 } from '../../../shared/models/stripe.interface';
 import { AuthUserService } from '../../../shared/services/auth-user.service';
 import { computed } from '@angular/core';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 /**
  * Invoice Dashboard Component
@@ -63,9 +63,9 @@ import { computed } from '@angular/core';
     TooltipModule,
     ConfirmDialogModule,
     ToastModule,
-    ProgressSpinnerModule,
     PanelModule,
     DividerModule,
+    LoadingSpinnerComponent,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './invoice-dashboard.component.html',

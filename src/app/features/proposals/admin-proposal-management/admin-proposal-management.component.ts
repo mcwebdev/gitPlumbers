@@ -19,7 +19,6 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PanelModule } from 'primeng/panel';
 import { DividerModule } from 'primeng/divider';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -49,7 +48,6 @@ const primeNgModules = [
   TooltipModule,
   ConfirmDialogModule,
   ToastModule,
-  ProgressSpinnerModule,
   PanelModule,
   DividerModule,
   AutoCompleteModule,

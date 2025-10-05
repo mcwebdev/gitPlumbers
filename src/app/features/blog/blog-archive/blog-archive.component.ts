@@ -7,7 +7,7 @@ import {
   effect,
   inject,
 } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { BlogStore } from '../blog.store';
 import { BlogContentService } from '../blog-content.service';
@@ -32,7 +32,7 @@ interface CategoryOption {
 @Component({
   selector: 'app-blog-archive',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, LoadingSpinnerComponent, PaginationComponent, SkeletonModule],
+  imports: [RouterLink, DatePipe, TitleCasePipe, LoadingSpinnerComponent, PaginationComponent, SkeletonModule],
   templateUrl: './blog-archive.component.html',
   styleUrl: './blog-archive.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

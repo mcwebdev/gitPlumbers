@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TitleCasePipe } from '@angular/common';
 import { AuthUserService } from '../../shared/services/auth-user.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -12,8 +12,8 @@ import { CardModule } from 'primeng/card';
   selector: 'app-profile',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
+    TitleCasePipe,
     ButtonModule,
     InputTextModule,
     CardModule,

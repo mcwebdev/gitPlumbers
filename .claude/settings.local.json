@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(ng generate component:*)",
-      "Bash(ng build:*)"
+      "Bash(ng build:*)",
+      "Bash(ng version)",
+      "WebFetch(domain:angular.dev)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

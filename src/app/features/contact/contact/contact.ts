@@ -5,7 +5,6 @@
   inject,
   OnInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
   Validators,
@@ -36,7 +35,6 @@ const GITHUB_REPO_REGEX =
   selector: 'app-contact',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     InputTextModule,
     TextareaModule,

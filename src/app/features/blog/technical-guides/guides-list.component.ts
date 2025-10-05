@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BlogContentService } from '../blog-content.service';
 import { GuideSummary } from '../blog-content';
@@ -8,7 +8,7 @@ import { SeoService } from '../../../shared/services/seo.service';
 @Component({
   selector: 'app-guides-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [TitleCasePipe, RouterLink],
   templateUrl: './guides-list.component.html',
   styleUrl: './guides-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

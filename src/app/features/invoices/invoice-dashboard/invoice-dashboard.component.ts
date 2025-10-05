@@ -1,8 +1,8 @@
 import { Component, inject, effect, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TitleCasePipe } from '@angular/common';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -46,10 +46,10 @@ import { computed } from '@angular/core';
   selector: 'app-invoice-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     RouterModule,
+    TitleCasePipe,
     CardModule,
     ButtonModule,
     TableModule,

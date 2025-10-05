@@ -1,5 +1,4 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { SitemapGeneratorService } from '../../services/sitemap-generator.service';
 
 interface SitemapStats {
@@ -12,7 +11,7 @@ interface SitemapStats {
 @Component({
   selector: 'app-sitemap-stats',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="sitemap-stats">
       <h3>Sitemap Statistics</h3>

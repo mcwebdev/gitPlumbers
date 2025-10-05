@@ -14,12 +14,11 @@ import {
   PLATFORM_ID,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-reading-progress',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './reading-progress.component.html',
   styleUrl: './reading-progress.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

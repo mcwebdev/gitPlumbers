@@ -1,7 +1,7 @@
 import { Component, inject, effect, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { TitleCasePipe } from '@angular/common';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -33,9 +33,9 @@ import { StripeInvoice } from '../../../shared/models/stripe.interface';
   selector: 'app-user-invoice-view',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     FormsModule,
+    TitleCasePipe,
     CardModule,
     ButtonModule,
     TableModule,

@@ -6,7 +6,6 @@ import {
   signal,
   OnInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs';
@@ -21,7 +20,7 @@ import {
 @Component({
   selector: 'app-ai-analytics-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './ai-analytics-dashboard.component.html',
   styleUrl: './ai-analytics-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

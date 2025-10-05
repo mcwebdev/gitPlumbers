@@ -5,7 +5,6 @@ import {
   effect,
   inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../shared/services/seo.service';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -272,7 +271,7 @@ const SERVICE_DETAILS: Record<ServiceSlug, ServiceDetailContent> = {
 @Component({
   selector: 'app-service-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './service-detail.component.html',
   styleUrl: './service-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

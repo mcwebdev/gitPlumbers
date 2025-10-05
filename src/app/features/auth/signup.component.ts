@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Auth, createUserWithEmailAndPassword, updateProfile } from '@angular/fire/auth';
@@ -10,7 +9,7 @@ import { InvoiceService } from '../../shared/services/invoice.service';
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

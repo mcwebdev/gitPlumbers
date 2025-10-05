@@ -6,7 +6,6 @@ import {
   signal,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 
 export interface FileUploadEvent {
@@ -23,7 +22,7 @@ export interface FileUploadConfig {
 @Component({
   selector: 'app-file-upload',
   standalone: true,
-  imports: [CommonModule, FileUploadModule],
+  imports: [FileUploadModule],
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

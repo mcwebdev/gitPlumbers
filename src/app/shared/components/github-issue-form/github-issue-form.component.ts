@@ -6,7 +6,6 @@ import {
   DestroyRef,
   OnInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
   Validators,
@@ -39,7 +38,6 @@ export interface GitHubIssueFormData {
   selector: 'app-github-issue-form',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     ButtonModule,
     InputTextModule,

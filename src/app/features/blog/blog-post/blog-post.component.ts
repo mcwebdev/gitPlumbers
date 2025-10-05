@@ -5,9 +5,9 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import { marked } from 'marked';
 import { toSignal } from '@angular/core/rxjs-interop';
 import hljs from 'highlight.js';
@@ -29,7 +29,7 @@ interface ShareMetadata {
 @Component({
   selector: 'app-blog-post',
   standalone: true,
-  imports: [CommonModule, RouterLink, LoadingSpinnerComponent, BreadcrumbNavComponent, ReadingProgressComponent, SocialShareComponent],
+  imports: [RouterLink, DatePipe, TitleCasePipe, LoadingSpinnerComponent, BreadcrumbNavComponent, ReadingProgressComponent, SocialShareComponent],
   templateUrl: './blog-post.component.html',
   styleUrl: './blog-post.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

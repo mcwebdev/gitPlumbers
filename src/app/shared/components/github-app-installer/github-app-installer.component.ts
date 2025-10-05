@@ -8,7 +8,6 @@ import {
   output,
   ChangeDetectorRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
   Validators,
@@ -47,7 +46,6 @@ export type GitHubAppInstallationData = {
   selector: 'app-github-app-installer',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     HttpClientModule,

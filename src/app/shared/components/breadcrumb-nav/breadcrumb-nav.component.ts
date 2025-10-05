@@ -4,7 +4,6 @@ import {
   computed,
   input,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink, Params } from '@angular/router';
 
 export interface BreadcrumbItem {
@@ -17,7 +16,7 @@ export interface BreadcrumbItem {
 @Component({
   selector: 'app-breadcrumb-nav',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './breadcrumb-nav.component.html',
   styleUrl: './breadcrumb-nav.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

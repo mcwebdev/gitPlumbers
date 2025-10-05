@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthUserService } from '../../services/auth-user.service';
 
 @Component({
   selector: 'app-site-header',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './site-header.component.html',
   styleUrl: './site-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

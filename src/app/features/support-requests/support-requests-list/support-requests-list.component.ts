@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TitleCasePipe } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
@@ -22,8 +22,8 @@ import {
   selector: 'app-support-requests-list',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
+    TitleCasePipe,
     ButtonModule,
     CardModule,
     TableModule,

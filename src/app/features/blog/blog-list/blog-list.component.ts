@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BlogContentService } from '../blog-content.service';
 import { BlogStore } from '../blog.store';
@@ -10,7 +10,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 @Component({
   selector: 'app-blog-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, LoadingSpinnerComponent],
+  imports: [RouterLink, DatePipe, TitleCasePipe, LoadingSpinnerComponent],
   templateUrl: './blog-list.component.html',
   styleUrl: './blog-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

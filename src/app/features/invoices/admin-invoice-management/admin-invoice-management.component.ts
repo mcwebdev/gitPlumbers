@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { TitleCasePipe } from '@angular/common';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -72,7 +72,7 @@ const primeNgModules = [
 @Component({
   selector: 'app-admin-invoice-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, ...primeNgModules],
+  imports: [ReactiveFormsModule, FormsModule, RouterModule, TitleCasePipe, ...primeNgModules],
   providers: [MessageService, ConfirmationService],
   templateUrl: './admin-invoice-management.component.html',
   styleUrl: './admin-invoice-management.component.scss'

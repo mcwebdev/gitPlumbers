@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SiteHeaderComponent } from './shared/components/site-header/site-header.component';
 import { SiteFooterComponent } from './shared/components/site-footer/site-footer.component';
+import { ScrollService } from './shared/services/scroll.service';
 
 @Component({
   selector: 'app-root',
@@ -10,4 +11,6 @@ import { SiteFooterComponent } from './shared/components/site-footer/site-footer
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {}
+export class App {
+  private scrollService = inject(ScrollService);
+}

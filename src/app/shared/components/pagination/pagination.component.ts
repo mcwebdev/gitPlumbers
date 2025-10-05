@@ -5,13 +5,12 @@ import {
   input,
   output,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { PaginationState, PaginationControls } from '../../models/pagination.model';
 
 @Component({
   selector: 'app-pagination',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './pagination.component.html',
   styleUrl: './pagination.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

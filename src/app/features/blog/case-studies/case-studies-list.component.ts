@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BlogContentService } from '../blog-content.service';
 import { CaseStudy } from '../blog-content';
@@ -8,7 +7,7 @@ import { SeoService } from '../../../shared/services/seo.service';
 @Component({
   selector: 'app-case-studies-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './case-studies-list.component.html',
   styleUrl: './case-studies-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

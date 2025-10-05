@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -67,7 +66,7 @@ const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, GitHubAppInstallerComponent, ConfirmDialogModule, MarkdownPipe, UserInvoiceViewComponent],
+  imports: [ReactiveFormsModule, FileUploadComponent, GitHubAppInstallerComponent, ConfirmDialogModule, MarkdownPipe, UserInvoiceViewComponent],
   providers: [MessageService, ConfirmationService],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.scss',

@@ -51,6 +51,201 @@
     }
   </section>
 
+  @if (study().diagnosticReport; as report) {
+    <section class="diagnostic-report" aria-label="Detailed Diagnostic Report">
+      <h2 class="diagnostic-report__title">Comprehensive Analysis Results</h2>
+
+      <!-- Codebase Statistics -->
+      <div class="diagnostic-section">
+        <h3>Codebase Overview</h3>
+        <div class="codebase-stats">
+          <div class="stat-card">
+            <div class="stat-value">{{ report.codebaseStats.totalLines.toLocaleString() }}</div>
+            <div class="stat-label">Lines of Code</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ report.codebaseStats.totalFiles.toLocaleString() }}</div>
+            <div class="stat-label">Files Analyzed</div>
+          </div>
+        </div>
+        <div class="language-breakdown">
+          <h4>Language Distribution</h4>
+          <div class="language-bars">
+            @for (lang of report.codebaseStats.languages; track lang.name) {
+              <div class="language-item">
+                <div class="language-header">
+                  <span class="language-name">{{ lang.name }}</span>
+                  <span class="language-percent">{{ lang.percentage }}%</span>
+                </div>
+                <div class="language-bar-container">
+                  <div class="language-bar" [style.width.%]="lang.percentage" [style.background-color]="lang.color"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Complexity Heatmap -->
+      <div class="diagnostic-section">
+        <h3>Complexity Heatmap</h3>
+        <p class="section-description">Modules sorted by cyclomatic complexity - higher scores indicate higher maintenance risk</p>
+        <div class="complexity-grid">
+          @for (item of report.complexityHeatmap; track item.module) {
+            <div class="complexity-card" [attr.data-risk]="item.risk">
+              <div class="complexity-header">
+                <span class="module-name">{{ item.module }}</span>
+                <span class="risk-badge" [attr.data-risk]="item.risk">{{ item.risk }}</span>
+              </div>
+              <div class="complexity-metrics">
+                <div class="metric">
+                  <span class="metric-label">Complexity</span>
+                  <span class="metric-value">{{ item.complexity }}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Lines</span>
+                  <span class="metric-value">{{ item.linesOfCode.toLocaleString() }}</span>
+                </div>
+              </div>
+              <div class="complexity-bar-container">
+                <div class="complexity-bar" [style.width.%]="item.complexity"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Dependency Graph -->
+      <div class="diagnostic-section">
+        <h3>Dependency Health Analysis</h3>
+        <p class="section-description">Critical vulnerabilities and deprecated packages requiring immediate attention</p>
+        <div class="dependency-table">
+          @for (dep of report.dependencyGraph; track dep.package) {
+            <div class="dependency-row" [attr.data-status]="dep.status">
+              <div class="dep-info">
+                <span class="dep-package">{{ dep.package }}</span>
+                <span class="dep-version">v{{ dep.version }}</span>
+              </div>
+              <div class="dep-status">
+                <span class="status-badge" [attr.data-status]="dep.status">{{ dep.status }}</span>
+                @if (dep.severity) {
+                  <span class="severity-badge" [attr.data-severity]="dep.severity">{{ dep.severity }}</span>
+                }
+              </div>
+              <div class="dep-dependents">
+                <span class="dependents-count">{{ dep.dependents }}</span>
+                <span class="dependents-label">dependents</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- AI Artifacts -->
+      <div class="diagnostic-section">
+        <h3>AI-Generated Code Artifacts</h3>
+        <p class="section-description">Files with high confidence of AI generation requiring manual review and hardening</p>
+        <div class="ai-artifacts-grid">
+          @for (artifact of report.aiArtifacts; track artifact.file) {
+            <div class="artifact-card">
+              <div class="artifact-header">
+                <span class="artifact-file">{{ artifact.file }}</span>
+                <span class="confidence-badge">{{ artifact.confidence }}% confidence</span>
+              </div>
+              <ul class="artifact-issues">
+                @for (issue of artifact.issues; track issue) {
+                  <li>{{ issue }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Test Coverage -->
+      <div class="diagnostic-section">
+        <h3>Test Coverage Analysis</h3>
+        <div class="coverage-overview">
+          <div class="coverage-circle">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="10"></circle>
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="#10b981"
+                stroke-width="10"
+                [attr.stroke-dasharray]="282.7"
+                [attr.stroke-dashoffset]="282.7 - (282.7 * report.testCoverage.overall / 100)"
+                transform="rotate(-90 50 50)"
+              ></circle>
+            </svg>
+            <div class="coverage-text">
+              <span class="coverage-percent">{{ report.testCoverage.overall }}%</span>
+              <span class="coverage-label">Overall</span>
+            </div>
+          </div>
+        </div>
+        <div class="coverage-breakdown">
+          <h4>Coverage by Module</h4>
+          @for (module of report.testCoverage.byModule; track module.module) {
+            <div class="coverage-item">
+              <div class="coverage-item-header">
+                <span class="module-name">{{ module.module }}</span>
+                <span class="coverage-value">{{ module.coverage }}%</span>
+              </div>
+              <div class="coverage-bar-container">
+                <div
+                  class="coverage-bar"
+                  [style.width.%]="module.coverage"
+                  [attr.data-level]="module.coverage >= 70 ? 'good' : module.coverage >= 40 ? 'medium' : 'low'"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Technical Debt Score -->
+      <div class="diagnostic-section">
+        <h3>Technical Debt Score</h3>
+        <div class="debt-score-card">
+          <div class="overall-score">
+            <span class="score-value">{{ report.technicalDebtScore.overall }}</span>
+            <span class="score-label">/ 100</span>
+          </div>
+          <p class="score-description">
+            @if (report.technicalDebtScore.overall >= 70) {
+              High technical debt - immediate remediation recommended
+            } @else if (report.technicalDebtScore.overall >= 40) {
+              Moderate technical debt - prioritize key areas
+            } @else {
+              Low technical debt - maintain current standards
+            }
+          </p>
+        </div>
+        <div class="debt-breakdown">
+          @for (item of report.technicalDebtScore.breakdown; track item.category) {
+            <div class="debt-category">
+              <div class="debt-category-header">
+                <span class="category-name">{{ item.category }}</span>
+                <span class="category-score">{{ item.score }}/{{ item.maxScore }}</span>
+              </div>
+              <div class="debt-bar-container">
+                <div
+                  class="debt-bar"
+                  [style.width.%]="(item.score / item.maxScore) * 100"
+                  [attr.data-level]="item.score >= 70 ? 'high' : item.score >= 40 ? 'medium' : 'low'"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
   @if (relatedStudies().length) {
     <section class="case-study-detail__related" aria-label="Related case studies">
       <h2>More modernisation wins</h2>

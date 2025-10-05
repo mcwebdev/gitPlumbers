@@ -25,7 +25,11 @@
           }
           <nav class="site-nav" aria-label="Primary section links">
             @for(anchor of heroAnchors; track anchor.label) {
-            <a [attr.href]="anchor.href" [innerText]="anchor.label"></a>
+              @if (anchor.type === 'route') {
+                <a [routerLink]="anchor.href" [innerText]="anchor.label"></a>
+              } @else {
+                <a [attr.href]="anchor.href" (click)="scrollToSection(anchor.href, $event)" [innerText]="anchor.label"></a>
+              }
             }
           </nav>
         </div>

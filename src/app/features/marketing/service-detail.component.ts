@@ -68,7 +68,7 @@ const SERVICE_DETAILS: Record<ServiceSlug, ServiceDetailContent> = {
       },
       {
         label: 'See our diagnostic results',
-        routerLink: '/case-studies',
+        routerLink: '/blog/case-studies/sample-diagnostic-report',
         ariaLabel: 'Review GitPlumbers diagnostic case studies',
       },
     ],

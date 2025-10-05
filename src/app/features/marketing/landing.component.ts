@@ -18,17 +18,25 @@ export class LandingComponent implements OnInit {
   }
   protected readonly currentYear = new Date().getFullYear();
 
+  protected scrollToSection(sectionId: string, event: Event): void {
+    event.preventDefault();
+    const element = document.querySelector(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   protected readonly heroCtas: ReadonlyArray<{
     label: string;
     href: string;
     variant: 'primary' | 'secondary';
   }> = [{ label: 'Share Your Code and Book an audit', href: '/contact', variant: 'primary' }];
   protected readonly heroAnchors = [
-    { label: 'Integration', href: '#integration' },
-    { label: 'Services', href: '#services' },
-    { label: 'Proof', href: '#proof' },
-    { label: 'Approach', href: '#process' },
-  ];
+    { label: 'Integration', href: '#integration', type: 'anchor' },
+    { label: 'Services', href: '#services', type: 'anchor' },
+    { label: 'Sample Report', href: '/blog/case-studies/sample-diagnostic-report', type: 'route' },
+    { label: 'Approach', href: '#process', type: 'anchor' },
+  ] as const;
 
   protected readonly integrationFeatures = [
     {

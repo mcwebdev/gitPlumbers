@@ -27,7 +27,7 @@ import { FormsModule } from '@angular/forms';
 
 // Store and Services
 import { InvoiceStore } from '../store/invoice.store';
-// InvoiceService removed - using MCP tools directly
+import { InvoiceService } from '../../../shared/services/invoice.service';
 import { AuthUserService } from '../../../shared/services/auth-user.service';
 import { UserService } from '../../../shared/services/user.service';
 import { UserProfile } from '../../../shared/services/auth-user.service';
@@ -80,7 +80,7 @@ const primeNgModules = [
 export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
   // Dependency injection
   private readonly _invoiceStore = inject(InvoiceStore);
-  // _invoiceService removed - using MCP tools directly
+  private readonly _invoiceService = inject(InvoiceService);
   private readonly _authService = inject(AuthUserService);
   private readonly _userService = inject(UserService);
   private readonly _messageService = inject(MessageService);
@@ -96,10 +96,12 @@ export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
   readonly error = this._invoiceStore.error;
   readonly invoiceStats = this._invoiceStore.invoiceStats;
   readonly hasMoreInvoices = this._invoiceStore.hasMoreInvoices;
+  readonly selectedInvoice = this._invoiceStore.selectedInvoice;
   
   // Local UI state signals
   readonly availableUsers = signal<UserOption[]>([]);
   selectedUser: UserOption | null = null;
+  showInvoiceDetail = false;
 
   // Forms
   customerForm!: FormGroup;
@@ -275,6 +277,15 @@ export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
    */
   onViewInvoice(invoice: StripeInvoice): void {
     this._invoiceStore.selectInvoice(invoice);
+    this.showInvoiceDetail = true;
+  }
+
+  /**
+   * Close invoice detail dialog
+   */
+  onCloseInvoiceDetail(): void {
+    this.showInvoiceDetail = false;
+    this._invoiceStore.selectInvoice(null);
   }
 
   /**
@@ -525,7 +536,8 @@ export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
   /**
    * Format date from Unix timestamp
    */
-  formatDate(timestamp: number): string {
+  formatDate(timestamp: number | undefined): string {
+    if (!timestamp) return 'N/A';
     return new Date(timestamp * 1000).toLocaleDateString();
   }
 
@@ -637,6 +649,45 @@ export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
       total += unitAmount * quantity * 100; // Convert to cents
     }
     return this.formatAmount(total, 'usd');
+  }
+
+  /**
+   * Check if invoice is overdue
+   */
+  isOverdue(invoice: StripeInvoice): boolean {
+    if (!invoice.due_date || invoice.status === 'paid') return false;
+    return invoice.due_date < Math.floor(Date.now() / 1000);
+  }
+
+  /**
+   * Get days until due or overdue
+   */
+  getDaysUntilDue(invoice: StripeInvoice): string {
+    if (!invoice.due_date || invoice.status === 'paid') return '';
+
+    const now = Math.floor(Date.now() / 1000);
+    const daysDiff = Math.ceil((invoice.due_date - now) / 86400);
+
+    if (daysDiff < 0) {
+      return `${Math.abs(daysDiff)} days overdue`;
+    } else if (daysDiff === 0) {
+      return 'Due today';
+    } else {
+      return `Due in ${daysDiff} days`;
+    }
+  }
+
+  /**
+   * Get invoice line items summary
+   */
+  getInvoiceItemsSummary(invoice: StripeInvoice): string {
+    const items = invoice.lines.data;
+    if (items.length === 1) {
+      return items[0].description || 'Service';
+    } else if (items.length > 1) {
+      return `${items.length} items`;
+    }
+    return 'No items';
   }
 }
 

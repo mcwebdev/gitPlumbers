@@ -638,4 +638,132 @@
   </form>
 </p-dialog>
 
+<!-- Invoice Detail Dialog -->
+<p-dialog
+  header="Invoice Details"
+  [modal]="true"
+  [(visible)]="showInvoiceDetail"
+  (onHide)="onCloseInvoiceDetail()"
+  [style]="{ width: '700px', maxHeight: '90vh' }"
+  [maximizable]="true">
 
+  <div class="invoice-detail" *ngIf="selectedInvoice() as invoice">
+    <!-- Invoice Header -->
+    <div class="invoice-header">
+      <div class="invoice-meta">
+        <h3>Invoice {{ invoice.number || invoice.id }}</h3>
+        <p-tag
+          [value]="invoice.status | titlecase"
+          [severity]="getStatusSeverity(invoice.status)"
+          [style]="{ 'font-size': '0.875rem' }">
+        </p-tag>
+      </div>
+
+      <div class="invoice-dates">
+        <div class="date-item">
+          <label>Created:</label>
+          <span>{{ formatDate(invoice.created) }}</span>
+        </div>
+        <div class="date-item" *ngIf="invoice.due_date">
+          <label>Due:</label>
+          <span [class]="isOverdue(invoice) ? 'overdue-text' : ''">
+            {{ formatDate(invoice.due_date) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Info -->
+    <div class="customer-info-section" *ngIf="invoice.customer_email || invoice.customer_name">
+      <h4>Customer</h4>
+      <div class="customer-details">
+        <div *ngIf="invoice.customer_name"><strong>Name:</strong> {{ invoice.customer_name }}</div>
+        <div *ngIf="invoice.customer_email"><strong>Email:</strong> {{ invoice.customer_email }}</div>
+        <div *ngIf="invoice.metadata?.['userId']"><strong>User ID:</strong> {{ invoice.metadata['userId'] }}</div>
+      </div>
+    </div>
+
+    <!-- Invoice Description -->
+    <div class="invoice-description-section" *ngIf="invoice.description">
+      <h4>Description</h4>
+      <p>{{ invoice.description }}</p>
+    </div>
+
+    <!-- Invoice Items -->
+    <div class="invoice-items">
+      <h4>Items</h4>
+      <div class="items-table">
+        <div class="item-header">
+          <span>Description</span>
+          <span>Quantity</span>
+          <span>Rate</span>
+          <span>Amount</span>
+        </div>
+
+        @for (item of invoice.lines.data; track item.id ?? $index) {
+          <div class="item-row">
+            <span class="item-description">
+              <strong>{{ item.description || 'Service' }}</strong>
+            </span>
+            <span class="item-quantity">{{ item.quantity || 1 }}</span>
+            <span class="item-rate">
+              {{ formatAmount(item.unit_amount || item.amount, item.currency) }}
+            </span>
+            <span class="item-amount">
+              {{ formatAmount(item.amount, item.currency) }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Invoice Totals -->
+    <div class="invoice-totals">
+      <div class="total-row" *ngIf="invoice.subtotal !== invoice.total">
+        <span>Subtotal:</span>
+        <span>{{ formatAmount(invoice.subtotal, invoice.currency) }}</span>
+      </div>
+
+      <div class="total-row" *ngIf="invoice.tax">
+        <span>Tax:</span>
+        <span>{{ formatAmount(invoice.tax, invoice.currency) }}</span>
+      </div>
+
+      <div class="total-row total-final">
+        <span><strong>Total:</strong></span>
+        <span><strong>{{ formatAmount(invoice.total, invoice.currency) }}</strong></span>
+      </div>
+
+      <div class="total-row" *ngIf="invoice.amount_paid > 0">
+        <span>Paid:</span>
+        <span class="paid-amount">{{ formatAmount(invoice.amount_paid, invoice.currency) }}</span>
+      </div>
+
+      <div class="total-row" *ngIf="invoice.amount_remaining > 0">
+        <span><strong>Amount Due:</strong></span>
+        <span class="due-amount"><strong>{{ formatAmount(invoice.amount_remaining, invoice.currency) }}</strong></span>
+      </div>
+    </div>
+
+    <!-- Payment Links -->
+    <div class="payment-links" *ngIf="invoice.hosted_invoice_url || invoice.invoice_pdf">
+      <h4>Links</h4>
+      <div class="links-list">
+        <a *ngIf="invoice.hosted_invoice_url" [href]="invoice.hosted_invoice_url" target="_blank" class="link-item">
+          <i class="pi pi-external-link"></i> Payment Page
+        </a>
+        <a *ngIf="invoice.invoice_pdf" [href]="invoice.invoice_pdf" target="_blank" class="link-item">
+          <i class="pi pi-file-pdf"></i> Download PDF
+        </a>
+      </div>
+    </div>
+
+    <!-- Payment Status -->
+    <div class="payment-status" *ngIf="invoice.status === 'paid'">
+      <div class="status-message">
+        <i class="pi pi-check-circle" style="color: var(--green-500);"></i>
+        <span>This invoice has been paid in full.</span>
+      </div>
+    </div>
+  </div>
+</p-dialog>

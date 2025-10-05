@@ -31,6 +31,7 @@ interface UserDocument {
   email?: string;
   displayName?: string;
   role?: UserRole;
+  stripeCustomerId?: string;
   githubInstallationId?: string;
   createdAt?: unknown;
   updatedAt?: unknown;
@@ -58,6 +59,12 @@ export class AuthUserService {
         this.clearCachedProfile();
         return of(null);
       }
+
+      // Skip Firestore call during SSR - use cached profile only
+      if (typeof window === 'undefined') {
+        return of(this.cachedProfile || null);
+      }
+
       const userDocRef = doc(this.firestore, 'users', user.uid);
       return from(getDoc(userDocRef)).pipe(
         map((snapshot) => {
@@ -97,6 +104,7 @@ export class AuthUserService {
       email: user.email ?? docValue?.email ?? '',
       displayName: user.displayName ?? docValue?.displayName ?? '',
       role: docValue?.role ?? 'user',
+      stripeCustomerId: docValue?.stripeCustomerId,
       githubInstallationId: docValue?.githubInstallationId,
       createdAt: docValue?.createdAt,
       updatedAt: docValue?.updatedAt,
@@ -130,10 +138,17 @@ export class AuthUserService {
         email: user.email ?? overrides?.email ?? '',
         displayName: user.displayName ?? overrides?.displayName ?? '',
         role: overrides?.role ?? 'user',
-        githubInstallationId: overrides?.githubInstallationId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
+
+      // Only include optional fields if they're defined
+      if (overrides?.stripeCustomerId !== undefined) {
+        payload.stripeCustomerId = overrides.stripeCustomerId;
+      }
+      if (overrides?.githubInstallationId !== undefined) {
+        payload.githubInstallationId = overrides.githubInstallationId;
+      }
 
       // Validate payload before creating document
       if (!payload.email || !payload.displayName) {
@@ -152,6 +167,7 @@ export class AuthUserService {
         email: payload.email ?? '',
         displayName: payload.displayName ?? '',
         role: payload.role ?? 'user',
+        stripeCustomerId: payload.stripeCustomerId,
         githubInstallationId: payload.githubInstallationId,
         createdAt: payload.createdAt,
         updatedAt: payload.updatedAt,
@@ -163,6 +179,7 @@ export class AuthUserService {
       email: overrides?.email ?? currentData.email ?? user.email ?? '',
       displayName: overrides?.displayName ?? currentData.displayName ?? user.displayName ?? '',
       role: overrides?.role ?? currentData.role ?? 'user',
+      stripeCustomerId: overrides?.stripeCustomerId ?? currentData.stripeCustomerId,
       githubInstallationId: overrides?.githubInstallationId ?? currentData.githubInstallationId,
       createdAt: currentData.createdAt,
       updatedAt: currentData.updatedAt,
@@ -177,9 +194,11 @@ export class AuthUserService {
       overrides?.email ||
       overrides?.displayName ||
       overrides?.role ||
+      overrides?.stripeCustomerId ||
       overrides?.githubInstallationId ||
       merged.email !== currentData.email ||
       merged.displayName !== currentData.displayName ||
+      merged.stripeCustomerId !== currentData.stripeCustomerId ||
       merged.githubInstallationId !== currentData.githubInstallationId
     ) {
       try {
@@ -187,6 +206,7 @@ export class AuthUserService {
           email: merged.email,
           displayName: merged.displayName,
           role: merged.role,
+          stripeCustomerId: merged.stripeCustomerId,
           githubInstallationId: merged.githubInstallationId,
           updatedAt: serverTimestamp(),
         });
@@ -201,6 +221,7 @@ export class AuthUserService {
       email: merged.email ?? '',
       displayName: merged.displayName ?? '',
       role: merged.role ?? 'user',
+      stripeCustomerId: merged.stripeCustomerId,
       githubInstallationId: merged.githubInstallationId,
       createdAt: merged.createdAt,
       updatedAt: merged.updatedAt,
@@ -219,6 +240,7 @@ export class AuthUserService {
       email: data.email ?? '',
       displayName: data.displayName ?? '',
       role: data.role ?? 'user',
+      stripeCustomerId: data.stripeCustomerId,
       githubInstallationId: data.githubInstallationId,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,

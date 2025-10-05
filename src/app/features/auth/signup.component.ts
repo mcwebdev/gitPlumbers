@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Auth, createUserWithEmailAndPassword, updateProfile } from '@angular/fire/auth';
 
 import { AuthUserService } from '../../shared/services/auth-user.service';
+import { InvoiceService } from '../../shared/services/invoice.service';
 
 @Component({
   selector: 'app-signup',
@@ -19,6 +20,7 @@ export class SignupComponent {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
   private readonly userService = inject(AuthUserService);
+  private readonly invoiceService = inject(InvoiceService);
 
   protected readonly form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -64,10 +66,24 @@ export class SignupComponent {
         await updateProfile(credential.user, { displayName: fullName.trim() });
       }
 
+      // Create Stripe customer
+      let stripeCustomerId: string | undefined;
+      try {
+        const stripeCustomer = await this.invoiceService.createCustomer({
+          name: fullName.trim(),
+          email: email,
+        });
+        stripeCustomerId = stripeCustomer.id;
+      } catch (stripeError) {
+        console.error('Failed to create Stripe customer:', stripeError);
+        // Continue with user creation even if Stripe fails
+      }
+
       await this.userService.ensureUserDocument(credential.user, {
         displayName: fullName.trim(),
         email,
         role: 'user',
+        stripeCustomerId,
       });
 
       await this.router.navigate(['/dashboard']);

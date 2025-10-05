@@ -8,35 +8,45 @@ export class UserService {
   private readonly _firestore = inject(Firestore);
 
   async listUsers(): Promise<UserProfile[]> {
+    // ONLY run on client
+    if (typeof window === 'undefined') {
+      console.log('UserService.listUsers: Skipping on server-side');
+      return [];
+    }
+
+    const startTime = performance.now();
+    console.log('UserService.listUsers: Starting getDocs call...');
+
     try {
       const usersRef = collection(this._firestore, 'users');
       const snapshot = await getDocs(usersRef);
-      
+      const getDocsTime = performance.now() - startTime;
+      console.log(`UserService.listUsers: getDocs completed in ${getDocsTime.toFixed(2)}ms, got ${snapshot.size} docs`);
+
       if (snapshot.empty) {
         return [];
       }
 
-      return snapshot.docs.map(doc => {
+      const users = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Validate required fields
-        if (!data['email'] || !data['displayName'] || !data['role']) {
-          throw new Error(`Invalid user data for document ${doc.id}: Missing required fields`);
-        }
-
         return {
           uid: doc.id,
-          email: data['email'] as string || '',
-          displayName: data['displayName'] as string || '',
-          role: data['role'] as UserRole || 'user',
-          stripeCustomerId: data['stripeCustomerId'] as string | undefined,
-          githubInstallationId: data['githubInstallationId'] as string | undefined,
+          email: data['email'] || '',
+          displayName: data['displayName'] || '',
+          role: data['role'] || 'user',
+          stripeCustomerId: data['stripeCustomerId'],
+          githubInstallationId: data['githubInstallationId'],
           createdAt: data['createdAt'],
           updatedAt: data['updatedAt'],
         } as UserProfile;
       });
+
+      const totalTime = performance.now() - startTime;
+      console.log(`UserService.listUsers: Total time ${totalTime.toFixed(2)}ms, returning ${users.length} users`);
+      return users;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      throw new Error(`Failed to list users: ${errorMessage}`);
+      console.error('UserService.listUsers: ERROR:', error);
+      return [];
     }
   }
 }

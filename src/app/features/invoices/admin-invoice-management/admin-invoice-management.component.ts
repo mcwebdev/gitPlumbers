@@ -1,4 +1,4 @@
-import { Component, inject, effect, computed, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -77,7 +77,7 @@ const primeNgModules = [
   templateUrl: './admin-invoice-management.component.html',
   styleUrl: './admin-invoice-management.component.scss'
 })
-export class AdminInvoiceManagementComponent implements OnInit {
+export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
   // Dependency injection
   private readonly _invoiceStore = inject(InvoiceStore);
   // _invoiceService removed - using MCP tools directly
@@ -99,9 +99,7 @@ export class AdminInvoiceManagementComponent implements OnInit {
   
   // Local UI state signals
   readonly availableUsers = signal<UserOption[]>([]);
-  readonly filteredUsers = signal<UserOption[]>([]);
   selectedUser: UserOption | null = null;
-  private readonly _pendingCustomerUserId = signal<string | null>(null);
 
   // Forms
   customerForm!: FormGroup;
@@ -168,13 +166,22 @@ export class AdminInvoiceManagementComponent implements OnInit {
 
   constructor() {
     this.initializeForms();
-    this.setupEffects();
   }
 
   ngOnInit(): void {
-    void this.loadUsers();
-    this._invoiceStore.loadCustomers();
-    this._invoiceStore.loadInvoices();
+    // Forms initialization only
+  }
+
+  ngAfterViewInit(): void {
+    // ONLY run on client-side, skip SSR completely
+    if (typeof window === 'undefined') return;
+
+    // Wait for next tick to ensure hydration is done
+    setTimeout(() => {
+      this._invoiceStore.loadCustomers();
+      this._invoiceStore.loadInvoices();
+      this.loadUsers();
+    }, 100);
   }
 
   /**
@@ -218,102 +225,24 @@ export class AdminInvoiceManagementComponent implements OnInit {
   }
 
   /**
-   * Setup effects for handling store state changes
-   */
-  private setupEffects(): void {
-    // Handle error messages
-    effect(() => {
-      const error = this.error();
-      if (error) {
-        this._messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: error,
-          life: 5000
-        });
-        if (error.includes('Failed to create customer')) {
-          this._pendingCustomerUserId.set(null);
-        }
-        this._invoiceStore.clearError();
-      }
-    });
-
-    // Handle success messages
-    effect(() => {
-      const lastOperation = this._invoiceStore.lastOperation();
-      if (lastOperation && lastOperation.includes('successfully')) {
-        this._messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: lastOperation,
-          life: 3000
-        });
-      }
-    });
-
-    effect(() => {
-      const pendingUserId = this._pendingCustomerUserId();
-      if (!pendingUserId) {
-        return;
-      }
-
-      const customers = this.customers();
-      const newCustomer = customers.find(c => c.metadata?.['userId'] === pendingUserId);
-      if (!newCustomer) {
-        return;
-      }
-
-      this._pendingCustomerUserId.set(null);
-
-      void this._authService.updateUserProfileById(pendingUserId, { stripeCustomerId: newCustomer.id })
-        .then(() => {
-          if (this.selectedUser && this.selectedUser.uid === pendingUserId) {
-            this.selectedUser = { ...this.selectedUser, stripeCustomerId: newCustomer.id };
-          }
-
-          this.availableUsers.update(users => users.map(user => 
-            user.uid === pendingUserId ? { ...user, stripeCustomerId: newCustomer.id } : user
-          ));
-          this.filteredUsers.update(users => users.map(user => 
-            user.uid === pendingUserId ? { ...user, stripeCustomerId: newCustomer.id } : user
-          ));
-
-          this._messageService.add({ severity: 'success', summary: 'Customer Created' });
-        })
-        .catch(err => {
-          this._messageService.add({ severity: 'error', detail: `Failed to update user: ${err.message}` });
-        });
-    }, { allowSignalWrites: true });
-  }
-
-  /**
    * Load available users for invoice creation
-   * In a real app, this would fetch from your user management system
    */
   private async loadUsers(): Promise<void> {
-    try {
-      const users = await this._userService.listUsers();
-      const userOptions = users.map((user: UserProfile) => {
-        const resolvedName = user.displayName || user.email || user.uid;
-        return {
-          ...user,
-          id: user.uid,
-          name: resolvedName,
-          email: user.email,
-          displayName: resolvedName
-        } as UserOption;
-      });
-      this.availableUsers.set(userOptions);
-      this.filteredUsers.set(userOptions);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      this._messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: `Failed to load users: ${message}`,
-        life: 5000
-      });
-    }
+    console.log('loadUsers: Starting...');
+    const users = await this._userService.listUsers();
+    console.log('loadUsers: Got users:', users);
+
+    const userOptions = users.map(user => ({
+      ...user,
+      id: user.uid,
+      name: user.displayName || user.email || user.uid,
+      email: user.email,
+      displayName: user.displayName
+    } as UserOption));
+
+    console.log('loadUsers: Setting availableUsers to:', userOptions);
+    this.availableUsers.set(userOptions);
+    console.log('loadUsers: availableUsers() signal now contains:', this.availableUsers());
   }
 
   // UI Actions
@@ -323,6 +252,7 @@ export class AdminInvoiceManagementComponent implements OnInit {
    */
   onCreateInvoice(): void {
     console.log('AdminInvoiceManagementComponent: onCreateInvoice method called.');
+    console.log('availableUsers() contains:', this.availableUsers());
     this.invoiceForm.reset();
     this.invoiceForm.patchValue({
       daysUntilDue: 30,
@@ -518,79 +448,39 @@ export class AdminInvoiceManagementComponent implements OnInit {
   // User Selection
 
   /**
-   * Filter users for autocomplete
-   */
-  onFilterUsers(event: { query: string }): void {
-    const query = event.query?.toLowerCase().trim() || '';
-
-    // Show all users if query is empty (dropdown click)
-    if (!query) {
-      this.filteredUsers.set(this.availableUsers());
-      return;
-    }
-
-    const users = this.availableUsers().filter(user =>
-      user.name?.toLowerCase().includes(query) ||
-      user.email?.toLowerCase().includes(query)
-    );
-    this.filteredUsers.set(users);
-  }
-
-  /**
    * Handle user selection
    */
   async onUserSelect(event: any): Promise<void> {
-    const user: UserOption = {
-      ...event.value,
-      name: event.value?.name ?? event.value?.displayName ?? event.value?.email ?? 'Unknown user',
-      displayName: event.value?.displayName ?? event.value?.name ?? event.value?.email ?? 'Unknown user'
-    };
+    const user: UserOption = this.selectedUser || event.value;
 
-    try {
-      let customerId = user.stripeCustomerId;
+    // If user doesn't have a Stripe customer ID, create one
+    if (!user.stripeCustomerId) {
+      const customerData: CreateCustomerRequest = {
+        name: user.name ?? user.displayName,
+        email: user.email,
+        description: `Customer for user ${user.uid}`,
+        metadata: { userId: user.uid },
+      };
 
-      // If user doesn't have a Stripe customer ID, create one
-      if (!customerId) {
-        const customerData: CreateCustomerRequest = {
-          name: user.name ?? user.displayName,
-          email: user.email,
-          description: `Customer for user ${user.uid}`,
-          metadata: { userId: user.uid },
-        };
-
-        this._pendingCustomerUserId.set(user.uid);
-        this._invoiceStore.createCustomer(customerData);
-      }
-
-      this.selectedUser = { ...user, stripeCustomerId: customerId };
-
-      this.invoiceForm.patchValue({
-        userId: user.uid,
-        customerName: user.name ?? user.displayName,
-        customerEmail: user.email,
-      });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
+      this._invoiceStore.createCustomer(customerData);
+      // Just notify user, don't wait for customer creation
       this._messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: `Failed to prepare customer: ${message}`,
-        life: 5000,
+        severity: 'info',
+        summary: 'Creating Stripe Customer',
+        detail: 'Creating customer record...',
+        life: 3000,
       });
     }
-  }
 
-  /**
-   * Clear user selection
-   */
-  onClearUserSelection(): void {
-    this.selectedUser = null;
+    this.selectedUser = user;
+
     this.invoiceForm.patchValue({
-      userId: '',
-      customerName: '',
-      customerEmail: ''
+      userId: user.uid,
+      customerName: user.name ?? user.displayName,
+      customerEmail: user.email,
     });
   }
+
 
   // Utility Methods
 
@@ -697,6 +587,7 @@ export class AdminInvoiceManagementComponent implements OnInit {
   onRefresh(): void {
     this._invoiceStore.loadInvoices();
     this._invoiceStore.loadCustomers();
+    this.loadUsers();
   }
 
   /**

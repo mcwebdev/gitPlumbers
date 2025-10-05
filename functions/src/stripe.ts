@@ -240,7 +240,7 @@ export const cleanupAllInvoicesDryRun = onRequest({ secrets: [STRIPE_SECRET_KEY]
 
 
 // Callable: Create Customer
-export const createStripeCustomer = onCall(async (request) => {
+export const createStripeCustomer = onCall({ secrets: [STRIPE_SECRET_KEY] }, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
 
   const data = request.data as CreateCustomerData;
@@ -268,7 +268,7 @@ export const createStripeCustomer = onCall(async (request) => {
 });
 
 // Callable: Create Product
-export const createStripeProduct = onCall(async (request) => {
+export const createStripeProduct = onCall({ secrets: [STRIPE_SECRET_KEY] }, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
 
   const data = request.data as CreateProductData;
@@ -286,7 +286,7 @@ export const createStripeProduct = onCall(async (request) => {
 });
 
 // Callable: Create Price
-export const createStripePrice = onCall(async (request) => {
+export const createStripePrice = onCall({ secrets: [STRIPE_SECRET_KEY] }, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
 
   const data = request.data as CreatePriceData;
@@ -304,7 +304,7 @@ export const createStripePrice = onCall(async (request) => {
 });
 
 // Callable: Create Invoice
-export const createStripeInvoice = onCall(async (request) => {
+export const createStripeInvoice = onCall({ secrets: [STRIPE_SECRET_KEY] }, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
 
   const data = request.data as CreateInvoiceData;
@@ -332,7 +332,7 @@ export const createStripeInvoice = onCall(async (request) => {
 });
 
 // Callable: Add Invoice Item
-export const addStripeInvoiceItem = onCall(async (request) => {
+export const addStripeInvoiceItem = onCall({ secrets: [STRIPE_SECRET_KEY] }, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
 
   const data = request.data as AddInvoiceItemData;
@@ -341,11 +341,11 @@ export const addStripeInvoiceItem = onCall(async (request) => {
 
   try {
     const stripe = new Stripe(STRIPE_SECRET_KEY.value());
-    await stripe.invoiceItems.create({ 
-      customer, 
-      price_data, 
-      invoice, 
-      quantity 
+    await stripe.invoiceItems.create({
+      customer,
+      price_data,
+      invoice,
+      quantity
     });
 
     const updatedInvoice = await stripe.invoices.retrieve(invoice);
@@ -393,7 +393,7 @@ export const deleteStripeInvoice = onCall({ secrets: [STRIPE_SECRET_KEY] }, asyn
 });
 
 // Callable: Finalize and Send Invoice
-export const finalizeAndSendStripeInvoice = onCall(async (request) => {
+export const finalizeAndSendStripeInvoice = onCall({ secrets: [STRIPE_SECRET_KEY] }, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
 
   const data = request.data as FinalizeInvoiceData;

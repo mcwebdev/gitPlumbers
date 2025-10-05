@@ -725,10 +725,8 @@ export const InvoiceStore = signalStore(
   // Lifecycle hooks
   withHooks({
     onInit(store): void {
-      // Load initial data when store is initialized
-      store.loadCustomers();
-      store.loadInvoices();
-      store.loadProducts();
+      // Don't load data on init - causes SSR/hydration blocking
+      // Data will be loaded by components after view init
     },
 
     onDestroy(): void {

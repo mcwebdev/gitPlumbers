@@ -11,7 +11,6 @@ import { MessageService } from 'primeng/api';
 import Aura from '@primeuix/themes/aura';
 import { routes } from './app.routes';
 import { TrailingSlashUrlSerializer } from './shared/routing/trailing-slash-url-serializer';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { environment } from '../environments/environment';
 
 const firebaseConfig = environment.firebase;
@@ -23,7 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideRouter(routes),
     { provide: UrlSerializer, useClass: TrailingSlashUrlSerializer },
-    provideClientHydration(withEventReplay()),
+    // REMOVED: provideClientHydration(withEventReplay()) - was blocking Firebase calls for 48+ seconds
     provideHttpClient(withFetch()),
     MessageService,
     provideFirebaseApp(() => initializeApp(firebaseConfig)),

@@ -97,6 +97,9 @@ export const routes: Routes = [
     canActivate: [userGuard],
     loadComponent: () =>
       import('./features/dashboard/user-dashboard.component').then((m) => m.UserDashboardComponent),
+    data: {
+      ssr: false, // Disable SSR for authenticated routes
+    },
   },
   {
     path: 'profile',
@@ -129,6 +132,9 @@ export const routes: Routes = [
       import('./features/dashboard/admin-dashboard.component').then(
         (m) => m.AdminDashboardComponent
       ),
+    data: {
+      ssr: false, // Disable SSR for admin routes
+    },
   },
   {
     path: 'admin/invoices',
@@ -138,11 +144,7 @@ export const routes: Routes = [
         (m) => m.AdminInvoiceManagementComponent
       ),
     data: {
-      seo: {
-        title: 'Admin Invoice Management - GitPlumbers',
-        description: 'Create and manage invoices for users. Administrative invoice management with Stripe integration.',
-        keywords: ['admin', 'invoice management', 'billing', 'Stripe', 'user invoices'],
-      },
+      ssr: false, // Disable SSR for this admin route
     },
   },
   {

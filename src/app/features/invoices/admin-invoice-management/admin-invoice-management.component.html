@@ -4,8 +4,8 @@
 <!-- Confirmation Dialog -->
 <p-confirmDialog></p-confirmDialog>
 
-<!-- Loading Overlay -->
-@if (isLoading()) {
+<!-- Loading Overlay - only show when actually loading invoices/customers, not for user selection -->
+@if (isLoading() && !showInvoiceForm() && !showCustomerForm()) {
   <div class="loading-overlay">
     <p-progressSpinner></p-progressSpinner>
   </div>
@@ -406,33 +406,27 @@
       <!-- User Selection -->
       <div class="form-field user-selection">
         <label for="userSelect">Select User *</label>
-        <p-autoComplete
+        <p-select
           id="userSelect"
+          [options]="availableUsers()"
           [(ngModel)]="selectedUser"
           [ngModelOptions]="{standalone: true}"
-          [suggestions]="filteredUsers()"
-          (completeMethod)="onFilterUsers($event)"
-          (onSelect)="onUserSelect($event)"
-          (onClear)="onClearUserSelection()"
+          (onChange)="onUserSelect($event)"
           optionLabel="name"
-          placeholder="Start typing to search users..."
-          [dropdown]="true"
+          placeholder="Select a user..."
+          [filter]="true"
+          filterPlaceholder="Search users..."
+          [showClear]="true"
           [style]="{ width: '100%' }">
-          
+
           <ng-template pTemplate="item" let-user>
             <div class="user-option">
               <div class="user-name">{{ user.name }}</div>
               <div class="user-email">{{ user.email }}</div>
             </div>
           </ng-template>
-          
-          <ng-template pTemplate="selectedItem" let-user>
-            <div class="selected-user" *ngIf="user">
-              <strong>{{ user.name }}</strong> - {{ user.email }}
-            </div>
-          </ng-template>
-        </p-autoComplete>
-        
+        </p-select>
+
         <small class="form-hint">
           This invoice will be sent to the selected user and appear on their dashboard
         </small>

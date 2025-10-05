@@ -15,8 +15,10 @@
   </p-toolbar>
 
   <!-- Error Message -->
-  <p-message *ngIf="error()" severity="error" [text]="error()!" (onClose)="error.set(null)">
+  @if (error()) {
+  <p-message severity="error" [text]="error()!" (onClose)="error.set(null)">
   </p-message>
+  }
 
   <!-- Statistics Cards -->
   <div class="stats-grid">
@@ -76,9 +78,11 @@
           class="status-select"
         >
           <option value="">All Statuses</option>
-          <option *ngFor="let option of statusOptions" [value]="option.value">
+          @for (option of statusOptions; track option.value) {
+          <option [value]="option.value">
             {{ option.label }}
           </option>
+          }
         </select>
       </div>
 
@@ -134,13 +138,15 @@
       <span>Support Requests ({{ requests().length }})</span>
     </ng-template>
 
-    <div *ngIf="loading()" class="loading-container">
+    @if (loading()) {
+    <div class="loading-container">
       <p-progressSpinner></p-progressSpinner>
       <p>Loading support requests...</p>
     </div>
+    }
 
+    @if (!loading()) {
     <p-table
-      *ngIf="!loading()"
       [value]="requests()"
       [paginator]="true"
       [rows]="10"
@@ -193,9 +199,11 @@
           <td>
             <div class="date-info">
               <div>{{ formatDate(request.createdAt) }}</div>
-              <small *ngIf="formatDate(request.updatedAt) !== formatDate(request.createdAt)">
+              @if (formatDate(request.updatedAt) !== formatDate(request.createdAt)) {
+              <small>
                 Updated: {{ formatDate(request.updatedAt) }}
               </small>
+              }
             </div>
           </td>
           <td>
@@ -209,8 +217,8 @@
                 (onClick)="viewRequest(request)"
               >
               </p-button>
+              @if (request.status === 'new') {
               <p-button
-                *ngIf="request.status === 'new'"
                 icon="pi pi-play"
                 size="small"
                 severity="success"
@@ -219,8 +227,9 @@
                 (onClick)="updateStatus(request.id, 'in_progress')"
               >
               </p-button>
+              }
+              @if (request.status === 'in_progress') {
               <p-button
-                *ngIf="request.status === 'in_progress'"
                 icon="pi pi-check"
                 size="small"
                 severity="success"
@@ -229,6 +238,7 @@
                 (onClick)="updateStatus(request.id, 'resolved')"
               >
               </p-button>
+              }
             </div>
           </td>
         </tr>
@@ -245,6 +255,7 @@
         </tr>
       </ng-template>
     </p-table>
+    }
   </p-card>
 
   <!-- Request Detail Dialog -->
@@ -303,17 +314,21 @@
           <label>Message:</label>
           <p class="request-message">{{ request.message }}</p>
         </div>
-        <div class="detail-item" *ngIf="request.githubRepo">
+        @if (request.githubRepo) {
+        <div class="detail-item">
           <label>GitHub Repository:</label>
           <a [href]="request.githubRepo" target="_blank" class="repo-link">
             <i class="pi pi-external-link"></i>
             {{ request.githubRepo }}
           </a>
         </div>
-        <div class="detail-item" *ngIf="request.filePath">
+        }
+        @if (request.filePath) {
+        <div class="detail-item">
           <label>File Path:</label>
           <code>{{ request.filePath }}</code>
         </div>
+        }
       </div>
 
       <div class="detail-section">
@@ -358,22 +373,24 @@
 
     <ng-template pTemplate="footer">
       <div class="dialog-actions">
+        @if (selectedRequest()?.status === 'new') {
         <p-button
-          *ngIf="selectedRequest()?.status === 'new'"
           label="Start Progress"
           icon="pi pi-play"
           severity="success"
           (onClick)="updateStatus(selectedRequest()!.id, 'in_progress')"
         >
         </p-button>
+        }
+        @if (selectedRequest()?.status === 'in_progress') {
         <p-button
-          *ngIf="selectedRequest()?.status === 'in_progress'"
           label="Mark Complete"
           icon="pi pi-check"
           severity="success"
           (onClick)="updateStatus(selectedRequest()!.id, 'resolved')"
         >
         </p-button>
+        }
         <p-button
           label="Close"
           icon="pi pi-times"

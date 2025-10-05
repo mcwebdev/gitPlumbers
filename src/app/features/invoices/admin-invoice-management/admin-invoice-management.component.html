@@ -157,12 +157,16 @@
               <div class="invoice-card-body">
                 <div class="customer-info">
                   <strong>{{ getCustomerName(invoice.customer) }}</strong>
-                  <div class="customer-email" *ngIf="invoice.customer_email">
-                    {{ invoice.customer_email }}
-                  </div>
-                  <div class="customer-meta" *ngIf="invoice.metadata?.['userId']">
-                    <small class="user-id">User ID: {{ invoice.metadata['userId'] }}</small>
-                  </div>
+                  @if (invoice.customer_email) {
+                    <div class="customer-email">
+                      {{ invoice.customer_email }}
+                    </div>
+                  }
+                  @if (invoice.metadata['userId']) {
+                    <div class="customer-meta">
+                      <small class="user-id">User ID: {{ invoice.metadata['userId'] }}</small>
+                    </div>
+                  }
                 </div>
                 <div class="invoice-date">
                   <i class="pi pi-calendar"></i>
@@ -240,12 +244,16 @@
                 <td>
                   <div class="customer-info">
                     <strong>{{ getCustomerName(invoice.customer) }}</strong>
-                    <div class="customer-email" *ngIf="invoice.customer_email">
-                      {{ invoice.customer_email }}
-                    </div>
-                    <div class="customer-meta" *ngIf="invoice.metadata?.['userId']">
-                      <small class="user-id">User ID: {{ invoice.metadata['userId'] }}</small>
-                    </div>
+                    @if (invoice.customer_email) {
+                      <div class="customer-email">
+                        {{ invoice.customer_email }}
+                      </div>
+                    }
+                    @if (invoice.metadata?.['userId']) {
+                      <div class="customer-meta">
+                        <small class="user-id">User ID: {{ invoice.metadata['userId'] }}</small>
+                      </div>
+                    }
                   </div>
                 </td>
                 <td>
@@ -341,11 +349,11 @@
           formControlName="name"
           [class.ng-invalid]="customerForm.get('name')?.invalid && customerForm.get('name')?.touched"
           placeholder="Enter customer name">
-        <small 
-          class="p-error" 
-          *ngIf="customerForm.get('name')?.invalid && customerForm.get('name')?.touched">
-          Customer name is required
-        </small>
+        @if (customerForm.get('name')?.invalid && customerForm.get('name')?.touched) {
+          <small class="p-error">
+            Customer name is required
+          </small>
+        }
       </div>
 
       <div class="form-field">
@@ -357,11 +365,11 @@
           formControlName="email"
           [class.ng-invalid]="customerForm.get('email')?.invalid && customerForm.get('email')?.touched"
           placeholder="customer@example.com">
-        <small 
-          class="p-error" 
-          *ngIf="customerForm.get('email')?.invalid && customerForm.get('email')?.touched">
-          Please enter a valid email address
-        </small>
+        @if (customerForm.get('email')?.invalid && customerForm.get('email')?.touched) {
+          <small class="p-error">
+            Please enter a valid email address
+          </small>
+        }
       </div>
 
       <div class="form-field">
@@ -435,13 +443,15 @@
       </div>
 
       <!-- Auto-filled customer info -->
-      <div class="form-field" *ngIf="selectedUser">
-        <label>Customer Information (Auto-filled)</label>
-        <div class="customer-preview">
-          <div><strong>Name:</strong> {{ invoiceForm.get('customerName')?.value }}</div>
-          <div><strong>Email:</strong> {{ invoiceForm.get('customerEmail')?.value }}</div>
+      @if (selectedUser) {
+        <div class="form-field">
+          <label>Customer Information (Auto-filled)</label>
+          <div class="customer-preview">
+            <div><strong>Name:</strong> {{ invoiceForm.get('customerName')?.value }}</div>
+            <div><strong>Email:</strong> {{ invoiceForm.get('customerEmail')?.value }}</div>
+          </div>
         </div>
-      </div>
+      }
 
       <!-- Invoice Description -->
       <div class="form-field">
@@ -647,47 +657,60 @@
   [style]="{ width: '700px', maxHeight: '90vh' }"
   [maximizable]="true">
 
-  <div class="invoice-detail" *ngIf="selectedInvoice() as invoice">
-    <!-- Invoice Header -->
-    <div class="invoice-header">
-      <div class="invoice-meta">
-        <h3>Invoice {{ invoice.number || invoice.id }}</h3>
-        <p-tag
-          [value]="invoice.status | titlecase"
-          [severity]="getStatusSeverity(invoice.status)"
-          [style]="{ 'font-size': '0.875rem' }">
-        </p-tag>
-      </div>
-
-      <div class="invoice-dates">
-        <div class="date-item">
-          <label>Created:</label>
-          <span>{{ formatDate(invoice.created) }}</span>
+  @if (selectedInvoice(); as invoice) {
+    <div class="invoice-detail">
+      <!-- Invoice Header -->
+      <div class="invoice-header">
+        <div class="invoice-meta">
+          <h3>Invoice {{ invoice.number || invoice.id }}</h3>
+          <p-tag
+            [value]="invoice.status | titlecase"
+            [severity]="getStatusSeverity(invoice.status)"
+            [style]="{ 'font-size': '0.875rem' }">
+          </p-tag>
         </div>
-        <div class="date-item" *ngIf="invoice.due_date">
-          <label>Due:</label>
-          <span [class]="isOverdue(invoice) ? 'overdue-text' : ''">
-            {{ formatDate(invoice.due_date) }}
-          </span>
+
+        <div class="invoice-dates">
+          <div class="date-item">
+            <label>Created:</label>
+            <span>{{ formatDate(invoice.created) }}</span>
+          </div>
+          @if (invoice.due_date) {
+            <div class="date-item">
+              <label>Due:</label>
+              <span [class]="isOverdue(invoice) ? 'overdue-text' : ''">
+                {{ formatDate(invoice.due_date) }}
+              </span>
+            </div>
+          }
         </div>
       </div>
-    </div>
 
-    <!-- Customer Info -->
-    <div class="customer-info-section" *ngIf="invoice.customer_email || invoice.customer_name">
-      <h4>Customer</h4>
-      <div class="customer-details">
-        <div *ngIf="invoice.customer_name"><strong>Name:</strong> {{ invoice.customer_name }}</div>
-        <div *ngIf="invoice.customer_email"><strong>Email:</strong> {{ invoice.customer_email }}</div>
-        <div *ngIf="invoice.metadata?.['userId']"><strong>User ID:</strong> {{ invoice.metadata['userId'] }}</div>
-      </div>
-    </div>
+      <!-- Customer Info -->
+      @if (invoice.customer_email || invoice.customer_name) {
+        <div class="customer-info-section">
+          <h4>Customer</h4>
+          <div class="customer-details">
+            @if (invoice.customer_name) {
+              <div><strong>Name:</strong> {{ invoice.customer_name }}</div>
+            }
+            @if (invoice.customer_email) {
+              <div><strong>Email:</strong> {{ invoice.customer_email }}</div>
+            }
+            @if (invoice.metadata['userId']) {
+              <div><strong>User ID:</strong> {{ invoice.metadata['userId'] }}</div>
+            }
+          </div>
+        </div>
+      }
 
-    <!-- Invoice Description -->
-    <div class="invoice-description-section" *ngIf="invoice.description">
-      <h4>Description</h4>
-      <p>{{ invoice.description }}</p>
-    </div>
+      <!-- Invoice Description -->
+      @if (invoice.description) {
+        <div class="invoice-description-section">
+          <h4>Description</h4>
+          <p>{{ invoice.description }}</p>
+        </div>
+      }
 
     <!-- Invoice Items -->
     <div class="invoice-items">
@@ -717,53 +740,70 @@
       </div>
     </div>
 
-    <!-- Invoice Totals -->
-    <div class="invoice-totals">
-      <div class="total-row" *ngIf="invoice.subtotal !== invoice.total">
-        <span>Subtotal:</span>
-        <span>{{ formatAmount(invoice.subtotal, invoice.currency) }}</span>
+      <!-- Invoice Totals -->
+      <div class="invoice-totals">
+        @if (invoice.subtotal !== invoice.total) {
+          <div class="total-row">
+            <span>Subtotal:</span>
+            <span>{{ formatAmount(invoice.subtotal, invoice.currency) }}</span>
+          </div>
+        }
+
+        @if (invoice.tax) {
+          <div class="total-row">
+            <span>Tax:</span>
+            <span>{{ formatAmount(invoice.tax, invoice.currency) }}</span>
+          </div>
+        }
+
+        <div class="total-row total-final">
+          <span><strong>Total:</strong></span>
+          <span><strong>{{ formatAmount(invoice.total, invoice.currency) }}</strong></span>
+        </div>
+
+        @if (invoice.amount_paid > 0) {
+          <div class="total-row">
+            <span>Paid:</span>
+            <span class="paid-amount">{{ formatAmount(invoice.amount_paid, invoice.currency) }}</span>
+          </div>
+        }
+
+        @if (invoice.amount_remaining > 0) {
+          <div class="total-row">
+            <span><strong>Amount Due:</strong></span>
+            <span class="due-amount"><strong>{{ formatAmount(invoice.amount_remaining, invoice.currency) }}</strong></span>
+          </div>
+        }
       </div>
 
-      <div class="total-row" *ngIf="invoice.tax">
-        <span>Tax:</span>
-        <span>{{ formatAmount(invoice.tax, invoice.currency) }}</span>
-      </div>
+      <!-- Payment Links -->
+      @if (invoice.hosted_invoice_url || invoice.invoice_pdf) {
+        <div class="payment-links">
+          <h4>Links</h4>
+          <div class="links-list">
+            @if (invoice.hosted_invoice_url) {
+              <a [href]="invoice.hosted_invoice_url" target="_blank" class="link-item">
+                <i class="pi pi-external-link"></i> Payment Page
+              </a>
+            }
+            @if (invoice.invoice_pdf) {
+              <a [href]="invoice.invoice_pdf" target="_blank" class="link-item">
+                <i class="pi pi-file-pdf"></i> Download PDF
+              </a>
+            }
+          </div>
+        </div>
+      }
 
-      <div class="total-row total-final">
-        <span><strong>Total:</strong></span>
-        <span><strong>{{ formatAmount(invoice.total, invoice.currency) }}</strong></span>
-      </div>
-
-      <div class="total-row" *ngIf="invoice.amount_paid > 0">
-        <span>Paid:</span>
-        <span class="paid-amount">{{ formatAmount(invoice.amount_paid, invoice.currency) }}</span>
-      </div>
-
-      <div class="total-row" *ngIf="invoice.amount_remaining > 0">
-        <span><strong>Amount Due:</strong></span>
-        <span class="due-amount"><strong>{{ formatAmount(invoice.amount_remaining, invoice.currency) }}</strong></span>
-      </div>
+      <!-- Payment Status -->
+      @if (invoice.status === 'paid') {
+        <div class="payment-status">
+          <div class="status-message">
+            <i class="pi pi-check-circle" style="color: var(--green-500);"></i>
+            <span>This invoice has been paid in full.</span>
+          </div>
+        </div>
+      }
     </div>
-
-    <!-- Payment Links -->
-    <div class="payment-links" *ngIf="invoice.hosted_invoice_url || invoice.invoice_pdf">
-      <h4>Links</h4>
-      <div class="links-list">
-        <a *ngIf="invoice.hosted_invoice_url" [href]="invoice.hosted_invoice_url" target="_blank" class="link-item">
-          <i class="pi pi-external-link"></i> Payment Page
-        </a>
-        <a *ngIf="invoice.invoice_pdf" [href]="invoice.invoice_pdf" target="_blank" class="link-item">
-          <i class="pi pi-file-pdf"></i> Download PDF
-        </a>
-      </div>
-    </div>
-
-    <!-- Payment Status -->
-    <div class="payment-status" *ngIf="invoice.status === 'paid'">
-      <div class="status-message">
-        <i class="pi pi-check-circle" style="color: var(--green-500);"></i>
-        <span>This invoice has been paid in full.</span>
-      </div>
-    </div>
-  </div>
+  }
 </p-dialog>

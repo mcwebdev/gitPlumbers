@@ -14,34 +14,41 @@
     <section class="service-detail__focus" aria-label="Where we focus">
       <h2>Where we focus</h2>
       <ul>
-        <li *ngFor="let item of service.focusAreas">{{ item }}</li>
+        @for (item of service.focusAreas; track item) {
+          <li>{{ item }}</li>
+        }
       </ul>
     </section>
 
     <section class="service-detail__outcomes" aria-label="Outcomes you can expect">
-      <h2>Outcomes you can expect</h2>
+      <h2>Risk Analysis</h2>
       <ul>
-        <li *ngFor="let item of service.outcomes">{{ item }}</li>
+        @for (item of service.outcomes; track item) {
+          <li>{{ item }}</li>
+        }
       </ul>
     </section>
 
     <section class="service-detail__playbook" aria-label="Engagement playbook">
       <h2>Engagement playbook</h2>
       <ol>
-        <li *ngFor="let step of service.playbook">{{ step }}</li>
+        @for (step of service.playbook; track step) {
+          <li>{{ step }}</li>
+        }
       </ol>
     </section>
 
     <section class="service-detail__cta" aria-label="Ready to talk?">
       <div class="service-detail__cta-grid">
-        <a
-          *ngFor="let cta of service.ctas"
-          [routerLink]="cta.routerLink"
-          class="service-detail__cta-link"
-          [attr.aria-label]="cta.ariaLabel"
-        >
-          {{ cta.label }}
-        </a>
+        @for (cta of service.ctas; track cta.label) {
+          <a
+            [routerLink]="cta.routerLink"
+            class="service-detail__cta-link"
+            [attr.aria-label]="cta.ariaLabel"
+          >
+            {{ cta.label }}
+          </a>
+        }
       </div>
     </section>
   </article>

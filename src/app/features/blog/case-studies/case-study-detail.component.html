@@ -6,11 +6,15 @@
       {{ study().client }} &middot; {{ study().industry }}
     </p>
     <p class="case-study-detail__summary">{{ study().summary }}</p>
-    <p *ngIf="unknownStudy()" class="case-study-detail__alert">
-      We could not locate the requested case study. Highlighting a recent engagement instead.
-    </p>
+    @if (unknownStudy()) {
+      <p class="case-study-detail__alert">
+        We could not locate the requested case study. Highlighting a recent engagement instead.
+      </p>
+    }
     <ul class="case-study-detail__stack" aria-label="Technology stack">
-      <li *ngFor="let tech of study().stack">{{ tech }}</li>
+      @for (tech of study().stack; track tech) {
+        <li>{{ tech }}</li>
+      }
     </ul>
     <a routerLink="/blog/case-studies" class="case-study-detail__back">Back to all case studies</a>
   </header>
@@ -23,33 +27,43 @@
   <section class="case-study-detail__section" aria-label="Approach">
     <h2>Approach</h2>
     <ul>
-      <li *ngFor="let item of study().approach">{{ item }}</li>
+      @for (item of study().approach; track item) {
+        <li>{{ item }}</li>
+      }
     </ul>
   </section>
 
   <section class="case-study-detail__section" aria-label="Outcomes">
     <h2>Outcomes</h2>
     <ul>
-      <li *ngFor="let outcome of study().outcomes">{{ outcome }}</li>
+      @for (outcome of study().outcomes; track outcome) {
+        <li>{{ outcome }}</li>
+      }
     </ul>
   </section>
 
   <section class="case-study-detail__metrics" aria-label="Impact">
-    <article *ngFor="let metric of study().metrics">
-      <p class="case-study-detail__metric-value">{{ metric.metric }}</p>
-      <p class="case-study-detail__metric-label">{{ metric.label }}</p>
-    </article>
+    @for (metric of study().metrics; track metric) {
+      <article>
+        <p class="case-study-detail__metric-value">{{ metric.metric }}</p>
+        <p class="case-study-detail__metric-label">{{ metric.label }}</p>
+      </article>
+    }
   </section>
 
-  <section class="case-study-detail__related" *ngIf="relatedStudies().length" aria-label="Related case studies">
-    <h2>More modernisation wins</h2>
-    <ul>
-      <li *ngFor="let item of relatedStudies()">
-        <a [routerLink]="['/blog/case-studies', item.slug]">
-          <span class="case-study-detail__related-title">{{ item.title }}</span>
-          <span class="case-study-detail__related-summary">{{ item.summary }}</span>
-        </a>
-      </li>
-    </ul>
-  </section>
+  @if (relatedStudies().length) {
+    <section class="case-study-detail__related" aria-label="Related case studies">
+      <h2>More modernisation wins</h2>
+      <ul>
+        @for (item of relatedStudies(); track item.slug) {
+          <li>
+            <a [routerLink]="['/blog/case-studies', item.slug]">
+              <span class="case-study-detail__related-title">{{ item.title }}</span>
+              <span class="case-study-detail__related-summary">{{ item.summary }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
 </article>

@@ -223,6 +223,9 @@
           <div class="process-body">
             <h3 [innerText]="step.title"></h3>
             <p [innerText]="step.body"></p>
+            @if(step.learnMoreLink) {
+            <a [routerLink]="step.learnMoreLink" class="learn-more-link">Learn More →</a>
+            }
           </div>
         </li>
         }

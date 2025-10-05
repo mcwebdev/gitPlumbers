@@ -7,42 +7,52 @@
     <h1 id="categoryHeading">{{ category().title }}</h1>
     <p class="blog-category__subtitle">{{ category().heroHeading }}</p>
     <p>{{ category().description }}</p>
-    <p *ngIf="unknownCategory()" class="blog-category__alert">
-      We could not find the requested category. Showing highlighted resources from
-      {{ category().title.toLowerCase() }} instead.
-    </p>
+    @if (unknownCategory()) {
+      <p class="blog-category__alert">
+        We could not find the requested category. Showing highlighted resources from
+        {{ category().title.toLowerCase() }} instead.
+      </p>
+    }
   </header>
 
   <section class="blog-category__list" aria-label="Posts in category">
-    <article *ngFor="let post of posts()" class="category-post">
-      <header>
-        <h2>
-          <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
-        </h2>
-        <p class="category-post__meta">
-          {{ post.publishedOn | date: 'MMM d, y' }} &middot; {{ post.readTime }}
-        </p>
-      </header>
-      <p class="category-post__summary">{{ post.summary }}</p>
-      <blockquote *ngIf="post.heroQuote" class="category-post__quote">
-        {{ post.heroQuote }}
-      </blockquote>
-      <section class="category-post__details" aria-label="Key takeaways">
-        <h3>Key takeaways</h3>
-        <ul>
-          <li *ngFor="let item of post.keyTakeaways">{{ item }}</li>
-        </ul>
-      </section>
-      <section class="category-post__details" aria-label="Implementation checklist">
-        <h3>Implementation checklist</h3>
-        <ul>
-          <li *ngFor="let item of post.checklist">{{ item }}</li>
-        </ul>
-      </section>
-      <footer class="category-post__footer">
-        <a [routerLink]="['/blog', post.slug]">Read the full briefing</a>
-      </footer>
-    </article>
+    @for (post of posts(); track post.slug) {
+      <article class="category-post">
+        <header>
+          <h2>
+            <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+          </h2>
+          <p class="category-post__meta">
+            {{ post.publishedOn | date: 'MMM d, y' }} &middot; {{ post.readTime }}
+          </p>
+        </header>
+        <p class="category-post__summary">{{ post.summary }}</p>
+        @if (post.heroQuote) {
+          <blockquote class="category-post__quote">
+            {{ post.heroQuote }}
+          </blockquote>
+        }
+        <section class="category-post__details" aria-label="Key takeaways">
+          <h3>Key takeaways</h3>
+          <ul>
+            @for (item of post.keyTakeaways; track $index) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        </section>
+        <section class="category-post__details" aria-label="Implementation checklist">
+          <h3>Implementation checklist</h3>
+          <ul>
+            @for (item of post.checklist; track $index) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        </section>
+        <footer class="category-post__footer">
+          <a [routerLink]="['/blog', post.slug]">Read the full briefing</a>
+        </footer>
+      </article>
+    }
   </section>
 </section>
 }

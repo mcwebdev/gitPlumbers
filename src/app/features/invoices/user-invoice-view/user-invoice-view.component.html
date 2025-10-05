@@ -2,9 +2,11 @@
 <p-toast></p-toast>
 
 <!-- Loading Overlay -->
-<div *ngIf="isLoading()" class="loading-overlay">
-  <p-progressSpinner></p-progressSpinner>
-</div>
+@if (isLoading()) {
+  <div class="loading-overlay">
+    <p-progressSpinner></p-progressSpinner>
+  </div>
+}
 
 <!-- Main Content -->
 <div class="user-invoice-view">
@@ -24,8 +26,9 @@
   </div>
 
   <!-- Quick Stats -->
-  <div class="stats-section" *ngIf="hasInvoices()">
-    <div class="stats-grid">
+  @if (hasInvoices()) {
+    <div class="stats-section">
+      <div class="stats-grid">
       <p-card class="stat-card">
         <div class="stat-content">
           <div class="stat-icon total">
@@ -62,11 +65,13 @@
         </div>
       </p-card>
     </div>
-  </div>
+    </div>
+  }
 
   <!-- Open Invoices Alert -->
-  <div class="alert-section" *ngIf="hasOpenInvoices()">
-    <p-card class="alert-card">
+  @if (hasOpenInvoices()) {
+    <div class="alert-section">
+      <p-card class="alert-card">
       <div class="alert-content">
         <div class="alert-icon">
           <i class="pi pi-exclamation-triangle"></i>
@@ -84,7 +89,8 @@
         </div>
       </div>
     </p-card>
-  </div>
+    </div>
+  }
 
   <!-- Invoices Table -->
   <div class="invoices-section">
@@ -92,14 +98,17 @@
       <ng-template pTemplate="header">
         <div class="card-header">
           <h3>Invoice History</h3>
-          <span class="invoice-count" *ngIf="hasInvoices()">
-            {{ userInvoices().length }} invoice(s)
-          </span>
+          @if (hasInvoices()) {
+            <span class="invoice-count">
+              {{ userInvoices().length }} invoice(s)
+            </span>
+          }
         </div>
       </ng-template>
 
       <!-- Universal Controls (for both desktop and mobile) -->
-      <div class="invoice-controls" *ngIf="userInvoices().length > 0">
+      @if (userInvoices().length > 0) {
+        <div class="invoice-controls">
         <!-- Search -->
         <div class="search-section">
           <label for="invoice-search">Search invoices:</label>
@@ -170,16 +179,18 @@
           <span class="results-count">
             {{ filteredInvoices().length }} of {{ userInvoices().length }} invoices
           </span>
-          <button 
-            type="button" 
-            class="clear-filters-btn"
-            *ngIf="hasActiveFilters()"
-            (click)="clearAllFilters()">
-            <i class="pi pi-times"></i>
-            Clear filters
-          </button>
+          @if (hasActiveFilters()) {
+            <button
+              type="button"
+              class="clear-filters-btn"
+              (click)="clearAllFilters()">
+              <i class="pi pi-times"></i>
+              Clear filters
+            </button>
+          }
         </div>
-      </div>
+        </div>
+      }
 
       <!-- Desktop Table View -->
       <div class="desktop-table-view">
@@ -213,9 +224,11 @@
             <td>
               <div class="invoice-description">
                 <span class="main-description">{{ invoice.description || getInvoiceItemsSummary(invoice) }}</span>
-                <small class="item-count" *ngIf="invoice.lines.data.length > 1">
-                  {{ invoice.lines.data.length }} items
-                </small>
+                @if (invoice.lines.data.length > 1) {
+                  <small class="item-count">
+                    {{ invoice.lines.data.length }} items
+                  </small>
+                }
               </div>
             </td>
             <td>
@@ -224,15 +237,17 @@
               </span>
             </td>
             <td>
-              <p-tag 
+              <p-tag
                 [value]="invoice.status | titlecase"
                 [severity]="getStatusSeverity(invoice.status)">
               </p-tag>
-              <div class="due-info" *ngIf="invoice.status === 'open' && invoice.due_date">
-                <small [class]="isOverdue(invoice) ? 'overdue-text' : 'due-text'">
-                  {{ getDaysUntilDue(invoice) }}
-                </small>
-              </div>
+              @if (invoice.status === 'open' && invoice.due_date) {
+                <div class="due-info">
+                  <small [class]="isOverdue(invoice) ? 'overdue-text' : 'due-text'">
+                    {{ getDaysUntilDue(invoice) }}
+                  </small>
+                </div>
+              }
             </td>
             <td>
               <span class="date">
@@ -280,23 +295,28 @@
           <tr>
             <td [attr.colspan]="selectedColumns.length" class="text-center">
               <div class="empty-state">
-                <i [class]="userInvoices().length === 0 ? 'pi pi-inbox' : 'pi pi-filter-slash'" 
+                <i [class]="userInvoices().length === 0 ? 'pi pi-inbox' : 'pi pi-filter-slash'"
                    style="font-size: 3rem; color: var(--surface-500);"></i>
                 <h3>{{ userInvoices().length === 0 ? 'No invoices yet' : 'No matching invoices' }}</h3>
-                <p *ngIf="userInvoices().length === 0">
-                  When gitPlumbers creates invoices for your work, they'll appear here.
-                </p>
-                <p *ngIf="userInvoices().length > 0">
-                  Try adjusting your search or filter criteria.
-                </p>
-                <button 
-                  type="button" 
-                  class="clear-filters-btn"
-                  *ngIf="userInvoices().length > 0 && hasActiveFilters()"
-                  (click)="clearAllFilters()">
-                  <i class="pi pi-times"></i>
-                  Clear all filters
-                </button>
+                @if (userInvoices().length === 0) {
+                  <p>
+                    When gitPlumbers creates invoices for your work, they'll appear here.
+                  </p>
+                }
+                @if (userInvoices().length > 0) {
+                  <p>
+                    Try adjusting your search or filter criteria.
+                  </p>
+                }
+                @if (userInvoices().length > 0 && hasActiveFilters()) {
+                  <button
+                    type="button"
+                    class="clear-filters-btn"
+                    (click)="clearAllFilters()">
+                    <i class="pi pi-times"></i>
+                    Clear all filters
+                  </button>
+                }
               </div>
             </td>
           </tr>
@@ -306,7 +326,8 @@
 
       <!-- Mobile Card View -->
       <div class="mobile-card-view">
-        <div class="invoice-cards" *ngIf="filteredInvoices().length > 0; else mobileEmptyState">
+        @if (filteredInvoices().length > 0) {
+          <div class="invoice-cards">
           @for (invoice of filteredInvoices(); track invoice.id) {
             <div class="invoice-card" [class.overdue]="isOverdue(invoice)">
               <div class="card-header">
@@ -325,9 +346,11 @@
               <div class="card-body">
                 <div class="description">
                   <span class="main-description">{{ invoice.description || getInvoiceItemsSummary(invoice) }}</span>
-                  <small class="item-count" *ngIf="invoice.lines.data.length > 1">
-                    {{ invoice.lines.data.length }} items
-                  </small>
+                  @if (invoice.lines.data.length > 1) {
+                    <small class="item-count">
+                      {{ invoice.lines.data.length }} items
+                    </small>
+                  }
                 </div>
 
                 <div class="dates-info">
@@ -335,19 +358,23 @@
                     <small class="label">Created:</small>
                     <span class="date">{{ formatDate(invoice.created) }}</span>
                   </div>
-                  <div class="date-item" *ngIf="invoice.due_date">
-                    <small class="label">Due:</small>
-                    <span class="date" [class]="isOverdue(invoice) ? 'overdue-text' : ''">
-                      {{ formatDate(invoice.due_date) }}
-                    </span>
-                  </div>
+                  @if (invoice.due_date) {
+                    <div class="date-item">
+                      <small class="label">Due:</small>
+                      <span class="date" [class]="isOverdue(invoice) ? 'overdue-text' : ''">
+                        {{ formatDate(invoice.due_date) }}
+                      </span>
+                    </div>
+                  }
                 </div>
 
-                <div class="due-info" *ngIf="invoice.status === 'open' && invoice.due_date">
-                  <small [class]="isOverdue(invoice) ? 'overdue-text' : 'due-text'">
-                    {{ getDaysUntilDue(invoice) }}
-                  </small>
-                </div>
+                @if (invoice.status === 'open' && invoice.due_date) {
+                  <div class="due-info">
+                    <small [class]="isOverdue(invoice) ? 'overdue-text' : 'due-text'">
+                      {{ getDaysUntilDue(invoice) }}
+                    </small>
+                  </div>
+                }
               </div>
 
               <div class="card-actions">
@@ -380,29 +407,32 @@
             </div>
           }
         </div>
-
-
-        <ng-template #mobileEmptyState>
+        } @else {
           <div class="empty-state">
-            <i [class]="userInvoices().length === 0 ? 'pi pi-inbox' : 'pi pi-filter-slash'" 
+            <i [class]="userInvoices().length === 0 ? 'pi pi-inbox' : 'pi pi-filter-slash'"
                style="font-size: 3rem; color: var(--surface-500);"></i>
             <h3>{{ userInvoices().length === 0 ? 'No invoices yet' : 'No matching invoices' }}</h3>
-            <p *ngIf="userInvoices().length === 0">
-              When gitPlumbers creates invoices for your work, they'll appear here.
-            </p>
-            <p *ngIf="userInvoices().length > 0">
-              Try adjusting your search or filter criteria.
-            </p>
-            <button 
-              type="button" 
-              class="clear-filters-btn"
-              *ngIf="userInvoices().length > 0 && hasActiveFilters()"
-              (click)="clearAllFilters()">
-              <i class="pi pi-times"></i>
-              Clear all filters
-            </button>
+            @if (userInvoices().length === 0) {
+              <p>
+                When gitPlumbers creates invoices for your work, they'll appear here.
+              </p>
+            }
+            @if (userInvoices().length > 0) {
+              <p>
+                Try adjusting your search or filter criteria.
+              </p>
+            }
+            @if (userInvoices().length > 0 && hasActiveFilters()) {
+              <button
+                type="button"
+                class="clear-filters-btn"
+                (click)="clearAllFilters()">
+                <i class="pi pi-times"></i>
+                Clear all filters
+              </button>
+            }
           </div>
-        </ng-template>
+        }
       </div>
     </p-card>
   </div>
@@ -416,8 +446,9 @@
   (onHide)="onCloseInvoiceDetail()"
   [style]="{ width: '700px', maxHeight: '90vh' }"
   [maximizable]="true">
-  
-  <div class="invoice-detail" *ngIf="selectedInvoice() as invoice">
+
+  @if (selectedInvoice(); as invoice) {
+    <div class="invoice-detail">
     <!-- Invoice Header -->
     <div class="invoice-header">
       <div class="invoice-meta">
@@ -434,20 +465,24 @@
           <label>Created:</label>
           <span>{{ formatDate(invoice.created) }}</span>
         </div>
-        <div class="date-item" *ngIf="invoice.due_date">
-          <label>Due:</label>
-          <span [class]="isOverdue(invoice) ? 'overdue-text' : ''">
-            {{ formatDate(invoice.due_date) }}
-          </span>
-        </div>
+        @if (invoice.due_date) {
+          <div class="date-item">
+            <label>Due:</label>
+            <span [class]="isOverdue(invoice) ? 'overdue-text' : ''">
+              {{ formatDate(invoice.due_date) }}
+            </span>
+          </div>
+        }
       </div>
     </div>
 
     <!-- Invoice Description -->
-    <div class="invoice-description-section" *ngIf="invoice.description">
-      <h4>Description</h4>
-      <p>{{ invoice.description }}</p>
-    </div>
+    @if (invoice.description) {
+      <div class="invoice-description-section">
+        <h4>Description</h4>
+        <p>{{ invoice.description }}</p>
+      </div>
+    }
 
     <!-- Invoice Items -->
     <div class="invoice-items">
@@ -480,59 +515,72 @@
 
     <!-- Invoice Totals -->
     <div class="invoice-totals">
-      <div class="total-row" *ngIf="invoice.subtotal !== invoice.total">
-        <span>Subtotal:</span>
-        <span>{{ formatAmount(invoice.subtotal, invoice.currency) }}</span>
-      </div>
-      
-      <div class="total-row" *ngIf="invoice.tax">
-        <span>Tax:</span>
-        <span>{{ formatAmount(invoice.tax, invoice.currency) }}</span>
-      </div>
-      
+      @if (invoice.subtotal !== invoice.total) {
+        <div class="total-row">
+          <span>Subtotal:</span>
+          <span>{{ formatAmount(invoice.subtotal, invoice.currency) }}</span>
+        </div>
+      }
+
+      @if (invoice.tax) {
+        <div class="total-row">
+          <span>Tax:</span>
+          <span>{{ formatAmount(invoice.tax, invoice.currency) }}</span>
+        </div>
+      }
+
       <div class="total-row total-final">
         <span><strong>Total:</strong></span>
         <span><strong>{{ formatAmount(invoice.total, invoice.currency) }}</strong></span>
       </div>
-      
-      <div class="total-row" *ngIf="invoice.amount_paid > 0">
-        <span>Paid:</span>
-        <span class="paid-amount">{{ formatAmount(invoice.amount_paid, invoice.currency) }}</span>
-      </div>
-      
-      <div class="total-row" *ngIf="invoice.amount_remaining > 0">
-        <span><strong>Amount Due:</strong></span>
-        <span class="due-amount"><strong>{{ formatAmount(invoice.amount_remaining, invoice.currency) }}</strong></span>
-      </div>
+
+      @if (invoice.amount_paid > 0) {
+        <div class="total-row">
+          <span>Paid:</span>
+          <span class="paid-amount">{{ formatAmount(invoice.amount_paid, invoice.currency) }}</span>
+        </div>
+      }
+
+      @if (invoice.amount_remaining > 0) {
+        <div class="total-row">
+          <span><strong>Amount Due:</strong></span>
+          <span class="due-amount"><strong>{{ formatAmount(invoice.amount_remaining, invoice.currency) }}</strong></span>
+        </div>
+      }
     </div>
 
     <!-- Payment Actions -->
-    <div class="payment-actions" *ngIf="invoice.status === 'open'">
-      <p-button 
-        label="Pay Now" 
-        icon="pi pi-credit-card"
-        severity="success"
-        (onClick)="onPayInvoice(invoice)"
-        [disabled]="!invoice.hosted_invoice_url">
-      </p-button>
-      
-      <p-button 
-        label="Download PDF" 
-        icon="pi pi-download"
-        severity="secondary"
-        (onClick)="onDownloadInvoice(invoice)"
-        [disabled]="!invoice.invoice_pdf">
-      </p-button>
-    </div>
+    @if (invoice.status === 'open') {
+      <div class="payment-actions">
+        <p-button
+          label="Pay Now"
+          icon="pi pi-credit-card"
+          severity="success"
+          (onClick)="onPayInvoice(invoice)"
+          [disabled]="!invoice.hosted_invoice_url">
+        </p-button>
+
+        <p-button
+          label="Download PDF"
+          icon="pi pi-download"
+          severity="secondary"
+          (onClick)="onDownloadInvoice(invoice)"
+          [disabled]="!invoice.invoice_pdf">
+        </p-button>
+      </div>
+    }
 
     <!-- Payment Status -->
-    <div class="payment-status" *ngIf="invoice.status === 'paid'">
-      <div class="status-message">
-        <i class="pi pi-check-circle" style="color: var(--green-500);"></i>
-        <span>This invoice has been paid in full.</span>
+    @if (invoice.status === 'paid') {
+      <div class="payment-status">
+        <div class="status-message">
+          <i class="pi pi-check-circle" style="color: var(--green-500);"></i>
+          <span>This invoice has been paid in full.</span>
+        </div>
       </div>
+    }
     </div>
-  </div>
+  }
 </p-dialog>
 
 

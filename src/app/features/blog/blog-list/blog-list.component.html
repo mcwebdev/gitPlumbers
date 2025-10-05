@@ -17,28 +17,30 @@
       <h2>Featured briefings</h2>
       <p>High-impact reads that engineering and product leaders share with their teams.</p>
     </header>
-    <article *ngFor="let post of featuredPosts()" class="blog-card">
-      <header>
-        <p class="blog-card__category">{{ post.categorySlug | titlecase }}</p>
-        <h3>
-          <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
-        </h3>
-      </header>
-      <p class="blog-card__deck">{{ post.deck }}</p>
-      <dl class="blog-card__meta">
-        <div>
-          <dt>Published</dt>
-          <dd>{{ post.publishedOn | date: 'MMM d, y' }}</dd>
-        </div>
-        <div>
-          <dt>Read time</dt>
-          <dd>{{ post.readTime }}</dd>
-        </div>
-      </dl>
-      <footer class="blog-card__footer">
-        <a [routerLink]="['/blog', post.slug]">Read article</a>
-      </footer>
-    </article>
+    @for (post of featuredPosts(); track post.slug) {
+      <article class="blog-card">
+        <header>
+          <p class="blog-card__category">{{ post.categorySlug | titlecase }}</p>
+          <h3>
+            <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+          </h3>
+        </header>
+        <p class="blog-card__deck">{{ post.deck }}</p>
+        <dl class="blog-card__meta">
+          <div>
+            <dt>Published</dt>
+            <dd>{{ post.publishedOn | date: 'MMM d, y' }}</dd>
+          </div>
+          <div>
+            <dt>Read time</dt>
+            <dd>{{ post.readTime }}</dd>
+          </div>
+        </dl>
+        <footer class="blog-card__footer">
+          <a [routerLink]="['/blog', post.slug]">Read article</a>
+        </footer>
+      </article>
+    }
   </section>
 
   <section class="blog-list__latest" aria-label="Latest posts">
@@ -47,15 +49,17 @@
       <p>Weekly perspectives on stabilising AI-assisted codebases with measurable outcomes.</p>
     </header>
     <ul>
-      <li *ngFor="let post of recentPosts()">
-        <a [routerLink]="['/blog', post.slug]">
-          <span class="blog-list__latest-title">{{ post.title }}</span>
-          <span class="blog-list__latest-summary">{{ post.summary }}</span>
-          <span class="blog-list__latest-meta">
-            {{ post.publishedOn | date: 'MMM d, y' }} &middot; {{ post.readTime }}
-          </span>
-        </a>
-      </li>
+      @for (post of recentPosts(); track post.slug) {
+        <li>
+          <a [routerLink]="['/blog', post.slug]">
+            <span class="blog-list__latest-title">{{ post.title }}</span>
+            <span class="blog-list__latest-summary">{{ post.summary }}</span>
+            <span class="blog-list__latest-meta">
+              {{ post.publishedOn | date: 'MMM d, y' }} &middot; {{ post.readTime }}
+            </span>
+          </a>
+        </li>
+      }
     </ul>
     <div class="blog-list__latest-footer">
       <a routerLink="/blog/articles">Browse all articles</a>
@@ -68,13 +72,15 @@
       <p>Choose the track that aligns with your current modernisation initiative.</p>
     </header>
     <ul>
-      <li *ngFor="let category of categories">
-        <a [routerLink]="['/blog/category', category.slug]">
-          <h3>{{ category.title }}</h3>
-          <p>{{ category.description }}</p>
-          <span class="blog-list__keywords">{{ category.keywords.join(', ') }}</span>
-        </a>
-      </li>
+      @for (category of categories; track category.slug) {
+        <li>
+          <a [routerLink]="['/blog/category', category.slug]">
+            <h3>{{ category.title }}</h3>
+            <p>{{ category.description }}</p>
+            <span class="blog-list__keywords">{{ category.keywords.join(', ') }}</span>
+          </a>
+        </li>
+      }
     </ul>
   </section>
 
@@ -83,24 +89,28 @@
       <h2>Modernisation wins</h2>
       <p>See how enterprises cleared debt, scaled safely, and hit aggressive deadlines.</p>
     </header>
-    <article *ngFor="let study of caseStudiesPreview" class="case-card">
-      <header>
-        <p class="case-card__client">{{ study.client }} &middot; {{ study.industry }}</p>
-        <h3>
-          <a [routerLink]="['/blog/case-studies', study.slug]">{{ study.title }}</a>
-        </h3>
-      </header>
-      <p>{{ study.summary }}</p>
-      <ul class="case-card__metrics">
-        <li *ngFor="let metric of study.metrics">
-          <span class="case-card__metric-value">{{ metric.metric }}</span>
-          <span class="case-card__metric-label">{{ metric.label }}</span>
-        </li>
-      </ul>
-      <footer class="case-card__footer">
-        <a [routerLink]="['/blog/case-studies', study.slug]">Read case study</a>
-      </footer>
-    </article>
+    @for (study of caseStudiesPreview; track study.slug) {
+      <article class="case-card">
+        <header>
+          <p class="case-card__client">{{ study.client }} &middot; {{ study.industry }}</p>
+          <h3>
+            <a [routerLink]="['/blog/case-studies', study.slug]">{{ study.title }}</a>
+          </h3>
+        </header>
+        <p>{{ study.summary }}</p>
+        <ul class="case-card__metrics">
+          @for (metric of study.metrics; track metric) {
+            <li>
+              <span class="case-card__metric-value">{{ metric.metric }}</span>
+              <span class="case-card__metric-label">{{ metric.label }}</span>
+            </li>
+          }
+        </ul>
+        <footer class="case-card__footer">
+          <a [routerLink]="['/blog/case-studies', study.slug]">Read case study</a>
+        </footer>
+      </article>
+    }
   </section>
 
   <section class="blog-list__guides" aria-label="Technical guides">
@@ -108,22 +118,26 @@
       <h2>Guides to keep handy</h2>
       <p>Battle-tested frameworks for teams running complex remediation programmes.</p>
     </header>
-    <article *ngFor="let guide of guideHighlights" class="guide-card">
-      <header>
-        <p class="guide-card__level">{{ guide.level | titlecase }} guide</p>
-        <h3>
-          <a [routerLink]="['/blog/guides', guide.slug]">{{ guide.title }}</a>
-        </h3>
-      </header>
-      <p>{{ guide.summary }}</p>
-      <ul class="guide-card__list">
-        <li *ngFor="let item of guide.takeaways">{{ item }}</li>
-      </ul>
-      <footer class="guide-card__footer">
-        <span>{{ guide.stack }}</span>
-        <a [routerLink]="['/blog/guides', guide.slug]">Open guide</a>
-      </footer>
-    </article>
+    @for (guide of guideHighlights; track guide.slug) {
+      <article class="guide-card">
+        <header>
+          <p class="guide-card__level">{{ guide.level | titlecase }} guide</p>
+          <h3>
+            <a [routerLink]="['/blog/guides', guide.slug]">{{ guide.title }}</a>
+          </h3>
+        </header>
+        <p>{{ guide.summary }}</p>
+        <ul class="guide-card__list">
+          @for (item of guide.takeaways; track item) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+        <footer class="guide-card__footer">
+          <span>{{ guide.stack }}</span>
+          <a [routerLink]="['/blog/guides', guide.slug]">Open guide</a>
+        </footer>
+      </article>
+    }
   </section>
 </section>
 }

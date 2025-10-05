@@ -779,6 +779,24 @@
 
 .process-body p {
   color: var(--color-ink-soft);
+  margin-bottom: 1rem;
+}
+
+.learn-more-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 200ms ease, gap 200ms ease;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-highlight);
+    gap: 0.6rem;
+  }
 }
 
 .section--testimonials {

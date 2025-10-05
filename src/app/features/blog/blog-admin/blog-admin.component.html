@@ -22,55 +22,65 @@
     </div>
   </section>
 
-  <section class="blog-admin__drafts" *ngIf="draftPosts().length">
-    <h2>Draft Posts</h2>
-    <div class="post-list">
-      <article *ngFor="let post of draftPosts()" class="post-card post-card--draft">
-        <header>
-          <h3>{{ post.title }}</h3>
-          <p class="post-meta">{{ post.categorySlug | titlecase }} &middot; {{ post.publishedOn | date: 'MMM d, y' }}</p>
-        </header>
-        <p class="post-summary">{{ post.summary }}</p>
-        <footer class="post-actions">
-          <button 
-            class="btn btn--primary" 
-            (click)="togglePostStatus(post)"
-            [disabled]="false">
-            Publish
-          </button>
-          <a [routerLink]="['/blog', post.slug]" class="btn btn--secondary" target="_blank">
-            Preview
-          </a>
-        </footer>
-      </article>
-    </div>
-  </section>
+  @if (draftPosts().length) {
+    <section class="blog-admin__drafts">
+      <h2>Draft Posts</h2>
+      <div class="post-list">
+        @for (post of draftPosts(); track post.slug) {
+          <article class="post-card post-card--draft">
+            <header>
+              <h3>{{ post.title }}</h3>
+              <p class="post-meta">{{ post.categorySlug | titlecase }} &middot; {{ post.publishedOn | date: 'MMM d, y' }}</p>
+            </header>
+            <p class="post-summary">{{ post.summary }}</p>
+            <footer class="post-actions">
+              <button
+                class="btn btn--primary"
+                (click)="togglePostStatus(post)"
+                [disabled]="false">
+                Publish
+              </button>
+              <a [routerLink]="['/blog', post.slug]" class="btn btn--secondary" target="_blank">
+                Preview
+              </a>
+            </footer>
+          </article>
+        }
+      </div>
+    </section>
+  }
 
-  <section class="blog-admin__published" *ngIf="publishedPosts().length">
-    <h2>Published Posts</h2>
-    <div class="post-list">
-      <article *ngFor="let post of publishedPosts()" class="post-card post-card--published">
-        <header>
-          <h3>{{ post.title }}</h3>
-          <p class="post-meta">{{ post.categorySlug | titlecase }} &middot; {{ post.publishedOn | date: 'MMM d, y' }}</p>
-        </header>
-        <p class="post-summary">{{ post.summary }}</p>
-        <footer class="post-actions">
-          <button 
-            class="btn btn--warning" 
-            (click)="togglePostStatus(post)"
-            [disabled]="false">
-            Unpublish
-          </button>
-          <a [routerLink]="['/blog', post.slug]" class="btn btn--secondary" target="_blank">
-            View
-          </a>
-        </footer>
-      </article>
-    </div>
-  </section>
+  @if (publishedPosts().length) {
+    <section class="blog-admin__published">
+      <h2>Published Posts</h2>
+      <div class="post-list">
+        @for (post of publishedPosts(); track post.slug) {
+          <article class="post-card post-card--published">
+            <header>
+              <h3>{{ post.title }}</h3>
+              <p class="post-meta">{{ post.categorySlug | titlecase }} &middot; {{ post.publishedOn | date: 'MMM d, y' }}</p>
+            </header>
+            <p class="post-summary">{{ post.summary }}</p>
+            <footer class="post-actions">
+              <button
+                class="btn btn--warning"
+                (click)="togglePostStatus(post)"
+                [disabled]="false">
+                Unpublish
+              </button>
+              <a [routerLink]="['/blog', post.slug]" class="btn btn--secondary" target="_blank">
+                View
+              </a>
+            </footer>
+          </article>
+        }
+      </div>
+    </section>
+  }
 
-  <section class="blog-admin__empty" *ngIf="!allPosts().length">
-    <p>No blog posts found. The blog generator will create posts automatically.</p>
-  </section>
+  @if (!allPosts().length) {
+    <section class="blog-admin__empty">
+      <p>No blog posts found. The blog generator will create posts automatically.</p>
+    </section>
+  }
 </div>

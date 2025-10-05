@@ -199,10 +199,8 @@
     @if (hasRequests()) { @if (hasFilteredRequests()) {
     <div class="requests-container">
       <div class="requests">
-        <article
-          class="request"
-          *ngFor="let request of filteredAndSortedRequests(); trackBy: trackByRequestId"
-        >
+        @for (request of filteredAndSortedRequests(); track trackByRequestId($index, request)) {
+        <article class="request">
           <header class="request-header">
             <div class="request-type-badge">
               @if (request.type === 'github') {
@@ -257,16 +255,19 @@
           } @if (request.notes && request.notes.length) {
           <section class="notes">
             <h3>Updates</h3>
-            <article class="note" *ngFor="let note of request.notes">
+            @for (note of request.notes; track $index) {
+            <article class="note">
               <div class="note-meta">
                 <strong>{{ note.authorName || note.authorId }}</strong>
                 <span>{{ formatTimestamp(note.createdAt) }}</span>
               </div>
               <p>{{ note.message }}</p>
             </article>
+            }
           </section>
           }
         </article>
+        }
       </div>
     </div>
     } @else {

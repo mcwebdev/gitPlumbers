@@ -6,7 +6,7 @@ import {
   effect,
   inject,
 } from '@angular/core';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -17,7 +17,7 @@ import { SeoService } from '../../../shared/services/seo.service';
 @Component({
   selector: 'app-guide-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgFor, NgIf],
+  imports: [CommonModule, RouterLink],
   templateUrl: './guide-detail.component.html',
   styleUrl: './guide-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

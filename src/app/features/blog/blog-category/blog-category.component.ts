@@ -6,7 +6,7 @@ import {
   effect,
   inject,
 } from '@angular/core';
-import { CommonModule, DatePipe, NgFor, NgIf } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -19,7 +19,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 @Component({
   selector: 'app-blog-category',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgIf, NgFor, DatePipe, LoadingSpinnerComponent],
+  imports: [CommonModule, RouterLink, DatePipe, LoadingSpinnerComponent],
   templateUrl: './blog-category.component.html',
   styleUrl: './blog-category.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

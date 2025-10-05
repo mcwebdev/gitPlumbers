@@ -8,7 +8,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CommonModule, NgClass, NgIf } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { isPlatformBrowser } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
@@ -24,7 +24,7 @@ interface ShareButton {
 @Component({
   selector: 'app-social-share',
   standalone: true,
-  imports: [CommonModule, NgClass, NgIf, ButtonModule, TooltipModule],
+  imports: [CommonModule, NgClass, ButtonModule, TooltipModule],
   templateUrl: './social-share.component.html',
   styleUrl: './social-share.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

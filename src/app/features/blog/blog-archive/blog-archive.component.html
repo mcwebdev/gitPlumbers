@@ -38,7 +38,9 @@
         [value]="_blogStore.selectedCategory()"
         (change)="onCategoryChange($any($event.target).value)"
       >
-        <option *ngFor="let option of categoryOptions" [value]="option.slug">{{ option.label }}</option>
+        @for (option of categoryOptions; track option.slug) {
+          <option [value]="option.slug">{{ option.label }}</option>
+        }
       </select>
     </div>
 
@@ -49,7 +51,9 @@
         [value]="_blogStore.sortOption()"
         (change)="onSortChange($any($event.target).value)"
       >
-        <option *ngFor="let option of sortOptions" [value]="option.id">{{ option.label }}</option>
+        @for (option of sortOptions; track option.id) {
+          <option [value]="option.id">{{ option.label }}</option>
+        }
       </select>
     </div>
 
@@ -58,15 +62,17 @@
 
   @if (isLoading()) {
     <div class="blog-archive__skeleton" aria-label="Loading articles">
-      <div *ngFor="let item of skeletonItems()" class="blog-archive__skeleton-item">
-        <p-skeleton width="60%" height="0.75rem" class="blog-archive__skeleton-line--short" />
-        <p-skeleton width="80%" height="1.25rem" class="blog-archive__skeleton-line--medium" />
-        <p-skeleton width="100%" height="1rem" class="blog-archive__skeleton-line--long" />
-        <p-skeleton width="100%" height="1rem" class="blog-archive__skeleton-line--long" />
-        <p-skeleton width="100%" height="1rem" class="blog-archive__skeleton-line--long" />
-        <p-skeleton width="40%" height="0.85rem" class="blog-archive__skeleton-line--meta" />
-        <p-skeleton width="25%" height="1rem" />
-      </div>
+      @for (item of skeletonItems(); track $index) {
+        <div class="blog-archive__skeleton-item">
+          <p-skeleton width="60%" height="0.75rem" class="blog-archive__skeleton-line--short" />
+          <p-skeleton width="80%" height="1.25rem" class="blog-archive__skeleton-line--medium" />
+          <p-skeleton width="100%" height="1rem" class="blog-archive__skeleton-line--long" />
+          <p-skeleton width="100%" height="1rem" class="blog-archive__skeleton-line--long" />
+          <p-skeleton width="100%" height="1rem" class="blog-archive__skeleton-line--long" />
+          <p-skeleton width="40%" height="0.85rem" class="blog-archive__skeleton-line--meta" />
+          <p-skeleton width="25%" height="1rem" />
+        </div>
+      }
     </div>
   } @else if (totalVisiblePosts() === 0) {
     <div class="blog-archive__empty">
@@ -77,19 +83,21 @@
     </div>
   } @else {
     <ul class="blog-archive__list">
-      <li *ngFor="let post of paginatedPosts().items" class="blog-archive__item">
-        <article>
-          <p class="blog-archive__category">{{ post.categorySlug | titlecase }}</p>
-          <h2>
-            <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
-          </h2>
-          <p class="blog-archive__summary">{{ post.summary }}</p>
-          <p class="blog-archive__meta">
-            {{ post.publishedOn | date: 'MMM d, y' }} | {{ post.readTime }}
-          </p>
-          <a [routerLink]="['/blog', post.slug]" class="blog-archive__read">Read article</a>
-        </article>
-      </li>
+      @for (post of paginatedPosts().items; track post.slug) {
+        <li class="blog-archive__item">
+          <article>
+            <p class="blog-archive__category">{{ post.categorySlug | titlecase }}</p>
+            <h2>
+              <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+            </h2>
+            <p class="blog-archive__summary">{{ post.summary }}</p>
+            <p class="blog-archive__meta">
+              {{ post.publishedOn | date: 'MMM d, y' }} | {{ post.readTime }}
+            </p>
+            <a [routerLink]="['/blog', post.slug]" class="blog-archive__read">Read article</a>
+          </article>
+        </li>
+      }
     </ul>
 
     <app-pagination

@@ -1,48 +1,54 @@
 <section class="share-toolbar" aria-label="Share this article">
   <p class="share-toolbar__title">Share this article</p>
   <div class="share-toolbar__buttons">
-    <button
-      *ngIf="hasWebShare()"
-      type="button"
-      pButton
-      class="share-button share-button--system p-button-rounded p-button-outlined"
-      icon="pi pi-send"
-      label="Share"
-      pTooltip="Share with your device apps"
-      tooltipPosition="top"
-      (click)="shareWithSystem()"
-      aria-label="Share using installed apps"
-    ></button>
+    @if (hasWebShare()) {
+      <button
+        type="button"
+        pButton
+        class="share-button share-button--system p-button-rounded p-button-outlined"
+        icon="pi pi-send"
+        label="Share"
+        pTooltip="Share with your device apps"
+        tooltipPosition="top"
+        (click)="shareWithSystem()"
+        aria-label="Share using installed apps"
+      ></button>
+    }
 
-    <button
-      *ngFor="let button of shareButtons"
-      type="button"
-      pButton
-      class="share-button p-button-rounded"
-      [ngClass]="[
-        button.styleClass,
-        button.key === 'copy' ? 'p-button-outlined' : '',
-        button.key === 'copy' && copyStatus() === 'success'
-          ? 'share-button--copied'
-          : '',
-        button.key === 'copy' && copyStatus() === 'error'
-          ? 'share-button--copy-error'
-          : ''
-      ]"
-      [icon]="button.icon"
-      [label]="button.label"
-      pTooltip="{{ button.description }}"
-      tooltipPosition="top"
-      (click)="handleShare(button)"
-      [attr.aria-label]="button.description"
-    ></button>
+    @for (button of shareButtons; track button.key) {
+      <button
+        type="button"
+        pButton
+        class="share-button p-button-rounded"
+        [ngClass]="[
+          button.styleClass,
+          button.key === 'copy' ? 'p-button-outlined' : '',
+          button.key === 'copy' && copyStatus() === 'success'
+            ? 'share-button--copied'
+            : '',
+          button.key === 'copy' && copyStatus() === 'error'
+            ? 'share-button--copy-error'
+            : ''
+        ]"
+        [icon]="button.icon"
+        [label]="button.label"
+        pTooltip="{{ button.description }}"
+        tooltipPosition="top"
+        (click)="handleShare(button)"
+        [attr.aria-label]="button.description"
+      ></button>
+    }
   </div>
 
   <div class="share-toolbar__feedback" aria-live="polite" role="status">
-    <span *ngIf="copyStatus() === 'success'">Link copied to clipboard.</span>
-    <span *ngIf="copyStatus() === 'error'"
-      >Copy failed. Please copy the link from your browser.</span
-    >
-    <span *ngIf="shareError()" class="share-toolbar__error">{{ shareError() }}</span>
+    @if (copyStatus() === 'success') {
+      <span>Link copied to clipboard.</span>
+    }
+    @if (copyStatus() === 'error') {
+      <span>Copy failed. Please copy the link from your browser.</span>
+    }
+    @if (shareError()) {
+      <span class="share-toolbar__error">{{ shareError() }}</span>
+    }
   </div>
 </section>

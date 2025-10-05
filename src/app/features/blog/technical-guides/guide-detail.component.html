@@ -3,9 +3,11 @@
     <p class="guide-detail__eyebrow">Technical playbook</p>
     <h1 id="guideTitle">{{ guide().title }}</h1>
     <p class="guide-detail__summary">{{ guide().summary }}</p>
-    <p *ngIf="unknownGuide()" class="guide-detail__alert">
-      We could not load the requested guide. Showing a recommended playbook instead.
-    </p>
+    @if (unknownGuide()) {
+      <p class="guide-detail__alert">
+        We could not load the requested guide. Showing a recommended playbook instead.
+      </p>
+    }
     <p class="guide-detail__stack">Stack focus: {{ guide().stack }}</p>
     <a routerLink="/blog/guides" class="guide-detail__back">Back to all guides</a>
   </header>
@@ -13,33 +15,43 @@
   <section class="guide-detail__section" aria-label="Takeaways">
     <h2>Key takeaways</h2>
     <ul>
-      <li *ngFor="let item of guide().takeaways">{{ item }}</li>
+      @for (item of guide().takeaways; track $index) {
+        <li>{{ item }}</li>
+      }
     </ul>
   </section>
 
   <section class="guide-detail__section" aria-label="Readiness checkpoints">
     <h2>Readiness checkpoints</h2>
     <ul>
-      <li *ngFor="let checkpoint of guide().checkpoints">{{ checkpoint }}</li>
+      @for (checkpoint of guide().checkpoints; track $index) {
+        <li>{{ checkpoint }}</li>
+      }
     </ul>
   </section>
 
   <section class="guide-detail__keywords" aria-label="Search keywords">
     <h2>Keywords we optimise for</h2>
     <ul>
-      <li *ngFor="let keyword of guide().keywords">{{ keyword }}</li>
+      @for (keyword of guide().keywords; track $index) {
+        <li>{{ keyword }}</li>
+      }
     </ul>
   </section>
 
-  <section class="guide-detail__related" *ngIf="relatedGuides().length" aria-label="Related guides">
-    <h2>Continue exploring</h2>
-    <ul>
-      <li *ngFor="let item of relatedGuides()">
-        <a [routerLink]="['/blog/guides', item.slug]">
-          <span class="guide-detail__related-title">{{ item.title }}</span>
-          <span class="guide-detail__related-summary">{{ item.summary }}</span>
-        </a>
-      </li>
-    </ul>
-  </section>
+  @if (relatedGuides().length) {
+    <section class="guide-detail__related" aria-label="Related guides">
+      <h2>Continue exploring</h2>
+      <ul>
+        @for (item of relatedGuides(); track item.slug) {
+          <li>
+            <a [routerLink]="['/blog/guides', item.slug]">
+              <span class="guide-detail__related-title">{{ item.title }}</span>
+              <span class="guide-detail__related-summary">{{ item.summary }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
 </article>

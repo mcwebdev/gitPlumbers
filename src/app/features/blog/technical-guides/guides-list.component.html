@@ -9,7 +9,8 @@
   </header>
 
   <section class="guides-list__grid" aria-label="Guides">
-    <article *ngFor="let guide of guides" class="guide-card">
+    @for (guide of guides; track guide.slug) {
+    <article class="guide-card">
       <header>
         <p class="guide-card__level">{{ guide.level | titlecase }} guide</p>
         <h2>
@@ -20,13 +21,17 @@
       <section class="guide-card__section" aria-label="Key takeaways">
         <h3>What you will learn</h3>
         <ul>
-          <li *ngFor="let item of guide.takeaways">{{ item }}</li>
+          @for (item of guide.takeaways; track $index) {
+          <li>{{ item }}</li>
+          }
         </ul>
       </section>
       <section class="guide-card__section" aria-label="Checkpoints">
         <h3>Readiness checkpoints</h3>
         <ul>
-          <li *ngFor="let checkpoint of guide.checkpoints">{{ checkpoint }}</li>
+          @for (checkpoint of guide.checkpoints; track $index) {
+          <li>{{ checkpoint }}</li>
+          }
         </ul>
       </section>
       <footer class="guide-card__footer">
@@ -34,5 +39,6 @@
         <a [routerLink]="['/blog/guides', guide.slug]">Open guide</a>
       </footer>
     </article>
+    }
   </section>
 </section>

@@ -106,14 +106,17 @@ export class LandingComponent implements OnInit {
     {
       title: 'Diagnose',
       body: 'Deep codebase review, dependency heatmaps, and risk scoring to surface what is clogging flow.',
+      learnMoreLink: '/services/modernization',
     },
     {
       title: 'Stabilize',
       body: 'Parallelized remediation sprints, automated regression barriers, and guardrailed releases.',
+      learnMoreLink: '/services/reliability',
     },
     {
       title: 'Accelerate',
       body: 'Co-create modern architectures, developer workflows, and knowledge-sharing systems that enable durable, high-velocity innovation.',
+      learnMoreLink: '/services/platform',
     },
   ];
 

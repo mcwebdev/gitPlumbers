@@ -84,6 +84,9 @@ export class AdminProposalManagementComponent implements AfterViewInit {
   isLoading = signal(false);
   adminNoteText = signal('');
 
+  // UI state for inline detail view (matching invoice pattern)
+  readonly showProposalDetailPanel = signal(false);
+
   // Forms
   proposalForm!: FormGroup;
 
@@ -223,8 +226,11 @@ export class AdminProposalManagementComponent implements AfterViewInit {
 
   onCloseProposalDetail(): void {
     this.showProposalDetail.set(false);
-    this.selectedProposal.set(null);
-    this.adminNoteText.set('');
+    // Small delay before clearing to allow animation to complete
+    setTimeout(() => {
+      this.selectedProposal.set(null);
+      this.adminNoteText.set('');
+    }, 300);
   }
 
   async onAddAdminNote(): Promise<void> {

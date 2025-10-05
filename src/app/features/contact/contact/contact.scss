@@ -27,8 +27,7 @@
 
 /* ===== Header (no loud gradients) ===== */
 .card-head {
-  text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 3rem;
 }
 .title {
   margin: 0;
@@ -394,5 +393,79 @@
   .gp-intake__clear-button:hover {
     background: #f87171;
     color: #0f172a;
+  }
+}
+
+/* ===== Responsive: 900px and below ===== */
+@media (max-width: 900px) {
+  .contact-hero {
+    padding: 1.5rem 0.75rem;
+    margin: 15px auto;
+  }
+
+  .contact-card {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+
+  .card-head {
+    margin-bottom: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+  }
+
+  .form-grid {
+    gap: 1.5rem;
+  }
+
+  .field-control > .p-inputtext,
+  .field-control > .p-inputtextarea,
+  .field-control > textarea.p-inputtextarea {
+    padding: 0.6rem 0.6rem 0.6rem 2rem;
+    font-size: 0.9rem;
+  }
+
+  .p-input-icon-left.field-control > i.pi {
+    left: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .hint,
+  .muted {
+    font-size: 0.75rem;
+  }
+
+  .actions {
+    margin-top: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .gp-intake {
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .gp-intake__steps {
+    gap: 1rem;
+  }
+
+  .gp-intake__badge {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  .gp-intake__step h3 {
+    font-size: 0.95rem;
+  }
+
+  .gp-intake__step p {
+    font-size: 0.85rem;
   }
 }

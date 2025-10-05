@@ -71,6 +71,7 @@ export class GitHubAppInstallerComponent implements OnInit {
   // Outputs for parent components
   readonly installationComplete = output<GitHubAppInstallationData>();
   readonly repositorySelected = output<string>();
+  readonly actionCompleted = output<void>();
 
   private readonly _messageService = inject(MessageService);
   private readonly _http = inject(HttpClient);
@@ -130,6 +131,11 @@ export class GitHubAppInstallerComponent implements OnInit {
           localStorage.removeItem('gitplumbers_installation_id');
         }
       });
+
+    // Set callback for when sync completes successfully
+    this.githubIssuesStore.setSyncCompletedCallback(() => {
+      this.actionCompleted.emit();
+    });
   }
 
   ngOnInit(): void {
@@ -243,13 +249,16 @@ export class GitHubAppInstallerComponent implements OnInit {
 
     try {
       const result = await this._githubIssuesService.syncExternalIssues(installationId, repoFullName).toPromise();
-      
+
       if (result?.success) {
         this._messageService.add({
           severity: 'success',
           summary: 'Issues Synced',
           detail: `Successfully synced ${result.count} external GitHub issues to your dashboard.`,
         });
+
+        // Notify parent to close the form after successful sync
+        this.actionCompleted.emit();
       } else {
         this._messageService.add({
           severity: 'error',
@@ -323,16 +332,26 @@ export class GitHubAppInstallerComponent implements OnInit {
 
   onIssueCreated(issueData: GitHubIssueFormData): void {
     this.showIssueForm = false;
-    
+
     this._messageService.add({
       severity: 'success',
       summary: 'GitHub Issue Created',
       detail: 'Your GitHub issue has been created successfully and will appear in your dashboard.',
     });
+
+    // Notify parent to close the form
+    this.actionCompleted.emit();
   }
 
   onIssueFormCancelled(): void {
     this.showIssueForm = false;
+  }
+
+  onOpenGitHubDirectly(): void {
+    if (this.selectedRepoIssueLink) {
+      // Notify parent to close the form when user clicks to open GitHub directly
+      this.actionCompleted.emit();
+    }
   }
 
   clearInstallationData(): void {

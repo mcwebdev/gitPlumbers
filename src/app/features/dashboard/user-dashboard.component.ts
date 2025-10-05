@@ -500,6 +500,11 @@ export class UserDashboardComponent {
     // Handle repository selection if needed
   }
 
+  onGitHubActionCompleted(): void {
+    // Close the form when any GitHub action is completed
+    this.showForm.set(false);
+  }
+
   /**
    * Remove GitHub issue from dashboard only (keeps GitHub issue intact)
    */

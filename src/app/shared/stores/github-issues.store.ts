@@ -33,6 +33,7 @@ interface GitHubIssuesState {
   syncingSelectedIssues: boolean;
   showIssueSelection: boolean;
   error: string | null;
+  syncCompletedCallback: (() => void) | null;
 }
 
 const initialState: GitHubIssuesState = {
@@ -42,6 +43,7 @@ const initialState: GitHubIssuesState = {
   syncingSelectedIssues: false,
   showIssueSelection: false,
   error: null,
+  syncCompletedCallback: null,
 };
 
 export const GitHubIssuesStore = signalStore(
@@ -91,6 +93,12 @@ export const GitHubIssuesStore = signalStore(
                   summary: 'No New Issues',
                   detail: 'All issues for this repository are already synced.',
                 });
+
+                // Call the callback to close the form since there's nothing to sync
+                const callback = store.syncCompletedCallback();
+                if (callback) {
+                  callback();
+                }
               } else {
                 _messageService.add({
                   severity: 'success',
@@ -146,13 +154,19 @@ export const GitHubIssuesStore = signalStore(
         return _githubIssuesService.syncSelectedExternalIssues(installationId, repoFullName, selectedIds).pipe(
           tap((result: any) => {
             if (result?.success) {
-              
+
               _messageService.add({
                 severity: 'success',
                 summary: 'Issues Synced',
                 detail: `Successfully synced ${result.count || selectedIds.length} selected issues.`,
               });
-              
+
+              // Call the callback if set
+              const callback = store.syncCompletedCallback();
+              if (callback) {
+                callback();
+              }
+
               // Reset state after successful sync
               patchState(store, {
                 selectedIssueIds: [],
@@ -161,7 +175,7 @@ export const GitHubIssuesStore = signalStore(
               });
             } else {
               const errorMsg = result?.error || 'Unable to sync selected issues.';
-              
+
               patchState(store, { error: errorMsg });
               _messageService.add({
                 severity: 'error',
@@ -206,6 +220,10 @@ export const GitHubIssuesStore = signalStore(
       patchState(store, initialState);
     }
 
+    function setSyncCompletedCallback(callback: (() => void) | null): void {
+      patchState(store, { syncCompletedCallback: callback });
+    }
+
     return {
       // Actions
       loadAvailableIssues,
@@ -213,6 +231,7 @@ export const GitHubIssuesStore = signalStore(
       setSelectedIssueIds,
       cancelIssueSelection,
       resetState,
+      setSyncCompletedCallback,
     };
   })
 );

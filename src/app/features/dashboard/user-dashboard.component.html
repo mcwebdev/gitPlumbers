@@ -51,6 +51,7 @@
       <app-github-app-installer
       (installationComplete)="onGitHubAppInstallationComplete($event)"
       (repositorySelected)="onRepositorySelected($event)"
+      (actionCompleted)="onGitHubActionCompleted()"
     ></app-github-app-installer>
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <h2>Submit a non GitHub request</h2>

@@ -5,7 +5,8 @@
       "Bash(ng build:*)",
       "Bash(ng version)",
       "WebFetch(domain:angular.dev)",
-      "WebSearch"
+      "WebSearch",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

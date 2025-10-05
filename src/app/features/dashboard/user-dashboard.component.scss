@@ -658,6 +658,72 @@ textarea {
   }
 }
 
+// Accordion styling
+::ng-deep .p-accordion {
+  .p-accordion-header {
+    margin-bottom: 0.5rem;
+
+    .p-accordion-header-link {
+      border: 1px solid rgba(0, 76, 137, 0.12);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.98);
+      padding: 1rem 1.25rem;
+      transition: all 200ms ease;
+
+      &:hover {
+        border-color: rgba(0, 76, 137, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 20, 50, 0.08);
+      }
+
+      &:focus {
+        box-shadow: 0 0 0 2px rgba(0, 76, 137, 0.1);
+      }
+    }
+  }
+
+  .p-accordion-content {
+    border: none;
+    background: transparent;
+    padding: 0 0 1rem 0;
+  }
+
+  .p-toggleable-content {
+    border: none;
+  }
+}
+
+.accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  flex: 1;
+}
+
+.accordion-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.accordion-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.request-content {
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(0, 76, 137, 0.08);
+  border-radius: 12px;
+  margin-top: 0.5rem;
+}
+
 .requests {
   display: grid;
   gap: 1rem;
@@ -708,6 +774,16 @@ textarea {
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+}
+
+.request-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .timestamp {

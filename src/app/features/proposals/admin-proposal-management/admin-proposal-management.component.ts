@@ -1,9 +1,10 @@
-import { Component, inject, signal, AfterViewInit } from '@angular/core';
+import { Component, inject, signal, AfterViewInit, DestroyRef } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { TitleCasePipe } from '@angular/common';
+import { TitleCasePipe, CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -57,7 +58,7 @@ const primeNgModules = [
 @Component({
   selector: 'app-admin-proposal-management',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, RouterModule, TitleCasePipe, ...primeNgModules],
+  imports: [ReactiveFormsModule, FormsModule, RouterModule, TitleCasePipe, CommonModule, ...primeNgModules],
   providers: [MessageService, ConfirmationService],
   templateUrl: './admin-proposal-management.component.html',
   styleUrl: './admin-proposal-management.component.scss'
@@ -69,6 +70,7 @@ export class AdminProposalManagementComponent implements AfterViewInit {
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
   // State
   readonly proposals = toSignal(
@@ -78,10 +80,11 @@ export class AdminProposalManagementComponent implements AfterViewInit {
   readonly availableUsers = signal<UserOption[]>([]);
   filteredUsers: UserOption[] = [];
   selectedUser: UserOption | null = null;
-  showProposalForm = signal(false);
+  panelState = signal<'hidden' | 'visible' | 'closing'>('hidden');
   showProposalDetail = signal(false);
   selectedProposal = signal<Proposal | null>(null);
   isLoading = signal(false);
+  adminNoteText = signal('');
 
   // Forms
   proposalForm!: FormGroup;
@@ -174,26 +177,33 @@ export class AdminProposalManagementComponent implements AfterViewInit {
     return this.proposalForm.get('items') as FormArray;
   }
 
-  private async loadUsers(): Promise<void> {
-    console.log('AdminProposalManagement: loadUsers() started');
-    try {
-      const users = await this.userService.listUsers();
-      console.log('AdminProposalManagement: Got users from service:', users.length);
-
-      const userOptions = users.map(user => ({
-        ...user,
-        id: user.uid,
-        name: user.displayName || user.email || user.uid,
-        email: user.email,
-        displayName: user.displayName
-      } as UserOption));
-
-      console.log('AdminProposalManagement: Setting availableUsers signal with:', userOptions.length, 'users');
-      this.availableUsers.set(userOptions);
-      console.log('AdminProposalManagement: availableUsers() after set:', this.availableUsers());
-    } catch (error) {
-      console.error('AdminProposalManagement: Error loading users:', error);
+  private loadUsers(): void {
+    if (this.availableUsers().length > 0) {
+      console.log('AdminProposalManagement: Users already loaded, skipping');
+      return;
     }
+
+    console.log('AdminProposalManagement: loadUsers() started');
+    this.userService.listUsers().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (users) => {
+        console.log('AdminProposalManagement: Got users from service:', users.length);
+        const userOptions = users.map(user => ({
+          ...user,
+          id: user.uid,
+          name: user.displayName || user.email || user.uid,
+          email: user.email,
+          displayName: user.displayName
+        } as UserOption));
+        console.log('AdminProposalManagement: Setting availableUsers signal with:', userOptions.length, 'users');
+        this.availableUsers.set(userOptions);
+        console.log('AdminProposalManagement: availableUsers() after set:', this.availableUsers());
+      },
+      error: (error) => {
+        console.error('AdminProposalManagement: Error loading users:', error);
+      }
+    });
   }
 
   // UI Actions
@@ -205,7 +215,7 @@ export class AdminProposalManagementComponent implements AfterViewInit {
       items: [{ unitAmount: 0, quantity: 1, currency: 'usd' }]
     });
     this.selectedUser = null;
-    this.showProposalForm.set(true);
+    this.panelState.set('visible');
   }
 
   onViewProposal(proposal: Proposal): void {
@@ -216,6 +226,56 @@ export class AdminProposalManagementComponent implements AfterViewInit {
   onCloseProposalDetail(): void {
     this.showProposalDetail.set(false);
     this.selectedProposal.set(null);
+    this.adminNoteText.set('');
+  }
+
+  async onAddAdminNote(): Promise<void> {
+    const proposal = this.selectedProposal();
+    const noteText = this.adminNoteText().trim();
+
+    if (!proposal) {
+      return;
+    }
+
+    if (!noteText) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Note Required',
+        detail: 'Please enter a note before submitting',
+        life: 3000
+      });
+      return;
+    }
+
+    try {
+      this.isLoading.set(true);
+      const admin = this.authService.profile();
+
+      if (!admin) {
+        throw new Error('Admin profile not found');
+      }
+
+      await this.proposalService.addNote(proposal.id, admin, noteText);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Note Added',
+        detail: 'Your note has been added to the proposal',
+        life: 3000
+      });
+
+      this.adminNoteText.set('');
+    } catch (error) {
+      console.error('Error adding admin note:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to add note',
+        life: 3000
+      });
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   async onDeleteProposal(proposal: Proposal): Promise<void> {
@@ -325,7 +385,7 @@ export class AdminProposalManagementComponent implements AfterViewInit {
         life: 3000
       });
 
-      this.showProposalForm.set(false);
+      this.closePanel();
       this.proposalForm.reset();
       this.selectedUser = null;
     } catch (error) {
@@ -363,15 +423,17 @@ export class AdminProposalManagementComponent implements AfterViewInit {
   }
 
   onCancelForm(): void {
-    this.showProposalForm.set(false);
+    this.closePanel();
     this.selectedUser = null;
   }
 
-  onDialogVisibilityChange(visible: boolean): void {
-    if (!visible) {
-      this.showProposalForm.set(false);
+  closePanel(): void {
+    this.panelState.set('closing');
+    setTimeout(() => {
+      this.panelState.set('hidden');
+      this.proposalForm.reset();
       this.selectedUser = null;
-    }
+    }, 300); // Match CSS transition duration
   }
 
   // User Selection
@@ -391,13 +453,18 @@ export class AdminProposalManagementComponent implements AfterViewInit {
   }
 
   async onUserSelect(event: any): Promise<void> {
-    const user: UserOption = this.selectedUser || event.value;
+    const user: UserOption | null = this.selectedUser || event?.value || null;
+    if (!user) {
+      console.warn('AdminProposalManagement: onUserSelect called with no user');
+      return;
+    }
+
     this.selectedUser = user;
 
     this.proposalForm.patchValue({
-      userId: user.uid,
-      userName: user.name ?? user.displayName,
-      userEmail: user.email,
+      userId: user.uid ?? '',
+      userName: user.name ?? user.displayName ?? '',
+      userEmail: user.email ?? '',
     });
   }
 
@@ -472,6 +539,6 @@ export class AdminProposalManagementComponent implements AfterViewInit {
   }
 
   onRefresh(): void {
-    this.loadUsers();
+    this.loadUsers(); // Will check if already loaded
   }
 }

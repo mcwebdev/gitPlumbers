@@ -17,6 +17,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { PaginatorModule } from 'primeng/paginator';
+import { DividerModule } from 'primeng/divider';
 
 // Store and Services
 import { InvoiceStore } from '../store/invoice.store';
@@ -48,6 +49,7 @@ import { StripeInvoice } from '../../../shared/models/stripe.interface';
     InputTextModule,
     SelectModule,
     PaginatorModule,
+    DividerModule,
   ],
   providers: [MessageService],
   templateUrl: './user-invoice-view.component.html',
@@ -161,8 +163,10 @@ export class UserInvoiceViewComponent {
   });
 
 
-  // UI state
-  showInvoiceDetail = false;
+  // UI state for inline detail view
+  readonly showInvoiceDetail = signal(false);
+  readonly selectedInvoiceDetail = signal<StripeInvoice | null>(null);
+
   selectedColumns = [
     { field: 'number', header: 'Invoice #' },
     { field: 'description', header: 'Description' },
@@ -260,19 +264,19 @@ export class UserInvoiceViewComponent {
   // UI Actions
 
   /**
-   * View invoice details
+   * View invoice details inline
    */
   onViewInvoice(invoice: StripeInvoice): void {
-    this._invoiceStore.selectInvoice(invoice);
-    this.showInvoiceDetail = true;
+    this.selectedInvoiceDetail.set(invoice);
+    this.showInvoiceDetail.set(true);
   }
 
   /**
-   * Close invoice detail dialog
+   * Close invoice detail inline view
    */
   onCloseInvoiceDetail(): void {
-    this.showInvoiceDetail = false;
-    this._invoiceStore.selectInvoice(null);
+    this.showInvoiceDetail.set(false);
+    this.selectedInvoiceDetail.set(null);
   }
 
   /**

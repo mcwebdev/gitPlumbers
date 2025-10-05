@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { TitleCasePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -21,7 +21,7 @@ interface Option<T> {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [FormsModule, RouterLink, TitleCasePipe, MarkdownPipe, MultiSelectModule],
+  imports: [FormsModule, RouterModule, TitleCasePipe, MarkdownPipe, MultiSelectModule],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,13 +46,19 @@ export class AdminDashboardComponent {
     }, { allowSignalWrites: true });
   }
 
-  private async loadUsers(): Promise<void> {
-    const users = await this.userService.listUsers();
-    this.allUsers.set(users.map(u => ({
-      uid: u.uid,
-      email: u.email,
-      displayName: u.displayName || u.email
-    })));
+  private loadUsers(): void {
+    this.userService.listUsers().subscribe({
+      next: (users) => {
+        this.allUsers.set(users.map(u => ({
+          uid: u.uid,
+          email: u.email,
+          displayName: u.displayName || u.email
+        })));
+      },
+      error: (error) => {
+        console.error('Error loading users:', error);
+      }
+    });
   }
 
   protected readonly requests = toSignal(

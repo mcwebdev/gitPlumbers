@@ -81,14 +81,147 @@
           <p>You have {{ openInvoices().length }} unpaid invoice(s) totaling {{ formatAmount(totalOwed(), 'usd') }}.</p>
         </div>
         <div class="alert-actions">
-          <p-button 
-            label="View All" 
-            severity="warn"
-            size="small">
-          </p-button>
+          
         </div>
       </div>
     </p-card>
+    </div>
+  }
+
+  <!-- Inline Invoice Detail View (slides up above table) -->
+  @if (selectedInvoiceDetail(); as invoice) {
+    <div class="invoice-detail-container" [class.visible]="showInvoiceDetail()">
+      <div class="invoice-detail-header">
+        <h2>Invoice {{ invoice.number || invoice.id }}</h2>
+        <div class="header-actions">
+          <p-tag
+            [value]="invoice.status | titlecase"
+            [severity]="getStatusSeverity(invoice.status)"
+            styleClass="status-tag-header">
+          </p-tag>
+          <button
+            class="close-button"
+            (click)="onCloseInvoiceDetail()"
+            aria-label="Close invoice detail">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="invoice-details">
+        <!-- Metadata -->
+        <div class="detail-row">
+          <strong>Created:</strong>
+          <span>{{ formatDate(invoice.created) }}</span>
+        </div>
+        @if (invoice.due_date) {
+          <div class="detail-row">
+            <strong>Due Date:</strong>
+            <span>{{ formatDate(invoice.due_date) }}</span>
+            @if (invoice.status === 'open') {
+              <span [class]="isOverdue(invoice) ? 'overdue-badge' : 'due-badge'">
+                {{ getDaysUntilDue(invoice) }}
+              </span>
+            }
+          </div>
+        }
+        @if (invoice.description) {
+          <div class="detail-row">
+            <strong>Description:</strong>
+            <p>{{ invoice.description }}</p>
+          </div>
+        }
+        @if (invoice.customer_email) {
+          <div class="detail-row">
+            <strong>Customer:</strong>
+            <span>{{ invoice.customer_email }}</span>
+          </div>
+        }
+
+        <p-divider></p-divider>
+
+        <!-- Line Items -->
+        <h3>Invoice Items</h3>
+        @for (item of invoice.lines.data; track item.id) {
+          <div class="line-item">
+            <div class="item-header">
+              <strong>{{ item.description }}</strong>
+              <span class="item-total">{{ formatAmount(item.amount, invoice.currency) }}</span>
+            </div>
+            @if (item.quantity && item.quantity > 1) {
+              <div class="item-footer">
+                <span>{{ formatAmount(item.price?.unit_amount || 0, invoice.currency) }} × {{ item.quantity }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <p-divider></p-divider>
+
+        <!-- Totals -->
+        <div class="totals-section">
+          @if (invoice.subtotal !== invoice.total) {
+            <div class="total-row">
+              <span>Subtotal:</span>
+              <span>{{ formatAmount(invoice.subtotal, invoice.currency) }}</span>
+            </div>
+          }
+          @if (invoice.tax) {
+            <div class="total-row">
+              <span>Tax:</span>
+              <span>{{ formatAmount(invoice.tax, invoice.currency) }}</span>
+            </div>
+          }
+          @if (invoice.total_discount_amounts && invoice.total_discount_amounts.length > 0) {
+            <div class="total-row discount">
+              <span>Discount:</span>
+              <span>-{{ formatAmount(invoice.total_discount_amounts[0].amount, invoice.currency) }}</span>
+            </div>
+          }
+          <div class="total-row total">
+            <strong>Total Amount:</strong>
+            <strong class="total-amount">{{ formatAmount(invoice.total, invoice.currency) }}</strong>
+          </div>
+          @if (invoice.amount_paid > 0) {
+            <div class="total-row paid">
+              <span>Amount Paid:</span>
+              <span>{{ formatAmount(invoice.amount_paid, invoice.currency) }}</span>
+            </div>
+          }
+          @if (invoice.amount_remaining > 0) {
+            <div class="total-row remaining">
+              <strong>Amount Due:</strong>
+              <strong>{{ formatAmount(invoice.amount_remaining, invoice.currency) }}</strong>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="invoice-detail-footer">
+        @if (invoice.status === 'open') {
+          <p-button
+            label="Pay Invoice"
+            icon="pi pi-credit-card"
+            (onClick)="onPayInvoice(invoice)"
+            severity="success">
+          </p-button>
+        }
+        @if (invoice.invoice_pdf) {
+          <p-button
+            label="Download PDF"
+            icon="pi pi-download"
+            (onClick)="onDownloadInvoice(invoice)"
+            severity="secondary"
+            [outlined]="true">
+          </p-button>
+        }
+        <p-button
+          label="Close"
+          (onClick)="onCloseInvoiceDetail()"
+          [outlined]="true">
+        </p-button>
+      </div>
     </div>
   }
 
@@ -438,150 +571,6 @@
   </div>
 </div>
 
-<!-- Invoice Detail Dialog -->
-<p-dialog
-  header="Invoice Details"
-  [modal]="true"
-  [(visible)]="showInvoiceDetail"
-  (onHide)="onCloseInvoiceDetail()"
-  [style]="{ width: '700px', maxHeight: '90vh' }"
-  [maximizable]="true">
-
-  @if (selectedInvoice(); as invoice) {
-    <div class="invoice-detail">
-    <!-- Invoice Header -->
-    <div class="invoice-header">
-      <div class="invoice-meta">
-        <h3>Invoice {{ invoice.number || invoice.id }}</h3>
-        <p-tag 
-          [value]="invoice.status | titlecase"
-          [severity]="getStatusSeverity(invoice.status)"
-          [style]="{ 'font-size': '0.875rem' }">
-        </p-tag>
-      </div>
-      
-      <div class="invoice-dates">
-        <div class="date-item">
-          <label>Created:</label>
-          <span>{{ formatDate(invoice.created) }}</span>
-        </div>
-        @if (invoice.due_date) {
-          <div class="date-item">
-            <label>Due:</label>
-            <span [class]="isOverdue(invoice) ? 'overdue-text' : ''">
-              {{ formatDate(invoice.due_date) }}
-            </span>
-          </div>
-        }
-      </div>
-    </div>
-
-    <!-- Invoice Description -->
-    @if (invoice.description) {
-      <div class="invoice-description-section">
-        <h4>Description</h4>
-        <p>{{ invoice.description }}</p>
-      </div>
-    }
-
-    <!-- Invoice Items -->
-    <div class="invoice-items">
-      <h4>Items</h4>
-      <div class="items-table">
-        <div class="item-header">
-          <span>Description</span>
-          <span>Quantity</span>
-          <span>Rate</span>
-          <span>Amount</span>
-        </div>
-        
-        @for (item of invoice.lines.data; track item.id ?? $index) {
-          <div 
-            class="item-row">
-            <span class="item-description">
-              <strong>{{ item.description || 'Service' }}</strong>
-            </span>
-            <span class="item-quantity">{{ item.quantity || 1 }}</span>
-            <span class="item-rate">
-              {{ formatAmount(item.unit_amount || item.amount, item.currency) }}
-            </span>
-            <span class="item-amount">
-              {{ formatAmount(item.amount, item.currency) }}
-            </span>
-          </div>
-        }
-      </div>
-    </div>
-
-    <!-- Invoice Totals -->
-    <div class="invoice-totals">
-      @if (invoice.subtotal !== invoice.total) {
-        <div class="total-row">
-          <span>Subtotal:</span>
-          <span>{{ formatAmount(invoice.subtotal, invoice.currency) }}</span>
-        </div>
-      }
-
-      @if (invoice.tax) {
-        <div class="total-row">
-          <span>Tax:</span>
-          <span>{{ formatAmount(invoice.tax, invoice.currency) }}</span>
-        </div>
-      }
-
-      <div class="total-row total-final">
-        <span><strong>Total:</strong></span>
-        <span><strong>{{ formatAmount(invoice.total, invoice.currency) }}</strong></span>
-      </div>
-
-      @if (invoice.amount_paid > 0) {
-        <div class="total-row">
-          <span>Paid:</span>
-          <span class="paid-amount">{{ formatAmount(invoice.amount_paid, invoice.currency) }}</span>
-        </div>
-      }
-
-      @if (invoice.amount_remaining > 0) {
-        <div class="total-row">
-          <span><strong>Amount Due:</strong></span>
-          <span class="due-amount"><strong>{{ formatAmount(invoice.amount_remaining, invoice.currency) }}</strong></span>
-        </div>
-      }
-    </div>
-
-    <!-- Payment Actions -->
-    @if (invoice.status === 'open') {
-      <div class="payment-actions">
-        <p-button
-          label="Pay Now"
-          icon="pi pi-credit-card"
-          severity="success"
-          (onClick)="onPayInvoice(invoice)"
-          [disabled]="!invoice.hosted_invoice_url">
-        </p-button>
-
-        <p-button
-          label="Download PDF"
-          icon="pi pi-download"
-          severity="secondary"
-          (onClick)="onDownloadInvoice(invoice)"
-          [disabled]="!invoice.invoice_pdf">
-        </p-button>
-      </div>
-    }
-
-    <!-- Payment Status -->
-    @if (invoice.status === 'paid') {
-      <div class="payment-status">
-        <div class="status-message">
-          <i class="pi pi-check-circle" style="color: var(--green-500);"></i>
-          <span>This invoice has been paid in full.</span>
-        </div>
-      </div>
-    }
-    </div>
-  }
-</p-dialog>
 
 
 

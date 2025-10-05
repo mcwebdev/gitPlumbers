@@ -123,14 +123,22 @@
       >
         <i class="pi pi-file-text"></i>
         <span>Invoices</span>
+        @if (invoicesCount() > 0) {
+          <span class="tab-badge">{{ invoicesCount() }}</span>
+        }
       </button>
-      <a
-        routerLink="/proposals"
-        class="tab-btn tab-link"
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'proposals'"
+        (click)="setActiveTab('proposals')"
       >
         <i class="pi pi-file-edit"></i>
         <span>Proposals</span>
-      </a>
+        @if (proposalsCount() > 0) {
+          <span class="tab-badge">{{ proposalsCount() }}</span>
+        }
+      </button>
     </div>
 
     <div class="tab-content">
@@ -205,77 +213,87 @@
 
     @if (hasRequests()) { @if (hasFilteredRequests()) {
     <div class="requests-container">
-      <div class="requests">
+      <p-accordion [multiple]="true">
         @for (request of filteredAndSortedRequests(); track trackByRequestId($index, request)) {
-        <article class="request">
-          <header class="request-header">
-            <div class="request-type-badge">
+        <p-accordion-panel [value]="request.id">
+          <p-accordion-header>
+            <div class="accordion-header">
+              <div class="accordion-header-left">
+                <div class="request-type-badge">
+                  @if (request.type === 'github') {
+                    <span class="type-badge type-badge--github">GitHub Issue</span>
+                  } @else {
+                    <span class="type-badge type-badge--support">Support Request</span>
+                  }
+                </div>
+                <h3 class="request-title">{{ request.title }}</h3>
+              </div>
+              <div class="accordion-header-right">
+                <span class="chip" [class]="'chip chip--' + statusCopy(request.status).tone">
+                  {{ statusCopy(request.status).label }}
+                </span>
+                <span class="timestamp">{{ formatTimestamp(request.createdAt) }}</span>
+              </div>
+            </div>
+          </p-accordion-header>
+
+          <p-accordion-content>
+            <div class="request-content">
               @if (request.type === 'github') {
-                <span class="type-badge type-badge--github">GitHub Issue</span>
+                <div class="request-message markdown-content" [innerHTML]="request.message | markdown"></div>
               } @else {
-                <span class="type-badge type-badge--support">Support Request</span>
+                <p class="request-message">{{ request.message }}</p>
+              }
+
+              @if (request.type === 'github' && request.githubIssueUrl) {
+              <div class="request-meta">
+                <p>
+                  <a [href]="request.githubIssueUrl" target="_blank" rel="noopener noreferrer">
+                    View on GitHub: {{ request.repository }}
+                  </a>
+                </p>
+                <div class="request-actions">
+                  <button
+                    type="button"
+                    class="action-btn action-btn--remove"
+                    (click)="removeIssueFromDashboard(request)"
+                    title="Remove from dashboard only - keeps the issue on GitHub and can be re-synced later"
+                  >
+                    <i class="pi pi-eye-slash"></i>
+                    Remove from Dashboard
+                  </button>
+                  <button
+                    type="button"
+                    class="action-btn action-btn--delete"
+                    (click)="deleteIssueCompletely(request)"
+                    title="Permanently close the issue on GitHub and remove from dashboard - this action cannot be undone"
+                  >
+                    <i class="pi pi-trash"></i>
+                    Delete Completely
+                  </button>
+                </div>
+              </div>
+              } @else if (request.type === 'support' && request.githubRepo) {
+              <p class="request-meta">Linked repo: {{ request.githubRepo }}</p>
+              } @if (request.notes && request.notes.length) {
+              <section class="notes">
+                <h3>Updates</h3>
+                @for (note of request.notes; track $index) {
+                <article class="note">
+                  <div class="note-meta">
+                    <strong>{{ note.authorName || note.authorId }}</strong>
+                    <span>{{ formatTimestamp(note.createdAt) }}</span>
+                  </div>
+                  <p>{{ note.message }}</p>
+                </article>
+                }
+              </section>
               }
             </div>
-            <span class="chip" [class]="'chip chip--' + statusCopy(request.status).tone">
-              {{ statusCopy(request.status).label }}
-            </span>
-            <span class="timestamp">{{ formatTimestamp(request.createdAt) }}</span>
-          </header>
-
-          <h3 class="request-title">{{ request.title }}</h3>
-          @if (request.type === 'github') {
-            <div class="request-message markdown-content" [innerHTML]="request.message | markdown"></div>
-          } @else {
-            <p class="request-message">{{ request.message }}</p>
-          }
-
-          @if (request.type === 'github' && request.githubIssueUrl) {
-          <div class="request-meta">
-            <p>
-              <a [href]="request.githubIssueUrl" target="_blank" rel="noopener noreferrer">
-                View on GitHub: {{ request.repository }}
-              </a>
-            </p>
-            <div class="request-actions">
-              <button
-                type="button"
-                class="action-btn action-btn--remove"
-                (click)="removeIssueFromDashboard(request)"
-                title="Remove from dashboard only - keeps the issue on GitHub and can be re-synced later"
-              >
-                <i class="pi pi-eye-slash"></i>
-                Remove from Dashboard
-              </button>
-              <button
-                type="button"
-                class="action-btn action-btn--delete"
-                (click)="deleteIssueCompletely(request)"
-                title="Permanently close the issue on GitHub and remove from dashboard - this action cannot be undone"
-              >
-                <i class="pi pi-trash"></i>
-                Delete Completely
-              </button>
-            </div>
-          </div>
-          } @else if (request.type === 'support' && request.githubRepo) {
-          <p class="request-meta">Linked repo: {{ request.githubRepo }}</p>
-          } @if (request.notes && request.notes.length) {
-          <section class="notes">
-            <h3>Updates</h3>
-            @for (note of request.notes; track $index) {
-            <article class="note">
-              <div class="note-meta">
-                <strong>{{ note.authorName || note.authorId }}</strong>
-                <span>{{ formatTimestamp(note.createdAt) }}</span>
-              </div>
-              <p>{{ note.message }}</p>
-            </article>
-            }
-          </section>
-          }
-        </article>
+          </p-accordion-content>
+        </p-accordion-panel>
         }
-      </div>
+      </p-accordion>
     </div>
     } @else {
     <div class="empty-state">
@@ -303,6 +321,13 @@
       @if (activeTab() === 'invoices') {
       <div class="invoices-section">
         <app-user-invoice-view></app-user-invoice-view>
+      </div>
+      }
+
+      <!-- Proposals Tab -->
+      @if (activeTab() === 'proposals') {
+      <div class="proposals-section">
+        <app-user-proposal-dashboard></app-user-proposal-dashboard>
       </div>
       }
     </div>

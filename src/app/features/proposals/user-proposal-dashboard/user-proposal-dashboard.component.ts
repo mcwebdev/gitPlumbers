@@ -16,7 +16,10 @@ import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PanelModule } from 'primeng/panel';
 import { DividerModule } from 'primeng/divider';
+import { TextareaModule } from 'primeng/textarea';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 // Services and Models
 import { ProposalService } from '../../../shared/services/proposal.service';
@@ -35,12 +38,13 @@ const primeNgModules = [
   ProgressSpinnerModule,
   PanelModule,
   DividerModule,
+  TextareaModule,
 ];
 
 @Component({
   selector: 'app-user-proposal-dashboard',
   standalone: true,
-  imports: [RouterModule, TitleCasePipe, ...primeNgModules],
+  imports: [RouterModule, CommonModule, TitleCasePipe, FormsModule, ...primeNgModules],
   providers: [MessageService, ConfirmationService],
   templateUrl: './user-proposal-dashboard.component.html',
   styleUrl: './user-proposal-dashboard.component.scss'
@@ -69,6 +73,9 @@ export class UserProposalDashboardComponent {
   readonly selectedProposal = signal<Proposal | null>(null);
   readonly showProposalDetail = signal(false);
   readonly isLoading = signal(false);
+  readonly showRevisionDialog = signal(false);
+  readonly revisionNotes = signal('');
+  readonly userNoteText = signal('');
 
   // Computed statistics
   readonly stats = computed(() => {
@@ -91,6 +98,56 @@ export class UserProposalDashboardComponent {
   onCloseProposalDetail(): void {
     this.showProposalDetail.set(false);
     this.selectedProposal.set(null);
+    this.userNoteText.set('');
+  }
+
+  async onAddUserNote(): Promise<void> {
+    const proposal = this.selectedProposal();
+    const noteText = this.userNoteText().trim();
+
+    if (!proposal) {
+      return;
+    }
+
+    if (!noteText) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Note Required',
+        detail: 'Please enter a note before submitting',
+        life: 3000
+      });
+      return;
+    }
+
+    try {
+      this.isLoading.set(true);
+      const user = this.currentUser();
+
+      if (!user) {
+        throw new Error('User profile not found');
+      }
+
+      await this.proposalService.addNote(proposal.id, user, noteText);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Note Added',
+        detail: 'Your note has been added to the proposal',
+        life: 3000
+      });
+
+      this.userNoteText.set('');
+    } catch (error) {
+      console.error('Error adding user note:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to add note',
+        life: 3000
+      });
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   async onAcceptProposal(proposal: Proposal): Promise<void> {
@@ -175,7 +232,7 @@ export class UserProposalDashboardComponent {
     });
   }
 
-  async onRequestRevision(proposal: Proposal): Promise<void> {
+  onRequestRevision(proposal: Proposal): void {
     if (proposal.status !== 'sent') {
       this.messageService.add({
         severity: 'warn',
@@ -186,33 +243,73 @@ export class UserProposalDashboardComponent {
       return;
     }
 
-    this.confirmationService.confirm({
-      message: `Request revision for "${proposal.title}"? This will notify the admin that changes are needed.`,
-      header: 'Request Revision',
-      icon: 'pi pi-pencil',
-      accept: async () => {
+    this.revisionNotes.set('');
+    this.showRevisionDialog.set(true);
+  }
+
+  async onSubmitRevisionRequest(): Promise<void> {
+    const proposal = this.selectedProposal();
+    const notes = this.revisionNotes().trim();
+
+    if (!proposal) {
+      return;
+    }
+
+    if (!notes) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Notes Required',
+        detail: 'Please provide details about what changes you need',
+        life: 3000
+      });
+      return;
+    }
+
+    try {
+      this.isLoading.set(true);
+
+      // Update status to revision_requested
+      await this.proposalService.updateProposal(proposal.id, {
+        status: 'revision_requested'
+      });
+
+      // Add a note with the revision request details
+      const user = this.currentUser();
+      if (user) {
         try {
-          this.isLoading.set(true);
-          await this.proposalService.updateProposal(proposal.id, { status: 'revision_requested' });
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Revision Requested',
-            detail: 'Revision request sent successfully',
-            life: 3000
-          });
-          this.onCloseProposalDetail();
-        } catch (error) {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to request revision',
-            life: 3000
-          });
-        } finally {
-          this.isLoading.set(false);
+          await this.proposalService.addNote(proposal.id, user, `Revision requested: ${notes}`);
+        } catch (noteError) {
+          console.error('Error adding note to proposal:', noteError);
+          // Continue even if note fails - status was already updated
         }
       }
-    });
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Revision Requested',
+        detail: 'Your revision request has been sent to the admin',
+        life: 3000
+      });
+
+      this.showRevisionDialog.set(false);
+      this.revisionNotes.set('');
+      this.onCloseProposalDetail();
+    } catch (error) {
+      console.error('Error requesting revision:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Failed to request revision: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        life: 5000
+      });
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  onCancelRevisionRequest(): void {
+    this.showRevisionDialog.set(false);
+    this.revisionNotes.set('');
   }
 
   // Utility Methods

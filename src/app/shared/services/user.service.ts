@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, getDocs } from '@angular/fire/firestore';
+import { Observable, defer, of, from } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { UserProfile } from './auth-user.service'; // Adjust path if needed
 import { UserRole } from './auth-user.service'; // Added import for UserRole
 
@@ -7,46 +9,39 @@ import { UserRole } from './auth-user.service'; // Added import for UserRole
 export class UserService {
   private readonly _firestore = inject(Firestore);
 
-  async listUsers(): Promise<UserProfile[]> {
-    // ONLY run on client
-    if (typeof window === 'undefined') {
-      console.log('UserService.listUsers: Skipping on server-side');
-      return [];
-    }
-
-    const startTime = performance.now();
-    console.log('UserService.listUsers: Starting getDocs call...');
-
-    try {
-      const usersRef = collection(this._firestore, 'users');
-      const snapshot = await getDocs(usersRef);
-      const getDocsTime = performance.now() - startTime;
-      console.log(`UserService.listUsers: getDocs completed in ${getDocsTime.toFixed(2)}ms, got ${snapshot.size} docs`);
-
-      if (snapshot.empty) {
-        return [];
+  listUsers(): Observable<UserProfile[]> {
+    return defer(() => {
+      if (typeof window === 'undefined') {
+        console.log('UserService.listUsers: Skipping on server-side');
+        return of([]);
       }
 
-      const users = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          uid: doc.id,
-          email: data['email'] || '',
-          displayName: data['displayName'] || '',
-          role: data['role'] || 'user',
-          stripeCustomerId: data['stripeCustomerId'],
-          githubInstallationId: data['githubInstallationId'],
-          createdAt: data['createdAt'],
-          updatedAt: data['updatedAt'],
-        } as UserProfile;
-      });
-
-      const totalTime = performance.now() - startTime;
-      console.log(`UserService.listUsers: Total time ${totalTime.toFixed(2)}ms, returning ${users.length} users`);
-      return users;
-    } catch (error) {
-      console.error('UserService.listUsers: ERROR:', error);
-      return [];
-    }
+      console.log('UserService.listUsers: Starting getDocs call...');
+      const usersRef = collection(this._firestore, 'users');
+      return from(getDocs(usersRef)).pipe(
+        map(snapshot => {
+          if (snapshot.empty) {
+            return [];
+          }
+          return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              uid: doc.id,
+              email: data['email'] || '',
+              displayName: data['displayName'] || '',
+              role: data['role'] || 'user',
+              stripeCustomerId: data['stripeCustomerId'],
+              githubInstallationId: data['githubInstallationId'],
+              createdAt: data['createdAt'],
+              updatedAt: data['updatedAt'],
+            } as UserProfile;
+          });
+        }),
+        catchError(error => {
+          console.error('UserService.listUsers: ERROR:', error);
+          return of([]);
+        })
+      );
+    });
   }
 }

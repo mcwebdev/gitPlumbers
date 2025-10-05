@@ -146,7 +146,7 @@ export class ProposalService {
       authorName: author.displayName || author.email,
       authorEmail: author.email,
       message: message.trim(),
-      createdAt: serverTimestamp(),
+      createdAt: Date.now(), // Use Date.now() instead of serverTimestamp() for array items
       role: author.role === 'admin' ? 'admin' : 'customer',
     };
 

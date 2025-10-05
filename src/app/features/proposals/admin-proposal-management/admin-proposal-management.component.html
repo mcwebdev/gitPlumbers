@@ -34,7 +34,8 @@
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} proposals"
       [rowsPerPageOptions]="[10, 25, 50]"
       [loading]="isLoading()"
-      styleClass="p-datatable-gridlines">
+      styleClass="p-datatable-gridlines"
+      responsiveLayout="stack">
       <ng-template pTemplate="header">
         <tr>
           <th pSortableColumn="title">
@@ -112,7 +113,7 @@
           <td colspan="6" class="text-center">
             <div class="empty-state">
               <i class="pi pi-file" style="font-size: 3rem; color: var(--surface-400);"></i>
-              <p>No proposals yet. Create your first proposal to get started.</p>
+              <p>No proposals found. Click "New Proposal" to create one and start collaborating with users.</p>
             </div>
           </td>
         </tr>
@@ -120,192 +121,212 @@
     </p-table>
   </p-card>
 
-  <!-- Create/Edit Proposal Dialog -->
-  <p-dialog
-    [(visible)]="showProposalForm"
-    [modal]="true"
-    [style]="{width: '50vw'}"
-    [breakpoints]="{'960px': '75vw', '640px': '90vw'}"
-    header="Create Proposal"
-    (onHide)="onDialogVisibilityChange(false)">
-    <form [formGroup]="proposalForm" (ngSubmit)="onSubmitProposal()">
-      <!-- User Selection -->
-      <div class="form-field">
-        <label for="user">Select User *</label>
-        <p-autocomplete
-          [(ngModel)]="selectedUser"
-          [ngModelOptions]="{standalone: true}"
-          [suggestions]="filteredUsers"
-          (completeMethod)="filterUsers($event)"
-          (onSelect)="onUserSelect($event)"
-          optionLabel="name"
-          [dropdown]="true"
-          placeholder="Search users..."
-          fluid>
-        </p-autocomplete>
+  <!-- Create/Edit Proposal Panel -->
+  @if (panelState() !== 'hidden') {
+    <div class="backdrop" (click)="closePanel()"></div>
+    <div class="slide-panel" [class.visible]="panelState() === 'visible'" [class.closing]="panelState() === 'closing'">
+      <div class="panel-header">
+        <h2>Create Proposal</h2>
+        <p-button icon="pi pi-times" [rounded]="true" [text]="true" (onClick)="closePanel()" pTooltip="Close"></p-button>
       </div>
-
-      <!-- Title -->
-      <div class="form-field">
-        <label for="title">Proposal Title *</label>
-        <input
-          pInputText
-          id="title"
-          formControlName="title"
-          placeholder="e.g., Code Review & Optimization Project"
-          class="w-full" />
-        @if (proposalForm.get('title')?.invalid && proposalForm.get('title')?.touched) {
-          <small class="p-error">Title is required</small>
-        }
-      </div>
-
-      <!-- Description -->
-      <div class="form-field">
-        <label for="description">Description</label>
-        <textarea
-          pTextarea
-          id="description"
-          formControlName="description"
-          rows="3"
-          placeholder="Additional details about this proposal..."
-          class="w-full">
-        </textarea>
-      </div>
-
-      <!-- Currency -->
-      <div class="form-field">
-        <label for="currency">Currency *</label>
-        <p-select
-          id="currency"
-          formControlName="currency"
-          [options]="currencyOptions"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Select currency"
-          styleClass="w-full">
-        </p-select>
-      </div>
-
-      <p-divider></p-divider>
-
-      <!-- Line Items -->
-      <div class="line-items-section">
-        <div class="section-header">
-          <h3>Line Items</h3>
-          <p-button
-            label="Add Item"
-            icon="pi pi-plus"
-            (onClick)="onAddProposalItem()"
-            [outlined]="true"
-            size="small">
-          </p-button>
+      <form [formGroup]="proposalForm" (ngSubmit)="onSubmitProposal()">
+        <!-- User Selection -->
+        <div class="form-field">
+          <label for="user">Select User *</label>
+          <p-autocomplete
+            [(ngModel)]="selectedUser"
+            [ngModelOptions]="{standalone: true}"
+            [suggestions]="filteredUsers"
+            (completeMethod)="filterUsers($event)"
+            (onSelect)="onUserSelect($event)"
+            optionLabel="name"
+            [dropdown]="true"
+            placeholder="Search users..."
+            fluid>
+          </p-autocomplete>
+          @if (filteredUsers.length > 0) {
+            {{filteredUsers[0].displayName}}
+          }
+          {{selectedUser?.displayName}}
         </div>
 
-        <div formArrayName="items">
-          @for (item of proposalItems.controls; track $index) {
-            <p-panel [header]="'Item ' + ($index + 1)" [toggleable]="true">
-              <div [formGroupName]="$index" class="item-form">
-                <!-- Service Templates -->
-                <div class="form-field">
-                  <label>Quick Select</label>
-                  <p-select
-                    [options]="serviceTemplates"
-                    (onChange)="onApplyServiceTemplate($event.value, $index)"
-                    optionLabel="name"
-                    placeholder="Choose a template..."
-                    styleClass="w-full">
-                  </p-select>
-                </div>
-
-                <!-- Product Name -->
-                <div class="form-field">
-                  <label>Service Name *</label>
-                  <input
-                    pInputText
-                    formControlName="productName"
-                    placeholder="e.g., Code Review"
-                    class="w-full" />
-                </div>
-
-                <!-- Description -->
-                <div class="form-field">
-                  <label>Description</label>
-                  <textarea
-                    pTextarea
-                    formControlName="description"
-                    rows="2"
-                    placeholder="Service details..."
-                    class="w-full">
-                  </textarea>
-                </div>
-
-                <div class="form-row">
-                  <!-- Unit Amount -->
-                  <div class="form-field">
-                    <label>Unit Price ($) *</label>
-                    <p-inputNumber
-                      formControlName="unitAmount"
-                      mode="currency"
-                      currency="USD"
-                      locale="en-US"
-                      [minFractionDigits]="2"
-                      styleClass="w-full">
-                    </p-inputNumber>
-                  </div>
-
-                  <!-- Quantity -->
-                  <div class="form-field">
-                    <label>Quantity *</label>
-                    <p-inputNumber
-                      formControlName="quantity"
-                      [min]="1"
-                      [showButtons]="true"
-                      styleClass="w-full">
-                    </p-inputNumber>
-                  </div>
-                </div>
-
-                @if (proposalItems.length > 1) {
-                  <p-button
-                    label="Remove Item"
-                    icon="pi pi-trash"
-                    (onClick)="onRemoveProposalItem($index)"
-                    severity="danger"
-                    [outlined]="true"
-                    size="small"
-                    styleClass="mt-2">
-                  </p-button>
-                }
-              </div>
-            </p-panel>
+        <!-- Title -->
+        <div class="form-field" [ngClass]="{ 'p-error': proposalForm.get('title')?.invalid && proposalForm.get('title')?.touched }">
+          <label for="title">Proposal Title *</label>
+          <input
+            pInputText
+            id="title"
+            formControlName="title"
+            placeholder="e.g., Code Review & Optimization Project"
+            class="w-full" />
+          @if (proposalForm.get('title')?.invalid && proposalForm.get('title')?.touched) {
+            <small class="p-error">Title is required and must be less than 200 characters</small>
           }
         </div>
-      </div>
 
-      <p-divider></p-divider>
+        <!-- Description -->
+        <div class="form-field" [ngClass]="{ 'p-error': proposalForm.get('description')?.invalid && proposalForm.get('description')?.touched }">
+          <label for="description">Description</label>
+          <textarea
+            pTextarea
+            id="description"
+            formControlName="description"
+            rows="3"
+            placeholder="Additional details about this proposal..."
+            class="w-full">
+          </textarea>
+          @if (proposalForm.get('description')?.invalid && proposalForm.get('description')?.touched) {
+            <small class="p-error">Description must be less than 1000 characters</small>
+          }
+        </div>
 
-      <!-- Total -->
-      <div class="total-section">
-        <h3>Total: {{ getProposalTotal() }}</h3>
-      </div>
+        <!-- Currency -->
+        <div class="form-field" [ngClass]="{ 'p-error': proposalForm.get('currency')?.invalid && proposalForm.get('currency')?.touched }">
+          <label for="currency">Currency *</label>
+          <p-select
+            id="currency"
+            formControlName="currency"
+            [options]="currencyOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select currency"
+>
+          </p-select>
+          @if (proposalForm.get('currency')?.invalid && proposalForm.get('currency')?.touched) {
+            <small class="p-error">Currency is required</small>
+          }
+        </div>
 
-      <!-- Actions -->
-      <div class="dialog-actions">
-        <p-button
-          label="Cancel"
-          (onClick)="onCancelForm()"
-          [outlined]="true"
-          severity="secondary">
-        </p-button>
-        <p-button
-          label="Create Proposal"
-          type="submit"
-          [loading]="isLoading()"
-          severity="success">
-        </p-button>
-      </div>
-    </form>
-  </p-dialog>
+        <p-divider></p-divider>
+
+        <!-- Line Items -->
+        <div class="line-items-section">
+          <div class="section-header">
+            <h3>Line Items</h3>
+            <p-button
+              label="Add Item"
+              icon="pi pi-plus"
+              (onClick)="onAddProposalItem()"
+              [outlined]="true"
+              size="small">
+            </p-button>
+          </div>
+
+          <div formArrayName="items">
+            @for (item of proposalItems.controls; track $index) {
+              <p-panel [header]="'Item ' + ($index + 1)" [toggleable]="true">
+                <div [formGroupName]="$index" class="item-form">
+                  <!-- Service Templates -->
+                  <div class="form-field">
+                    <label>Quick Select</label>
+                    <p-select
+                      [options]="serviceTemplates"
+                      (onChange)="onApplyServiceTemplate($event.value, $index)"
+                      optionLabel="name"
+                      placeholder="Choose a template..."
+                      styleClass="w-full">
+                    </p-select>
+                  </div>
+
+                  <!-- Product Name -->
+                  <div class="form-field" [ngClass]="{ 'p-error': item.get('productName')?.invalid && item.get('productName')?.touched }">
+                    <label>Service Name *</label>
+                    <input
+                      pInputText
+                      formControlName="productName"
+                      placeholder="e.g., Code Review"
+                      class="w-full" />
+                    @if (item.get('productName')?.invalid && item.get('productName')?.touched) {
+                      <small class="p-error">Service name is required</small>
+                    }
+                  </div>
+
+                  <!-- Description -->
+                  <div class="form-field">
+                    <label>Description</label>
+                    <textarea
+                      pTextarea
+                      formControlName="description"
+                      rows="2"
+                      placeholder="Service details..."
+                      class="w-full">
+                    </textarea>
+                  </div>
+
+                  <div class="form-row">
+                    <!-- Unit Amount -->
+                    <div class="form-field" [ngClass]="{ 'p-error': item.get('unitAmount')?.invalid && item.get('unitAmount')?.touched }">
+                      <label>Unit Price ($) *</label>
+                      <p-inputNumber
+                        formControlName="unitAmount"
+                        mode="currency"
+                        currency="USD"
+                        locale="en-US"
+                        [minFractionDigits]="2"
+                        styleClass="w-full">
+                      </p-inputNumber>
+                      @if (item.get('unitAmount')?.invalid && item.get('unitAmount')?.touched) {
+                        <small class="p-error">Unit price is required</small>
+                      }
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="form-field" [ngClass]="{ 'p-error': item.get('quantity')?.invalid && item.get('quantity')?.touched }">
+                      <label>Quantity *</label>
+                      <p-inputNumber
+                        formControlName="quantity"
+                        [min]="1"
+                        [showButtons]="true"
+                        styleClass="w-full">
+                      </p-inputNumber>
+                      @if (item.get('quantity')?.invalid && item.get('quantity')?.touched) {
+                        <small class="p-error">Quantity is required</small>
+                      }
+                    </div>
+                  </div>
+
+                  @if (proposalItems.length > 1) {
+                    <p-button
+                      label="Remove Item"
+                      icon="pi pi-trash"
+                      (onClick)="onRemoveProposalItem($index)"
+                      severity="danger"
+                      [outlined]="true"
+                      size="small"
+                      styleClass="mt-2">
+                    </p-button>
+                  }
+                </div>
+              </p-panel>
+            }
+          </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- Total -->
+        <div class="total-section">
+          <h3>Total: {{ getProposalTotal() }}</h3>
+        </div>
+
+        <!-- Actions -->
+        <div class="dialog-actions">
+          <p-button
+            label="Cancel"
+            (onClick)="onCancelForm()"
+            [outlined]="true"
+            severity="secondary">
+          </p-button>
+          <p-button
+            label="Create Proposal"
+            type="submit"
+            [loading]="isLoading()"
+            severity="success">
+          </p-button>
+        </div>
+      </form>
+    </div>
+  }
 
   <!-- View Proposal Dialog -->
   @if (selectedProposal(); as proposal) {
@@ -361,6 +382,49 @@
         <div class="total-row">
           <strong>Total:</strong>
           <strong>{{ formatAmount(proposal.totalAmount, proposal.currency) }}</strong>
+        </div>
+
+        <!-- Notes Section -->
+        <p-divider></p-divider>
+        <h3>Notes & Communication</h3>
+
+        @if (proposal.notes && proposal.notes.length > 0) {
+          <div class="notes-list">
+            @for (note of proposal.notes; track note.id) {
+              <div class="note-item">
+                <div class="note-header">
+                  <strong>{{ note.authorName }}</strong>
+                  <span class="note-role" [class]="note.role">{{ note.role | titlecase }}</span>
+                  <span class="note-date">{{ formatDate(note.createdAt) }}</span>
+                </div>
+                <p class="note-message">{{ note.message }}</p>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="no-notes">No notes yet. Add a note to communicate with the customer.</p>
+        }
+
+        <!-- Add Note Form -->
+        <div class="add-note-section">
+          <label for="admin-note">Add a note:</label>
+          <textarea
+            pTextarea
+            id="admin-note"
+            [(ngModel)]="adminNoteText"
+            rows="3"
+            placeholder="Type your message to the customer..."
+            class="w-full">
+          </textarea>
+          <p-button
+            label="Add Note"
+            icon="pi pi-send"
+            (onClick)="onAddAdminNote()"
+            [disabled]="!adminNoteText().trim()"
+            [loading]="isLoading()"
+            size="small"
+            styleClass="mt-2">
+          </p-button>
         </div>
       </div>
 

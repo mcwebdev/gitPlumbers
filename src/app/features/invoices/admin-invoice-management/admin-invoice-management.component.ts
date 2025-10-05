@@ -229,22 +229,26 @@ export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
   /**
    * Load available users for invoice creation
    */
-  private async loadUsers(): Promise<void> {
+  private loadUsers(): void {
     console.log('loadUsers: Starting...');
-    const users = await this._userService.listUsers();
-    console.log('loadUsers: Got users:', users);
-
-    const userOptions = users.map(user => ({
-      ...user,
-      id: user.uid,
-      name: user.displayName || user.email || user.uid,
-      email: user.email,
-      displayName: user.displayName
-    } as UserOption));
-
-    console.log('loadUsers: Setting availableUsers to:', userOptions);
-    this.availableUsers.set(userOptions);
-    console.log('loadUsers: availableUsers() signal now contains:', this.availableUsers());
+    this._userService.listUsers().subscribe({
+      next: (users) => {
+        console.log('loadUsers: Got users:', users);
+        const userOptions = users.map(user => ({
+          ...user,
+          id: user.uid,
+          name: user.displayName || user.email || user.uid,
+          email: user.email,
+          displayName: user.displayName
+        } as UserOption));
+        console.log('loadUsers: Setting availableUsers to:', userOptions);
+        this.availableUsers.set(userOptions);
+        console.log('loadUsers: availableUsers() signal now contains:', this.availableUsers());
+      },
+      error: (error) => {
+        console.error('loadUsers: Error:', error);
+      }
+    });
   }
 
   // UI Actions

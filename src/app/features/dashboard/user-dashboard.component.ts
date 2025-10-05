@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, effect } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FileUploadComponent,
@@ -23,6 +23,10 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { GitHubAppInstallerComponent, type GitHubAppInstallationData } from '../../shared/components/github-app-installer/github-app-installer.component';
 import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
 import { UserInvoiceViewComponent } from '../invoices/user-invoice-view/user-invoice-view.component';
+import { UserProposalDashboardComponent } from '../proposals/user-proposal-dashboard/user-proposal-dashboard.component';
+import { InvoiceStore } from '../invoices/store/invoice.store';
+import { ProposalService } from '../../shared/services/proposal.service';
+import { AccordionModule } from 'primeng/accordion';
 interface RequestStatusCopy {
   label: string;
   tone: 'neutral' | 'progress' | 'success' | 'warning';
@@ -66,8 +70,8 @@ const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [ReactiveFormsModule, FileUploadComponent, GitHubAppInstallerComponent, ConfirmDialogModule, MarkdownPipe, UserInvoiceViewComponent],
-  providers: [MessageService, ConfirmationService],
+  imports: [ReactiveFormsModule, RouterModule, FileUploadComponent, GitHubAppInstallerComponent, ConfirmDialogModule, MarkdownPipe, UserInvoiceViewComponent, UserProposalDashboardComponent, AccordionModule],
+  providers: [MessageService, ConfirmationService, InvoiceStore],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,7 +85,19 @@ export class UserDashboardComponent {
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly router = inject(Router);
+  private readonly invoiceStore = inject(InvoiceStore);
+  private readonly proposalService = inject(ProposalService);
   private selectedFile: File | null = null;
+
+  constructor() {
+    // Load invoices when component initializes to show badge count
+    effect(() => {
+      const profile = this.profile();
+      if (profile) {
+        this.invoiceStore.loadInvoices();
+      }
+    });
+  }
 
   protected readonly fileUploadConfig: FileUploadConfig = {
     accept: '.zip',
@@ -107,7 +123,7 @@ export class UserDashboardComponent {
   protected readonly showForm = signal(false);
 
   // Tab state
-  protected readonly activeTab = signal<'requests' | 'invoices'>('requests');
+  protected readonly activeTab = signal<'requests' | 'invoices' | 'proposals'>('requests');
 
   // Filtering and sorting state
   protected readonly statusFilter = signal<RequestStatus | 'all'>('all');
@@ -151,6 +167,39 @@ export class UserDashboardComponent {
     ),
     { initialValue: [] }
   );
+
+  // Proposals for current user
+  protected readonly proposals = toSignal(
+    this.profile$.pipe(
+      switchMap((profile) => {
+        if (!profile) {
+          return of([]);
+        }
+        return this.proposalService.listenForUserProposals(profile.uid).pipe(
+          catchError((error) => {
+            return of([]);
+          })
+        );
+      })
+    ),
+    { initialValue: [] }
+  );
+
+  // User invoices computed from invoice store
+  protected readonly userInvoices = computed(() => {
+    const currentUser = this.profile();
+    if (!currentUser) return [];
+
+    return this.invoiceStore.invoices().filter(invoice =>
+      invoice.customer === currentUser.stripeCustomerId ||
+      invoice.customer_email === currentUser.email ||
+      invoice.metadata?.['userId'] === currentUser.uid
+    );
+  });
+
+  // Count badges
+  protected readonly proposalsCount = computed(() => this.proposals().length);
+  protected readonly invoicesCount = computed(() => this.userInvoices().length);
 
   // Combined items (support requests + GitHub issues)
   protected readonly allItems = computed(() => {
@@ -562,7 +611,7 @@ export class UserDashboardComponent {
     this.router.navigate(['/invoices']);
   }
 
-  protected setActiveTab(tab: 'requests' | 'invoices'): void {
+  protected setActiveTab(tab: 'requests' | 'invoices' | 'proposals'): void {
     this.activeTab.set(tab);
   }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -11,6 +11,7 @@ import { RequestStatus, RequestsService } from '../../shared/services/requests.s
 import { GitHubIssuesService } from '../../shared/services/github-issues.service';
 import { GitHubIssueStatus } from '../../shared/models/github-issue.model';
 import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
+import { UserService } from '../../shared/services/user.service';
 
 interface Option<T> {
   label: string;
@@ -29,8 +30,30 @@ export class AdminDashboardComponent {
   private readonly requestsService = inject(RequestsService);
   private readonly githubIssuesService = inject(GitHubIssuesService);
   private readonly authUser = inject(AuthUserService);
+  private readonly userService = inject(UserService);
 
   protected readonly profile = this.authUser.profile;
+
+  // All users from Firestore
+  protected readonly allUsers = signal<Array<{ uid: string; email: string; displayName: string }>>([]);
+
+  constructor() {
+    // Load all users on init
+    effect(() => {
+      if (this.profile()) {
+        this.loadUsers();
+      }
+    }, { allowSignalWrites: true });
+  }
+
+  private async loadUsers(): Promise<void> {
+    const users = await this.userService.listUsers();
+    this.allUsers.set(users.map(u => ({
+      uid: u.uid,
+      email: u.email,
+      displayName: u.displayName || u.email
+    })));
+  }
 
   protected readonly requests = toSignal(
     this.requestsService.listenForAllRequests().pipe(map((items) => items ?? [])),
@@ -106,32 +129,16 @@ export class AdminDashboardComponent {
   // User filtering state
   private readonly selectedUserEmails = signal<string[]>([]);
 
-  // Extract unique users from all items
-  protected readonly availableUsers = computed(() => {
-    const allItems = this.allItems();
-    const userMap = new Map<string, { email: string; name: string; uid: string }>();
-    
-    allItems.forEach(item => {
-      if (item.userEmail && item.userId) {
-        userMap.set(item.userEmail, {
-          email: item.userEmail,
-          name: item.userName || item.userEmail,
-          uid: item.userId
-        });
-      }
-    });
-    
-    return Array.from(userMap.values()).sort((a, b) => a.name.localeCompare(b.name));
-  });
-
-  // Format user options for display with name and UID
+  // Format user options for display with displayName and email
   protected readonly userOptions = computed(() => {
-    const users = this.availableUsers();
-    return users.map(user => ({
-      email: user.email,
-      label: `${user.name} (${user.uid})`,
-      value: user.email
-    }));
+    const users = this.allUsers();
+    return users
+      .map(user => ({
+        email: user.email,
+        label: `${user.displayName} (${user.email})`,
+        value: user.email
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   });
 
   // Filtered items based on selected users

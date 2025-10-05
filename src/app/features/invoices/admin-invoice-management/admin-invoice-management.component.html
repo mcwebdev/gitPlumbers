@@ -322,11 +322,12 @@
 </div>
 
 <!-- Customer Form Dialog -->
-<p-dialog 
-  header="Create New Customer" 
-  [modal]="true" 
+<p-dialog
+  header="Create New Customer"
+  [modal]="true"
   [visible]="showCustomerForm()"
-  (onHide)="onCancelForm()"
+  [closable]="true"
+  (visibleChange)="onDialogVisibilityChange($event, 'customer')"
   [style]="{ width: '500px' }">
   
   <form [formGroup]="customerForm" (ngSubmit)="onSubmitCustomer()">
@@ -393,11 +394,12 @@
 </p-dialog>
 
 <!-- Invoice Form Dialog -->
-<p-dialog 
+<p-dialog
   header="Create Invoice for User"
-  [modal]="true" 
+  [modal]="true"
   [visible]="showInvoiceForm()"
-  (onHide)="onCancelForm()"
+  [closable]="true"
+  (visibleChange)="onDialogVisibilityChange($event, 'invoice')"
   [style]="{ width: '900px', maxHeight: '90vh' }"
   [maximizable]="true">
   

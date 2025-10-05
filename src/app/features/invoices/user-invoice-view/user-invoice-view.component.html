@@ -409,10 +409,10 @@
 </div>
 
 <!-- Invoice Detail Dialog -->
-<p-dialog 
-  header="Invoice Details" 
-  [modal]="true" 
-  [visible]="showInvoiceDetail"
+<p-dialog
+  header="Invoice Details"
+  [modal]="true"
+  [(visible)]="showInvoiceDetail"
   (onHide)="onCloseInvoiceDetail()"
   [style]="{ width: '700px', maxHeight: '90vh' }"
   [maximizable]="true">

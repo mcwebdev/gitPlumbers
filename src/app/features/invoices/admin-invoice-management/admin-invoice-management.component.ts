@@ -445,6 +445,20 @@ export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
     this.selectedUser = null;
   }
 
+  /**
+   * Handle dialog visibility changes (for X button clicks)
+   */
+  onDialogVisibilityChange(visible: boolean, dialogType: 'invoice' | 'customer'): void {
+    if (!visible) {
+      if (dialogType === 'invoice') {
+        this._invoiceStore.setShowInvoiceForm(false);
+      } else {
+        this._invoiceStore.setShowCustomerForm(false);
+      }
+      this.selectedUser = null;
+    }
+  }
+
   // User Selection
 
   /**

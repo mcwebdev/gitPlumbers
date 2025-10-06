@@ -350,7 +350,7 @@ export const SYSTEM_PROMPT = [
 
 export const generateBlogArticleHourly = onSchedule(
   {
-    schedule: 'every 60 minutes',
+    schedule: 'every 360 minutes',
     timeZone: 'Etc/UTC',
     region: 'us-central1',
     secrets: [OPENAI_API_KEY],

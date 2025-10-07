@@ -357,4 +357,10 @@
       </div>
     </ng-template>
   </p-dialog>
+
+  <!-- Loading Spinner Overlay -->
+  <app-loading-spinner 
+    [active]="isLoading()" 
+    message="Processing your request...">
+  </app-loading-spinner>
 </div>

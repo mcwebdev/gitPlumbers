@@ -399,7 +399,7 @@ export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
   /**
    * Submit invoice form
    */
-  onSubmitInvoice(): void {
+  async onSubmitInvoice(): Promise<void> {
     if (this.invoiceForm.invalid) {
       this.markFormGroupTouched(this.invoiceForm);
       return;
@@ -416,7 +416,7 @@ export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
     }
 
     const formValue = this.invoiceForm.value;
-    this.createInvoiceForUser(formValue);
+    await this.createInvoiceForUser(formValue);
   }
 
   /**
@@ -490,14 +490,42 @@ export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
         metadata: { userId: user.uid },
       };
 
-      this._invoiceStore.createCustomer(customerData);
-      // Just notify user, don't wait for customer creation
-      this._messageService.add({
-        severity: 'info',
-        summary: 'Creating Stripe Customer',
-        detail: 'Creating customer record...',
-        life: 3000,
-      });
+      // Create customer and update user document
+      try {
+        this._messageService.add({
+          severity: 'info',
+          summary: 'Creating Stripe Customer',
+          detail: 'Creating customer record...',
+          life: 3000,
+        });
+
+        const createdCustomer = await this._invoiceService.createCustomer(customerData);
+        
+        if (createdCustomer && createdCustomer.id) {
+          // Update the user document with the new customer ID
+          await this._authService.updateUserProfileById(user.uid, {
+            stripeCustomerId: createdCustomer.id
+          });
+          
+          // Update the user object
+          user.stripeCustomerId = createdCustomer.id;
+          
+          this._messageService.add({
+            severity: 'success',
+            summary: 'Customer Created',
+            detail: 'Stripe customer created successfully.',
+            life: 3000,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to create customer:', error);
+        this._messageService.add({
+          severity: 'error',
+          summary: 'Customer Creation Failed',
+          detail: 'Failed to create Stripe customer.',
+          life: 5000,
+        });
+      }
     }
 
     this.selectedUser = user;
@@ -580,25 +608,78 @@ export class AdminInvoiceManagementComponent implements OnInit, AfterViewInit {
   /**
    * Create invoice for selected user
    */
-  private createInvoiceForUser(formValue: any): void {
+  private async createInvoiceForUser(formValue: any): Promise<void> {
     console.log('AdminInvoiceManagementComponent: Attempting to create invoice for user.', { 
       selectedUser: this.selectedUser, 
       formValue 
     });
 
-    if (!this.selectedUser?.stripeCustomerId) {
+    let customerId = this.selectedUser?.stripeCustomerId;
+
+    // If user doesn't have a Stripe customer ID, create one
+    if (!customerId) {
       this._messageService.add({
-        severity: 'error',
-        summary: 'Missing Customer ID',
-        detail: 'The selected user does not have a Stripe Customer ID.',
-        life: 5000
+        severity: 'info',
+        summary: 'Creating Customer',
+        detail: 'Creating Stripe customer for user...',
+        life: 3000,
       });
-      console.error('Create invoice failed: No Stripe Customer ID on selected user.');
-      return;
+
+      try {
+        const customerData: CreateCustomerRequest = {
+          name: this.selectedUser?.name ?? this.selectedUser?.displayName ?? formValue.customerName,
+          email: this.selectedUser?.email ?? formValue.customerEmail,
+          description: `Customer for user ${this.selectedUser?.uid}`,
+          metadata: { userId: this.selectedUser?.uid || '' },
+        };
+
+        // Create customer directly using the service
+        const createdCustomer = await this._invoiceService.createCustomer(customerData);
+        
+        if (createdCustomer && createdCustomer.id && this.selectedUser) {
+          // Update the user document with the new customer ID
+          await this._authService.updateUserProfileById(this.selectedUser.uid, {
+            stripeCustomerId: createdCustomer.id
+          });
+          
+          // Update the local selectedUser object
+          this.selectedUser.stripeCustomerId = createdCustomer.id;
+          customerId = createdCustomer.id;
+          
+          // Also update the store's customer list
+          this._invoiceStore.loadCustomers();
+        }
+
+        if (!customerId) {
+          this._messageService.add({
+            severity: 'error',
+            summary: 'Customer Creation Failed',
+            detail: 'Failed to create Stripe customer. Please try again.',
+            life: 5000,
+          });
+          return;
+        }
+
+        this._messageService.add({
+          severity: 'success',
+          summary: 'Customer Created',
+          detail: 'Stripe customer created successfully.',
+          life: 3000,
+        });
+      } catch (error) {
+        console.error('Failed to create Stripe customer:', error);
+        this._messageService.add({
+          severity: 'error',
+          summary: 'Customer Creation Failed',
+          detail: 'Failed to create Stripe customer. Please try again.',
+          life: 5000,
+        });
+        return;
+      }
     }
 
     const invoiceData: InvoiceFormData = {
-      customerId: this.selectedUser.stripeCustomerId,
+      customerId: customerId,
       customerName: formValue.customerName,
       customerEmail: formValue.customerEmail,
       description: formValue.description,

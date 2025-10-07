@@ -16,4 +16,7 @@
     appListingUrl: 'https://github.com/apps/gitplumbers',
     apiBaseUrl: 'https://us-central1-gitplumbers-35d92.cloudfunctions.net',
   },
+  stripe: {
+    publishableKey: 'pk_test_51SBIX4BKPhC1ndwCCvOySwh5XD3aw8voINyuTkoHhz7fNfrxbnTzWXf4fFBKY6oesch11Km58mFNGD7QKPkUy7JA00ifTu1Zg3', // Test key for development
+  },
 };

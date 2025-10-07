@@ -6,7 +6,7 @@
   <section class="dashboard-hero">
     <div class="hero-content">
       <div class="hero-copy">
-        <p class="hero-eyebrow">Welcome back</p>
+        <p class="hero-eyebrow">Welcome back{{ profile()?.displayName ? ', ' + profile()!.displayName : profile()?.email ? ', ' + profile()!.email : '' }}</p>
       
         <p class="hero-body">
           Manage your support requests and track your invoices all in one place.

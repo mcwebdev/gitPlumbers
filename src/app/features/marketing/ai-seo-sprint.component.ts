@@ -96,9 +96,9 @@ export class AiSeoSprintComponent implements OnInit {
       description:
         'We produce your first batch of AI-generated content: blog posts, landing pages, product descriptions, or whatever you need most.',
       whatYouGet: [
-        '10 optimized topic titles',
-        '10 detailed content outlines',
-        '3 full long-form draft articles',
+        'AI optimized topic titles',
+        'AI detailed content outlines',
+        '200 full long-form draft articles',
         'Schema markup + OG/Twitter cards',
         'Internal link mapping',
         '90-day content calendar',

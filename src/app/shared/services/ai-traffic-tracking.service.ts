@@ -61,10 +61,21 @@ export class AiTrafficTrackingService {
   }
 
   /**
+   * Check if running on localhost
+   */
+  private _isLocalhost(): boolean {
+    if (!this._isBrowser) {
+      return false;
+    }
+    const hostname = this._document.location.hostname;
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+  }
+
+  /**
    * Identify if current session is from AI source
    */
   identifyAiTrafficSource(): AiTrafficSource | null {
-    if (!this._isBrowser) return null;
+    if (!this._isBrowser || this._isLocalhost()) return null;
 
     const referrer = this._document.referrer;
     const urlParams = new URLSearchParams(this._document.location.search);
@@ -101,7 +112,7 @@ export class AiTrafficTrackingService {
    * Track page view and identify AI traffic
    */
   private trackPageView(): void {
-    if (!this._isBrowser) return;
+    if (!this._isBrowser || this._isLocalhost()) return;
 
     this.sessionData.pageViews++;
 
@@ -128,7 +139,7 @@ export class AiTrafficTrackingService {
    * Track conversion events (contact form, signup, etc.)
    */
   trackConversion(eventName: string, value?: number): void {
-    if (!this._isBrowser) return;
+    if (!this._isBrowser || this._isLocalhost()) return;
 
     this.sessionData.conversionEvents++;
 
@@ -145,7 +156,7 @@ export class AiTrafficTrackingService {
    * Track engagement events
    */
   trackEngagement(eventName: string, data: Record<string, unknown> = {}): void {
-    if (!this._isBrowser) return;
+    if (!this._isBrowser || this._isLocalhost()) return;
 
     this.sendTrackingEvent('engagement', {
       event: eventName,

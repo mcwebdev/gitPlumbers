@@ -2,7 +2,6 @@
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   color: #333;
 
@@ -22,7 +21,7 @@
         margin: 0;
         font-size: 2.5rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: #003c48;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -40,7 +39,7 @@
       align-items: center;
       gap: 0.5rem;
       padding: 0.75rem 1.5rem;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: #003c48;
       color: white;
       border: none;
       border-radius: 12px;
@@ -84,7 +83,7 @@
       width: 50px;
       height: 50px;
       border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
+      border-top: 4px solid #4681ff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-bottom: 1rem;
@@ -153,7 +152,7 @@
         align-items: center;
         justify-content: center;
         border-radius: 16px;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        background: rgba(102, 126, 234, 0.1);
       }
 
       .metric-content {
@@ -213,19 +212,19 @@
       }
 
       &.primary .metric-icon {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+        background: rgba(102, 126, 234, 0.2);
       }
 
       &.success .metric-icon {
-        background: linear-gradient(135deg, rgba(39, 174, 96, 0.2), rgba(46, 204, 113, 0.2));
+        background: rgba(39, 174, 96, 0.2);
       }
 
       &.info .metric-icon {
-        background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(41, 128, 185, 0.2));
+        background: rgba(52, 152, 219, 0.2);
       }
 
       &.warning .metric-icon {
-        background: linear-gradient(135deg, rgba(243, 156, 18, 0.2), rgba(230, 126, 34, 0.2));
+        background: rgba(243, 156, 18, 0.2);
       }
     }
   }
@@ -289,11 +288,11 @@
                 transition: all 0.3s ease;
 
                 &.ai-traffic {
-                  background: linear-gradient(to top, #667eea, #764ba2);
+                  background: #667eea;
                 }
 
                 &.conversions {
-                  background: linear-gradient(to top, #27ae60, #2ecc71);
+                  background: #27ae60;
                 }
               }
             }
@@ -336,11 +335,11 @@
               border-radius: 4px;
 
               &.ai-traffic {
-                background: linear-gradient(135deg, #667eea, #764ba2);
+                background: #667eea;
               }
 
               &.conversions {
-                background: linear-gradient(135deg, #27ae60, #2ecc71);
+                background: #27ae60;
               }
             }
           }

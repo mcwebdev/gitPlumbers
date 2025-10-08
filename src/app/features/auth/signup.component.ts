@@ -5,6 +5,7 @@ import { Auth, createUserWithEmailAndPassword, updateProfile } from '@angular/fi
 
 import { AuthUserService } from '../../shared/services/auth-user.service';
 import { InvoiceService } from '../../shared/services/invoice.service';
+import { AiTrafficTrackingService } from '../../shared/services/ai-traffic-tracking.service';
 
 @Component({
   selector: 'app-signup',
@@ -20,6 +21,7 @@ export class SignupComponent {
   private readonly router = inject(Router);
   private readonly userService = inject(AuthUserService);
   private readonly invoiceService = inject(InvoiceService);
+  private readonly aiTrafficTracking = inject(AiTrafficTrackingService);
 
   protected readonly form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -89,6 +91,9 @@ export class SignupComponent {
       }
 
       await this.userService.ensureUserDocument(credential.user, userOverrides);
+
+      // Track signup conversion
+      this.aiTrafficTracking.trackConversion('signup');
 
       await this.router.navigate(['/dashboard']);
     } catch (error: unknown) {

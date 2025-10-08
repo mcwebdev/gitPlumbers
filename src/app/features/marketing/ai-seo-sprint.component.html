@@ -80,15 +80,34 @@
   </div>
 </section>
 
-<!-- Ideal For Section -->
-<section class="ideal-for">
+<!-- Perfect For & How It Works Section -->
+<section class="perfect-for-and-process">
   <div class="container">
-    <h2>Perfect For</h2>
-    <div class="ideal-grid">
-      <div class="ideal-card" *ngFor="let client of idealFor">
-        <span class="ideal-emoji">{{ client.emoji }}</span>
-        <h3>{{ client.title }}</h3>
-        <p>{{ client.description }}</p>
+    <div class="two-column-layout">
+      <!-- Left Column: Perfect For -->
+      <div class="column">
+        <h2>Perfect For</h2>
+        <div class="ideal-grid">
+          <div class="ideal-card" *ngFor="let client of idealFor">
+            <span class="ideal-emoji">{{ client.emoji }}</span>
+            <h3>{{ client.title }}</h3>
+            <p>{{ client.description }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: How It Works -->
+      <div class="column">
+        <h2>How It Works</h2>
+        <div class="process-timeline">
+          <div class="process-step" *ngFor="let step of processSteps">
+            <div class="step-number">{{ step.step }}</div>
+            <div class="step-content">
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.description }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -103,22 +122,6 @@
         <span class="benefit-icon">{{ benefit.icon }}</span>
         <h3>{{ benefit.title }}</h3>
         <p>{{ benefit.description }}</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Process Section -->
-<section class="process">
-  <div class="container">
-    <h2>How It Works</h2>
-    <div class="process-timeline">
-      <div class="process-step" *ngFor="let step of processSteps">
-        <div class="step-number">{{ step.step }}</div>
-        <div class="step-content">
-          <h3>{{ step.title }}</h3>
-          <p>{{ step.description }}</p>
-        </div>
       </div>
     </div>
   </div>
@@ -187,6 +190,6 @@
       <a [routerLink]="'/blog'" class="btn btn-secondary btn-large">See Sample Content</a>
     </div>
 
-    <p class="cta-note">Most clients add ongoing content production ($2K/month) to maintain consistent publishing after the sprint.</p>
+    <p class="cta-note">Most clients add Integration with your codebase Add On.</p>
   </div>
 </section>

@@ -27,6 +27,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { AiTrafficTrackingService } from '../../../shared/services/ai-traffic-tracking.service';
 
 const GITHUB_REPO_REGEX =
   /^(?:https?:\/\/(?:www\.)?github\.com\/)?([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\/)?$/;
@@ -52,6 +53,7 @@ const GITHUB_REPO_REGEX =
 export class ContactComponent implements OnInit {
   private readonly _seoService = inject(SeoService);
   private readonly _location = inject(Location);
+  private readonly _aiTrafficTracking = inject(AiTrafficTrackingService);
   @ViewChild('uploader') uploader!: FileUpload;
 
   contactForm: FormGroup;
@@ -107,6 +109,9 @@ export class ContactComponent implements OnInit {
         this.contactForm.reset();
         this.selectedFile = undefined;
         this.uploader?.clear();
+
+        // Track contact form conversion
+        this._aiTrafficTracking.trackConversion('contact_form_submit');
       }
 
       if (error) {

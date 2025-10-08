@@ -103,6 +103,29 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'ai-seo-sprint',
+    loadComponent: () =>
+      import('./features/marketing/ai-seo-sprint.component').then((m) => m.AiSeoSprintComponent),
+    data: {
+      seo: {
+        title: 'AI SEO Content Sprint - Transform Your Content Strategy in 1 Week | $5K',
+        description:
+          'One-week AI-powered SEO content generation using your industry expertise. Get unlimited scalable content creation, rich metadata, social sharing optimization, and a frictionless content pipeline. Perfect for companies that need high-quality content at scale.',
+        keywords: [
+          'AI SEO content',
+          'AI content generation',
+          'SEO content service',
+          'automated content creation',
+          'AI SEO optimization',
+          'content marketing AI',
+          'scalable content production',
+          'SEO metadata generation',
+          '1 week content sprint',
+        ],
+      },
+    },
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent),
   },

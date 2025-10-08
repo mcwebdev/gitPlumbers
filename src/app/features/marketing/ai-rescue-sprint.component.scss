@@ -1,12 +1,25 @@
 // AI Rescue Sprint Landing Page Styles
 
+// Keyframe Animations
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
 // Variables
-$primary-color: #2563eb;
-$primary-hover: #1d4ed8;
+$primary-color: #96ddec;
+$primary-hover: #7dd3e8;
 $secondary-color: #64748b;
-$accent-color: #f59e0b;
+$accent-color: #ffa726; // Warm orange to complement the cool cyan
 $success-color: #10b981;
-$danger-color: #ef4444;
+$danger-color: #ef4444; // Bright red for emergency badge
+$emergency-bg: #fff4e6; // Warm cream for emergency card background
 $background: #ffffff;
 $background-alt: #f8fafc;
 $text-primary: #0f172a;
@@ -20,6 +33,19 @@ $spacing-lg: 2rem;
 $spacing-xl: 3rem;
 $spacing-2xl: 4rem;
 $spacing-3xl: 6rem;
+
+// Responsive spacing for screens < 1560px
+@media (max-width: 1560px) {
+  :root {
+    --spacing-xs: 0.375rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 2.5rem;
+    --spacing-3xl: 3.5rem;
+  }
+}
 
 $radius-sm: 0.375rem;
 $radius-md: 0.5rem;
@@ -40,6 +66,10 @@ $radius-xl: 1.5rem;
   padding: $spacing-3xl $spacing-md;
   position: relative;
   overflow: hidden;
+
+  @media (max-width: 1560px) {
+    padding: $spacing-2xl $spacing-md;
+  }
 
   &::before {
     content: '';
@@ -62,6 +92,10 @@ $radius-xl: 1.5rem;
     max-width: 1280px;
     margin: auto;
 
+    @media (max-width: 1560px) {
+      gap: 2.5rem;
+    }
+
     @media (max-width: 968px) {
       grid-template-columns: 1fr;
       gap: $spacing-xl;
@@ -76,6 +110,12 @@ $radius-xl: 1.5rem;
       margin-bottom: $spacing-md;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
+      @media (max-width: 1560px) {
+        font-size: 2.75rem;
+        margin-top: 0;
+        margin-bottom: $spacing-sm;
+      }
+
       @media (max-width: 768px) {
         font-size: 2.5rem;
       }
@@ -87,8 +127,13 @@ $radius-xl: 1.5rem;
       margin-bottom: $spacing-md;
       opacity: 0.95;
 
-      @media (max-width: 768px) {
+      @media (max-width: 1560px) {
         font-size: 1.5rem;
+        margin-bottom: $spacing-sm;
+      }
+
+      @media (max-width: 768px) {
+        font-size: 1.25rem;
       }
     }
 
@@ -97,6 +142,149 @@ $radius-xl: 1.5rem;
       line-height: 1.6;
       margin-bottom: $spacing-xl;
       opacity: 0.9;
+
+      @media (max-width: 1560px) {
+        font-size: 1.125rem;
+        margin-bottom: $spacing-lg;
+      }
+    }
+  }
+
+  // Sprint Options Selector
+  .sprint-options {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: $radius-xl;
+    padding: $spacing-xl;
+    margin-bottom: $spacing-xl;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    @media (max-width: 1560px) {
+      padding: $spacing-lg;
+      margin-bottom: $spacing-lg;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: $spacing-lg;
+      text-align: center;
+      color: white;
+
+      @media (max-width: 1560px) {
+        font-size: 1.25rem;
+        margin-bottom: $spacing-md;
+      }
+    }
+
+    .sprint-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: $spacing-md;
+
+      @media (max-width: 968px) {
+        grid-template-columns: 1fr;
+      }
+
+      .sprint-card {
+        background: white;
+        color: $text-primary;
+        padding: $spacing-lg;
+        border-radius: $radius-lg;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 3px solid transparent;
+        position: relative;
+        overflow: hidden;
+
+        @media (max-width: 1560px) {
+          padding: $spacing-md;
+        }
+
+        &.urgent {
+          .urgent-badge {
+            position: absolute;
+            top: $spacing-sm;
+            right: $spacing-sm;
+            background: $danger-color;
+            color: white;
+            padding: $spacing-xs $spacing-sm;
+            border-radius: $radius-sm;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            animation: pulse 2s infinite;
+          }
+        }
+
+        &.selected {
+          border-color: $primary-color;
+          box-shadow: 0 0 0 4px rgba(150, 221, 236, 0.3);
+          transform: scale(1.05);
+        }
+
+        &:hover:not(.selected) {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        h4 {
+          font-size: 1.25rem;
+          font-weight: 700;
+          margin-bottom: $spacing-sm;
+          margin-top: $spacing-lg;
+          color: $text-primary;
+
+          @media (max-width: 1560px) {
+            font-size: 1.125rem;
+            margin-top: $spacing-md;
+          }
+        }
+
+        .sprint-price {
+          font-size: 2rem;
+          font-weight: 800;
+          color: #2d8a9e; // Darker shade of primary for better readability
+          margin-bottom: $spacing-xs;
+
+          @media (max-width: 1560px) {
+            font-size: 1.75rem;
+          }
+
+          .urgent & {
+            color: #d97706; // Darker orange for emergency pricing
+          }
+        }
+
+        .sprint-timeline {
+          font-size: 0.875rem;
+          color: $text-secondary;
+          font-weight: 600;
+          margin-bottom: $spacing-md;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .sprint-description {
+          font-size: 0.9375rem;
+          color: $text-secondary;
+          line-height: 1.5;
+          margin-bottom: $spacing-md;
+        }
+
+        .sprint-highlights {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            font-size: 0.875rem;
+            padding: $spacing-xs 0;
+            color: $text-secondary;
+            font-weight: 500;
+          }
+        }
+      }
     }
   }
 
@@ -145,13 +333,23 @@ $radius-xl: 1.5rem;
   }
 
   .hero-visuals {
-    .ad-showcase {
+    .content-showcase {
       .showcase-main {
         width: 100%;
         height: auto;
         border-radius: $radius-xl;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
-        border: 3px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        border: 3px solid rgba(150, 221, 236, 0.3);
+        transition: transform 0.3s ease;
+
+        &:hover {
+          transform: scale(1.02);
+          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        @media (max-width: 1560px) {
+          border-radius: $radius-lg;
+        }
       }
     }
   }
@@ -173,12 +371,12 @@ $radius-xl: 1.5rem;
 
   &.btn-primary {
     background: white;
-    color: $primary-color;
+    color: #2d8a9e; // Darker cyan for better readability on white
 
     &:hover {
       background: #f1f5f9;
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 25px -5px rgba(45, 138, 158, 0.3);
     }
   }
 
@@ -199,10 +397,54 @@ $radius-xl: 1.5rem;
   }
 }
 
+// Visual Break Sections
+.visual-break {
+  padding: $spacing-2xl 0;
+  background: white;
+  overflow: hidden;
+
+  @media (max-width: 1560px) {
+    padding: $spacing-xl 0;
+  }
+
+  &.alternate {
+    background: $background-alt;
+  }
+
+  .container {
+    max-width: 1400px;
+    padding: 0 $spacing-md;
+  }
+
+  .break-image {
+    width: 100%;
+    max-width: 1200px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: $radius-xl;
+    box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.3);
+    transition: all 0.4s ease;
+
+    @media (max-width: 1560px) {
+      border-radius: $radius-lg;
+    }
+
+    &:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.4);
+    }
+  }
+}
+
 // Pain Points Section
 .pain-points {
   background: $background-alt;
   padding: $spacing-2xl $spacing-md;
+
+  @media (max-width: 1560px) {
+    padding: $spacing-xl $spacing-md;
+  }
 
   h2 {
     text-align: center;
@@ -210,6 +452,11 @@ $radius-xl: 1.5rem;
     font-weight: 800;
     color: $text-primary;
     margin-bottom: $spacing-xl;
+
+    @media (max-width: 1560px) {
+      font-size: 2rem;
+      margin-bottom: $spacing-lg;
+    }
   }
 
   .pain-grid {
@@ -253,12 +500,21 @@ $radius-xl: 1.5rem;
   padding: $spacing-3xl $spacing-md;
   background: white;
 
+  @media (max-width: 1560px) {
+    padding: $spacing-2xl $spacing-md;
+  }
+
   h2 {
     text-align: center;
     font-size: 2.5rem;
     font-weight: 800;
     color: $text-primary;
     margin-bottom: $spacing-xl;
+
+    @media (max-width: 1560px) {
+      font-size: 2rem;
+      margin-bottom: $spacing-lg;
+    }
   }
 
   .deliverables-grid {
@@ -275,9 +531,13 @@ $radius-xl: 1.5rem;
       border: 2px solid $border-color;
       transition: all 0.3s ease;
 
+      @media (max-width: 1560px) {
+        padding: $spacing-lg;
+      }
+
       &:hover {
         border-color: $primary-color;
-        box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.2);
+        box-shadow: 0 20px 40px -10px rgba(150, 221, 236, 0.3);
         transform: translateY(-4px);
       }
 
@@ -303,7 +563,7 @@ $radius-xl: 1.5rem;
           .timeline {
             display: inline-block;
             background: $primary-color;
-            color: white;
+            color: #0f172a; // Dark text for better contrast on light cyan
             padding: $spacing-xs $spacing-md;
             border-radius: $radius-sm;
             font-size: 0.875rem;
@@ -389,6 +649,10 @@ $radius-xl: 1.5rem;
 .perfect-for-and-process {
   padding: $spacing-3xl $spacing-md;
   background: white;
+
+  @media (max-width: 1560px) {
+    padding: $spacing-2xl $spacing-md;
+  }
 
   .two-column-layout {
     display: grid;
@@ -482,14 +746,14 @@ $radius-xl: 1.5rem;
         height: 3rem;
         flex-shrink: 0;
         background: $primary-color;
-        color: white;
+        color: #0f172a; // Dark text for better contrast
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.25rem;
         font-weight: 700;
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 4px 10px rgba(150, 221, 236, 0.4);
       }
 
       .step-content {
@@ -518,6 +782,10 @@ $radius-xl: 1.5rem;
 .benefits {
   padding: $spacing-3xl $spacing-md;
   background: $background-alt;
+
+  @media (max-width: 1560px) {
+    padding: $spacing-2xl $spacing-md;
+  }
 
   h2 {
     text-align: center;
@@ -573,6 +841,10 @@ $radius-xl: 1.5rem;
   padding: $spacing-3xl $spacing-md;
   background: $background-alt;
 
+  @media (max-width: 1560px) {
+    padding: $spacing-2xl $spacing-md;
+  }
+
   h2 {
     text-align: center;
     font-size: 2.5rem;
@@ -590,8 +862,12 @@ $radius-xl: 1.5rem;
       padding: $spacing-2xl;
       border-radius: $radius-xl;
       text-align: center;
-      box-shadow: 0 20px 50px -10px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 20px 50px -10px rgba(150, 221, 236, 0.4);
       border: 3px solid $primary-color;
+
+      @media (max-width: 1560px) {
+        padding: $spacing-xl;
+      }
 
       h3 {
         font-size: 1.75rem;
@@ -665,7 +941,7 @@ $radius-xl: 1.5rem;
 
         &:hover {
           border-color: $accent-color;
-          box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.2);
+          box-shadow: 0 10px 30px -5px rgba(255, 167, 38, 0.3);
           transform: translateY(-2px);
         }
 
@@ -696,6 +972,10 @@ $radius-xl: 1.5rem;
 .faq {
   padding: $spacing-3xl $spacing-md;
   background: white;
+
+  @media (max-width: 1560px) {
+    padding: $spacing-2xl $spacing-md;
+  }
 
   h2 {
     text-align: center;
@@ -737,6 +1017,47 @@ $radius-xl: 1.5rem;
   }
 }
 
+// Cracked AI Visual CTA
+.cracked-ai-cta {
+  padding: $spacing-3xl $spacing-md;
+  background: $background-alt;
+  text-align: center;
+
+  @media (max-width: 1560px) {
+    padding: $spacing-2xl $spacing-md;
+  }
+
+  h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: $text-primary;
+    margin-bottom: $spacing-xl;
+    line-height: 1.2;
+
+    @media (max-width: 1560px) {
+      font-size: 2rem;
+      margin-bottom: $spacing-lg;
+    }
+
+    @media (max-width: 768px) {
+      font-size: 1.75rem;
+    }
+  }
+
+  .cracked-image-wrapper {
+    text-align: center;
+
+    .cracked-image {
+      border-radius: $radius-xl;
+      box-shadow: 0 25px 60px -20px rgba(0, 0, 0, 0.4);
+
+      &:hover {
+        box-shadow: 0 35px 70px -20px rgba(0, 0, 0, 0.5);
+      }
+    }
+  }
+}
+
 // Final CTA
 .final-cta {
   padding: $spacing-3xl $spacing-md;
@@ -744,16 +1065,30 @@ $radius-xl: 1.5rem;
   color: white;
   text-align: center;
 
+  @media (max-width: 1560px) {
+    padding: $spacing-2xl $spacing-md;
+  }
+
   h2 {
     font-size: 2.5rem;
     font-weight: 800;
     margin-bottom: $spacing-md;
+
+    @media (max-width: 1560px) {
+      font-size: 2rem;
+      margin-bottom: $spacing-sm;
+    }
   }
 
   p {
     font-size: 1.25rem;
     margin-bottom: $spacing-xl;
     opacity: 0.95;
+
+    @media (max-width: 1560px) {
+      font-size: 1.125rem;
+      margin-bottom: $spacing-lg;
+    }
   }
 
   .cta-buttons {

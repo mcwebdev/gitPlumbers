@@ -6,6 +6,33 @@
       <p class="hero-subtitle">{{ heroSection.subheadline }}</p>
       <p class="hero-description">{{ heroSection.description }}</p>
 
+      <!-- Sprint Options Selector -->
+      <div class="sprint-options">
+        <h3>Choose Your Sprint Level:</h3>
+        <div class="sprint-cards">
+          @for (option of sprintOptions; track option.weeks) {
+            <div
+              class="sprint-card"
+              [class.selected]="selectedSprint() === option.weeks"
+              [class.urgent]="option.weeks === 1"
+              (click)="selectSprint(option.weeks)">
+              @if (option.weeks === 1) {
+                <span class="urgent-badge">🚑 EMERGENCY</span>
+              }
+              <h4>{{ option.name }}</h4>
+              <div class="sprint-price">${{ option.price | number }}</div>
+              <div class="sprint-timeline">{{ option.timeline }}</div>
+              <p class="sprint-description">{{ option.description }}</p>
+              <ul class="sprint-highlights">
+                @for (highlight of option.highlights; track highlight) {
+                  <li>{{ highlight }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      </div>
+
       <div class="hero-cta">
         <a [routerLink]="heroSection.ctaPrimary.href" class="btn btn-primary">
           {{ heroSection.ctaPrimary.label }}
@@ -57,7 +84,7 @@
 <!-- What You Get Section -->
 <section class="deliverables">
   <div class="container">
-    <h2>What You Get in 1 Week</h2>
+    <h2>What You Get in {{ timeline }}</h2>
 
     <div class="deliverables-grid">
       @for (item of deliverables; track item.title) {
@@ -123,6 +150,13 @@
   </div>
 </section>
 
+<!-- Visual Break 1 -->
+<section class="visual-break">
+  <div class="container">
+    <img src="/triage.png" alt="Code Emergency - AI Rescue Team" class="break-image" />
+  </div>
+</section>
+
 <!-- Benefits Section -->
 <section class="benefits">
   <div class="container">
@@ -180,6 +214,13 @@
   </div>
 </section>
 
+<!-- Visual Break 2 -->
+<section class="visual-break alternate">
+  <div class="container">
+    <img src="/triageii.png" alt="Emergency Code Response Team" class="break-image" />
+  </div>
+</section>
+
 <!-- FAQ Section -->
 <section class="faq">
   <div class="container">
@@ -195,14 +236,24 @@
   </div>
 </section>
 
+<!-- Cracked AI Visual CTA -->
+<section class="cracked-ai-cta">
+  <div class="container">
+    <h2>Your Codebase is Cracked—Let's Get Cooking! 👨‍🍳</h2>
+    <div class="cracked-image-wrapper">
+      <img src="/crackedAI.png" alt="Cracked AI Code - Time to Fix It" class="cracked-image" width="1024" height="1024" />
+    </div>
+  </div>
+</section>
+
 <!-- Final CTA Section -->
 <section class="final-cta">
   <div class="container">
     <h2>Ready to Fix Your Codebase?</h2>
-    <p>Book your 1-week sprint today and transform your codebase from fragile to production-ready.</p>
+    <p>Book your {{ timeline }} sprint today and transform your codebase from fragile to production-ready.</p>
 
     <div class="cta-buttons">
-      <a [routerLink]="'/contact'" class="btn btn-primary btn-large">Book Your Sprint - $5,000</a>
+      <a [routerLink]="'/contact'" class="btn btn-primary btn-large">Book Your Sprint - ${{ packagePrice | number }}</a>
       <a [routerLink]="'/blog/case-studies/sample-diagnostic-report'" class="btn btn-secondary btn-large">See Sample Report</a>
     </div>
 

@@ -186,7 +186,7 @@ export class AiSeoSprintComponent implements OnInit {
     {
       icon: '⚡',
       title: 'Unlimited Scale',
-      description: 'Generate 10 or 1000 articles - the engine handles it',
+      description: 'Generate 10 or 1000 articles - the engine handles it. You can set it and forget it via an automated schedule timer pipeline.',
     },
     {
       icon: '🎯',

@@ -6,7 +6,13 @@
       "Bash(ng version)",
       "WebFetch(domain:angular.dev)",
       "WebSearch",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(mkdir:*)",
+      "Bash(if [ -f .claude/settings.json ])",
+      "Bash(then cat .claude/settings.json)",
+      "Bash(else echo \"{}\")",
+      "Bash(fi)",
+      "Bash(curl -L https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-win64.exe -o /c/Users/d33psp33d/bin/jq.exe)"
     ],
     "deny": [],
     "ask": []

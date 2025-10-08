@@ -385,29 +385,49 @@ $radius-xl: 1.5rem;
   }
 }
 
-// Ideal For Section
-.ideal-for {
+// Perfect For & Process Section (Two Column Layout)
+.perfect-for-and-process {
   padding: $spacing-3xl $spacing-md;
   background: white;
 
-  h2 {
-    text-align: center;
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: $text-primary;
-    margin-bottom: $spacing-xl;
+  .two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-3xl;
+    max-width: 1400px;
+    margin: 0 auto;
+
+    @media (max-width: 968px) {
+      grid-template-columns: 1fr;
+      gap: $spacing-2xl;
+    }
+
+    .column {
+      h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: $text-primary;
+        margin-bottom: $spacing-xl;
+
+        @media (max-width: 968px) {
+          text-align: center;
+        }
+      }
+    }
   }
 
   .ideal-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: $spacing-lg;
-    max-width: 1000px;
-    margin: 0 auto;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-md;
+
+    @media (max-width: 968px) {
+      grid-template-columns: 1fr;
+    }
 
     .ideal-card {
       text-align: center;
-      padding: $spacing-xl;
+      padding: $spacing-lg;
       background: $background-alt;
       border-radius: $radius-lg;
       transition: all 0.2s ease;
@@ -419,22 +439,76 @@ $radius-xl: 1.5rem;
       }
 
       .ideal-emoji {
-        font-size: 4rem;
+        font-size: 3rem;
         display: block;
-        margin-bottom: $spacing-md;
+        margin-bottom: $spacing-sm;
       }
 
       h3 {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
         font-weight: 700;
         color: $text-primary;
-        margin-bottom: $spacing-sm;
+        margin-bottom: $spacing-xs;
       }
 
       p {
         color: $text-secondary;
-        line-height: 1.6;
+        line-height: 1.5;
         margin: 0;
+        font-size: 0.9375rem;
+      }
+    }
+  }
+
+  .process-timeline {
+    .process-step {
+      display: flex;
+      gap: $spacing-md;
+      margin-bottom: $spacing-lg;
+      position: relative;
+
+      &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 1.5rem;
+        top: 3rem;
+        width: 2px;
+        height: calc(100% + #{$spacing-md});
+        background: linear-gradient(to bottom, $primary-color, transparent);
+      }
+
+      .step-number {
+        width: 3rem;
+        height: 3rem;
+        flex-shrink: 0;
+        background: $primary-color;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+      }
+
+      .step-content {
+        flex: 1;
+        padding-top: $spacing-xs;
+
+        h3 {
+          font-size: 1.125rem;
+          font-weight: 700;
+          color: $text-primary;
+          margin-bottom: $spacing-xs;
+        }
+
+        p {
+          color: $text-secondary;
+          line-height: 1.5;
+          margin: 0;
+          font-size: 0.9375rem;
+        }
       }
     }
   }
@@ -489,75 +563,6 @@ $radius-xl: 1.5rem;
       p {
         color: $text-secondary;
         margin: 0;
-      }
-    }
-  }
-}
-
-// Process Timeline
-.process {
-  padding: $spacing-3xl $spacing-md;
-  background: white;
-
-  h2 {
-    text-align: center;
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: $text-primary;
-    margin-bottom: $spacing-xl;
-  }
-
-  .process-timeline {
-    max-width: 800px;
-    margin: 0 auto;
-
-    .process-step {
-      display: flex;
-      gap: $spacing-lg;
-      margin-bottom: $spacing-xl;
-      position: relative;
-
-      &:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        left: 2rem;
-        top: 4rem;
-        width: 2px;
-        height: calc(100% + #{$spacing-xl});
-        background: linear-gradient(to bottom, $primary-color, transparent);
-      }
-
-      .step-number {
-        width: 4rem;
-        height: 4rem;
-        flex-shrink: 0;
-        background: $primary-color;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        font-weight: 700;
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
-      }
-
-      .step-content {
-        flex: 1;
-        padding-top: $spacing-xs;
-
-        h3 {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: $text-primary;
-          margin-bottom: $spacing-sm;
-        }
-
-        p {
-          color: $text-secondary;
-          line-height: 1.6;
-          margin: 0;
-        }
       }
     }
   }

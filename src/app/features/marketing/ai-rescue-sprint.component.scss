@@ -54,11 +54,13 @@ $radius-xl: 1.5rem;
 
   .hero-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: $spacing-2xl;
+    grid-template-columns: 1fr;
+    gap: 4rem;
     align-items: center;
     position: relative;
     z-index: 1;
+    max-width: 1280px;
+    margin: auto;
 
     @media (max-width: 968px) {
       grid-template-columns: 1fr;

@@ -185,6 +185,76 @@ async function fetchInstallationRepositories(installationId: string): Promise<Re
   }
 }
 
+/**
+ * Get installation access token for git clone operations
+ */
+export const getInstallationAccessToken = onRequest(
+  {
+    cors: true,
+    secrets: [GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY],
+  },
+  async (req, res) => {
+    console.log('🔥 getInstallationAccessToken HTTP called!');
+    console.log('📝 Method:', req.method);
+
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+      res.set('Access-Control-Allow-Origin', '*');
+      res.set('Access-Control-Allow-Methods', 'GET');
+      res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.status(204).send('');
+      return;
+    }
+
+    if (req.method !== 'GET') {
+      res.status(405).json({ error: 'Method not allowed' });
+      return;
+    }
+
+    try {
+      // Extract installation ID from URL path
+      const pathParts = req.path.split('/');
+      const installationId = pathParts[pathParts.length - 1];
+      console.log('🔍 Installation ID:', installationId);
+
+      if (!installationId || !/^\d+$/.test(installationId)) {
+        res.status(400).json({ error: 'Valid installation ID is required' });
+        return;
+      }
+
+      // Get installation token
+      const accessToken = await getInstallationToken(installationId);
+
+      console.log('✅ Successfully fetched installation token');
+
+      res.status(200).json({
+        token: accessToken,
+        installationId,
+      });
+    } catch (error) {
+      console.error('💥 Error getting installation token:', error);
+
+      let errorMessage = 'Failed to get installation token';
+      let statusCode = 500;
+
+      if (error instanceof Error) {
+        if (error.message.includes('GitHub API error: 404')) {
+          errorMessage = 'Installation not found';
+          statusCode = 404;
+        } else if (error.message.includes('GitHub API error: 401')) {
+          errorMessage = 'Authentication failed';
+          statusCode = 401;
+        }
+      }
+
+      res.status(statusCode).json({
+        error: errorMessage,
+        details: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+);
+
 export const getInstallationRepos = onRequest(
   {
     cors: true,

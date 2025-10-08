@@ -89,6 +89,7 @@ export class AdminDashboardComponent {
       userId: issue.userId, // Include userId for filtering
       githubIssueUrl: issue.githubIssueUrl,
       repository: issue.repository,
+      installationId: issue.installationId, // Include installationId for git clone
       notes: (issue.notes || []).map(note => ({
         id: note.id,
         authorName: note.authorName,
@@ -338,5 +339,92 @@ export class AdminDashboardComponent {
 
   protected get selectedUserEmailsValue(): string[] {
     return this.selectedUserEmails();
+  }
+
+  protected async copyCloneCommand(repository: string, installationId?: string): Promise<void> {
+    if (!installationId) {
+      // Fallback to regular clone if no installation ID
+      const cloneCommand = `git clone https://github.com/${repository}.git`;
+      await this.copyToClipboard(cloneCommand);
+      return;
+    }
+
+    const apiBaseUrl = 'https://us-central1-gitplumbers-35d92.cloudfunctions.net';
+    const repoName = repository.split('/')[1];
+
+    // Create a Windows batch script that fetches token and sets up git credential helper
+    const windowsScript = `@echo off
+REM gitPlumbers Auto-Clone Script for Windows
+REM This script fetches a fresh GitHub App token and clones the repository
+
+set REPO=${repository}
+set INSTALLATION_ID=${installationId}
+set API_URL=${apiBaseUrl}/getInstallationAccessToken/%INSTALLATION_ID%
+
+echo Fetching GitHub App installation token...
+curl -s "%API_URL%" > token_response.json
+
+REM Extract token from JSON response (requires PowerShell)
+for /f "delims=" %%i in ('powershell -Command "(Get-Content token_response.json | ConvertFrom-Json).token"') do set TOKEN=%%i
+del token_response.json
+
+if "%TOKEN%"=="" (
+    echo Failed to get installation token
+    exit /b 1
+)
+
+echo Token acquired, cloning repository...
+git clone https://x-access-token:%TOKEN%@github.com/%REPO%.git
+
+echo.
+echo Repository cloned successfully!
+echo.
+echo IMPORTANT: To push changes later, run this command inside the repo folder:
+echo   refresh-token.bat
+echo.
+
+REM Create a helper script to refresh the token for push operations
+cd ${repoName}
+(
+echo @echo off
+echo echo Refreshing GitHub App token...
+echo curl -s "${apiBaseUrl}/getInstallationAccessToken/${installationId}" ^> token_response.json
+echo for /f "delims=" %%%%i in ^('powershell -Command "^(Get-Content token_response.json ^| ConvertFrom-Json^).token"'^) do set NEW_TOKEN=%%%%i
+echo del token_response.json
+echo git remote set-url origin https://x-access-token:%%NEW_TOKEN%%@github.com/${repository}.git
+echo echo Token refreshed! You can now push your changes.
+) > refresh-token.bat
+
+echo Helper script created: refresh-token.bat
+`;
+
+    await this.copyToClipboard(windowsScript);
+
+    const instructions = `📋 Windows clone script copied to clipboard!
+
+SETUP INSTRUCTIONS:
+1. Create file: clone-${repoName}.bat
+2. Paste the clipboard content
+3. Run: clone-${repoName}.bat
+
+WORKFLOW:
+• Clone: Run clone-${repoName}.bat (does this once)
+• Make your code fixes
+• Before pushing: Run refresh-token.bat (gets fresh token)
+• Push: git push origin your-branch
+
+The refresh-token.bat script will be created automatically in the cloned repo folder!`;
+
+    alert(instructions);
+    console.log('✅ Windows clone script copied');
+  }
+
+  private async copyToClipboard(text: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      alert(`Copy this command:\n\n${text}`);
+    }
   }
 }

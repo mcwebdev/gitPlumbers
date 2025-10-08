@@ -122,6 +122,15 @@
             <a [href]="item.githubIssueUrl" target="_blank" rel="noopener noreferrer">
               View on GitHub: {{ item.repository }}
             </a>
+            <button
+              type="button"
+              class="clone-badge"
+              (click)="copyCloneCommand(item.repository, item.installationId)"
+              title="Copy authenticated git clone command"
+            >
+              <i class="pi pi-copy"></i>
+              Clone Repo
+            </button>
           </p>
         } @else if (item.type === 'support' && item.githubRepo) {
           <p class="meta">Repo: {{ item.githubRepo }}</p>

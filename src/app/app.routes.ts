@@ -80,6 +80,29 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'ai-rescue-sprint',
+    loadComponent: () =>
+      import('./features/marketing/ai-rescue-sprint.component').then((m) => m.AiRescueSprintComponent),
+    data: {
+      seo: {
+        title: 'AI Code Rescue Sprint - Transform Your AI-Generated Codebase in 1 Week | $5K',
+        description:
+          'One-week intensive audit and optimization of your AI-generated codebase. Get a comprehensive code health report, critical fixes implemented, 90-day roadmap, and knowledge transfer session. Perfect for startups and teams dealing with AI-assisted code.',
+        keywords: [
+          'AI code rescue',
+          'AI-generated code audit',
+          'code cleanup service',
+          'ChatGPT code optimization',
+          'Cursor code review',
+          'GitHub Copilot cleanup',
+          'startup code audit',
+          'code health report',
+          '1 week code sprint',
+        ],
+      },
+    },
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent),
   },

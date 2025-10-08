@@ -13,7 +13,8 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { SeoService } from '../../../shared/services/seo.service';
 
 import { ContactFormData, ContactStore } from '../store/contact.store';
@@ -50,6 +51,7 @@ const GITHUB_REPO_REGEX =
 })
 export class ContactComponent implements OnInit {
   private readonly _seoService = inject(SeoService);
+  private readonly _location = inject(Location);
   @ViewChild('uploader') uploader!: FileUpload;
 
   contactForm: FormGroup;
@@ -189,5 +191,7 @@ export class ContactComponent implements OnInit {
     this.messages.add({ severity: 'info', summary: 'Attachment added', detail: file.name });
   }
 
- 
+  goBack(): void {
+    this._location.back();
+  }
 }

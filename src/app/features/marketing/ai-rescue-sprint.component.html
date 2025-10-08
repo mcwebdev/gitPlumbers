@@ -1,0 +1,192 @@
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1 class="hero-title">{{ heroSection.headline }}</h1>
+      <p class="hero-subtitle">{{ heroSection.subheadline }}</p>
+      <p class="hero-description">{{ heroSection.description }}</p>
+
+      <div class="hero-cta">
+        <a [routerLink]="heroSection.ctaPrimary.href" class="btn btn-primary">
+          {{ heroSection.ctaPrimary.label }}
+        </a>
+        <a [routerLink]="heroSection.ctaSecondary.href" class="btn btn-secondary">
+          {{ heroSection.ctaSecondary.label }}
+        </a>
+      </div>
+
+      <div class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-label">Investment:</span>
+          <span class="meta-value">${{ packagePrice | number }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Timeline:</span>
+          <span class="meta-value">{{ timeline }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Payment:</span>
+          <span class="meta-value">50% upfront, 50% on delivery</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visuals">
+      <div class="ad-showcase">
+        <img [src]="adImages[0]" alt="AI Code Rescue Sprint - Before and After" class="showcase-main" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pain Points Section -->
+<section class="pain-points">
+  <div class="container">
+    <h2>Sound Familiar?</h2>
+    <div class="pain-grid">
+      <div class="pain-item" *ngFor="let pain of painPoints">
+        <span class="pain-icon">⚠️</span>
+        <p>{{ pain }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What You Get Section -->
+<section class="deliverables">
+  <div class="container">
+    <h2>What You Get in 1 Week</h2>
+
+    <div class="deliverables-grid">
+      <div class="deliverable-card" *ngFor="let item of deliverables">
+        <div class="card-header">
+          <span class="card-icon">{{ item.icon }}</span>
+          <div class="card-title-group">
+            <h3>{{ item.title }}</h3>
+            <span class="timeline">{{ item.timeline }}</span>
+          </div>
+        </div>
+
+        <p class="card-description">{{ item.description }}</p>
+
+        <div class="card-deliverables">
+          <p class="deliverables-title">What you get:</p>
+          <ul>
+            <li *ngFor="let deliverable of item.whatYouGet">{{ deliverable }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Ideal For Section -->
+<section class="ideal-for">
+  <div class="container">
+    <h2>Perfect For</h2>
+    <div class="ideal-grid">
+      <div class="ideal-card" *ngFor="let client of idealFor">
+        <span class="ideal-emoji">{{ client.emoji }}</span>
+        <h3>{{ client.title }}</h3>
+        <p>{{ client.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits">
+  <div class="container">
+    <h2>Why Choose AI Code Rescue Sprint?</h2>
+    <div class="benefits-grid">
+      <div class="benefit-card" *ngFor="let benefit of benefits">
+        <span class="benefit-icon">{{ benefit.icon }}</span>
+        <h3>{{ benefit.title }}</h3>
+        <p>{{ benefit.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Process Section -->
+<section class="process">
+  <div class="container">
+    <h2>How It Works</h2>
+    <div class="process-timeline">
+      <div class="process-step" *ngFor="let step of processSteps">
+        <div class="step-number">{{ step.step }}</div>
+        <div class="step-content">
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="pricing">
+  <div class="container">
+    <h2>Investment & Add-Ons</h2>
+
+    <div class="pricing-main">
+      <div class="price-card main-package">
+        <h3>AI Code Rescue Sprint</h3>
+        <div class="price">${{ pricingDetails.price | number }}</div>
+        <p class="price-note">{{ pricingDetails.timeline }} • {{ pricingDetails.effectiveRate }} effective rate</p>
+
+        <div class="payment-terms">
+          <div class="payment-item">
+            <span class="payment-label">Upfront (50%):</span>
+            <span class="payment-value">${{ pricingDetails.payment.upfront | number }}</span>
+          </div>
+          <div class="payment-item">
+            <span class="payment-label">On Delivery (50%):</span>
+            <span class="payment-value">${{ pricingDetails.payment.onDelivery | number }}</span>
+          </div>
+        </div>
+
+        <a [routerLink]="'/contact'" class="btn btn-primary btn-large">Book Your Sprint</a>
+      </div>
+    </div>
+
+    <div class="add-ons">
+      <h3>Optional Add-Ons</h3>
+      <div class="add-ons-grid">
+        <div class="add-on-card" *ngFor="let addon of addOns">
+          <h4>{{ addon.title }}</h4>
+          <div class="addon-price">{{ addon.price }}</div>
+          <p>{{ addon.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq">
+  <div class="container">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-list">
+      <div class="faq-item" *ngFor="let item of faq">
+        <h3 class="faq-question">{{ item.question }}</h3>
+        <p class="faq-answer">{{ item.answer }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA Section -->
+<section class="final-cta">
+  <div class="container">
+    <h2>Ready to Fix Your AI-Generated Code?</h2>
+    <p>Book your 1-week sprint today and transform your codebase from fragile to production-ready.</p>
+
+    <div class="cta-buttons">
+      <a [routerLink]="'/contact'" class="btn btn-primary btn-large">Book Your Sprint - $5,000</a>
+      <a [routerLink]="'/blog/case-studies/sample-diagnostic-report'" class="btn btn-secondary btn-large">See Sample Report</a>
+    </div>
+
+    <p class="cta-note">Most clients hire us for follow-on implementation work ($12K-20K) after seeing the value from the sprint.</p>
+  </div>
+</section>

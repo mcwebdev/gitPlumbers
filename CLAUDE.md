@@ -1,1 +1,2 @@
 - never use deprecated *ng
+- NEVER USE DEPRECATED CONTROL FLOW *ng use the new control flow angular ver 20

@@ -1,7 +1,11 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
-import { filter } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { filter, debounceTime } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, Observable } from 'rxjs';
+import { UserVisitInfo, FirebaseFunctionResponse } from '../types/analytics-types';
 
 declare let gtag: Function;
 
@@ -17,12 +21,111 @@ export interface AnalyticsEvent {
 export class AnalyticsService {
   private readonly _router = inject(Router);
   private readonly _platformId = inject(PLATFORM_ID);
+  private readonly _httpClient = inject(HttpClient);
+  private readonly _destroyRef = inject(DestroyRef);
   private readonly _isBrowser = isPlatformBrowser(this._platformId);
   private initialized = false;
+  private _emailSent = false;
+  private readonly _routeSubject = new Subject<string>();
 
   constructor() {
     this.initializeGoogleAnalytics();
     this.trackRouteChanges();
+
+    // Initialize email tracking in browser environment
+    if (this._isBrowser) {
+      this._initializeEmailTracking();
+    }
+  }
+
+  /**
+   * Initialize email-based analytics tracking
+   */
+  private _initializeEmailTracking(): void {
+    // Send initial visit email only once
+    if (!this._emailSent) {
+      this._trackInitialVisit();
+      this._emailSent = true;
+    }
+
+    // Track navigation events with debouncing
+    this._routeSubject
+      .pipe(
+        debounceTime(1000),
+        takeUntilDestroyed(this._destroyRef)
+      )
+      .subscribe((route: string) => {
+        this._trackRouteChangeViaEmail(route);
+      });
+  }
+
+  /**
+   * Track initial user visit with minimal data collection
+   */
+  private _trackInitialVisit(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const visitInfo: UserVisitInfo = this._collectMinimalUserInfo(
+      window.location.pathname
+    );
+    this._sendAnalyticsEmail(visitInfo);
+  }
+
+  /**
+   * Track route changes via email
+   */
+  private _trackRouteChangeViaEmail(route: string): void {
+    const routeInfo: UserVisitInfo = this._collectMinimalUserInfo(route);
+    this._sendAnalyticsEmail(routeInfo);
+  }
+
+  /**
+   * Collect minimal user information for analytics (privacy-focused)
+   */
+  private _collectMinimalUserInfo(url: string): UserVisitInfo {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return {
+        userAgent: 'SSR',
+        platform: 'SSR',
+        language: 'en',
+        screenWidth: 0,
+        screenHeight: 0,
+        pageUrl: url,
+        app: 'gitPlumbers',
+      };
+    }
+
+    return {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      screenWidth: window.screen.width,
+      screenHeight: window.screen.height,
+      pageUrl: url,
+      app: 'gitPlumbers',
+    };
+  }
+
+  /**
+   * Send analytics email via Firebase Function
+   */
+  private _sendAnalyticsEmail(info: UserVisitInfo): void {
+    const emailObservable: Observable<FirebaseFunctionResponse> =
+      this._httpClient.post<FirebaseFunctionResponse>(
+        'https://us-central1-angularux.cloudfunctions.net/sendUserVisitEmail',
+        info
+      );
+
+    emailObservable.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
+      next: () => {
+        console.log('Analytics email sent successfully');
+      },
+      error: (error: Error) => {
+        console.error('Failed to send analytics email:', error);
+      },
+    });
   }
 
   private initializeGoogleAnalytics(): void {
@@ -52,9 +155,14 @@ export class AnalyticsService {
 
   private trackRouteChanges(): void {
     this._router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this._destroyRef)
+      )
       .subscribe((event: NavigationEnd) => {
         this.trackPageView(event.urlAfterRedirects);
+        // Also trigger email tracking via subject
+        this._routeSubject.next(event.urlAfterRedirects);
       });
   }
 
@@ -156,5 +264,24 @@ export class AnalyticsService {
         service_type: serviceName,
       },
     });
+  }
+
+  /**
+   * Manually trigger email analytics for a specific event
+   */
+  trackEmailEvent(
+    eventName: string,
+    additionalData?: Record<string, unknown>
+  ): void {
+    if (!this._isBrowser) {
+      return;
+    }
+
+    const eventInfo: UserVisitInfo = {
+      ...this._collectMinimalUserInfo(window.location.pathname),
+      eventName,
+      ...additionalData,
+    };
+    this._sendAnalyticsEmail(eventInfo);
   }
 }

@@ -44,10 +44,12 @@
   <div class="container">
     <h2>Sound Familiar?</h2>
     <div class="pain-grid">
-      <div class="pain-item" *ngFor="let pain of painPoints">
-        <span class="pain-icon">⚠️</span>
-        <p>{{ pain }}</p>
-      </div>
+      @for (pain of painPoints; track pain) {
+        <div class="pain-item">
+          <span class="pain-icon">⚠️</span>
+          <p>{{ pain }}</p>
+        </div>
+      }
     </div>
   </div>
 </section>
@@ -58,24 +60,28 @@
     <h2>What You Get in 1 Week</h2>
 
     <div class="deliverables-grid">
-      <div class="deliverable-card" *ngFor="let item of deliverables">
-        <div class="card-header">
-          <span class="card-icon">{{ item.icon }}</span>
-          <div class="card-title-group">
-            <h3>{{ item.title }}</h3>
-            <span class="timeline">{{ item.timeline }}</span>
+      @for (item of deliverables; track item.title) {
+        <div class="deliverable-card">
+          <div class="card-header">
+            <span class="card-icon">{{ item.icon }}</span>
+            <div class="card-title-group">
+              <h3>{{ item.title }}</h3>
+              <span class="timeline">{{ item.timeline }}</span>
+            </div>
+          </div>
+
+          <p class="card-description">{{ item.description }}</p>
+
+          <div class="card-deliverables">
+            <p class="deliverables-title">What you get:</p>
+            <ul>
+              @for (deliverable of item.whatYouGet; track deliverable) {
+                <li>{{ deliverable }}</li>
+              }
+            </ul>
           </div>
         </div>
-
-        <p class="card-description">{{ item.description }}</p>
-
-        <div class="card-deliverables">
-          <p class="deliverables-title">What you get:</p>
-          <ul>
-            <li *ngFor="let deliverable of item.whatYouGet">{{ deliverable }}</li>
-          </ul>
-        </div>
-      </div>
+      }
     </div>
   </div>
 </section>
@@ -85,11 +91,13 @@
   <div class="container">
     <h2>Perfect For</h2>
     <div class="ideal-grid">
-      <div class="ideal-card" *ngFor="let client of idealFor">
-        <span class="ideal-emoji">{{ client.emoji }}</span>
-        <h3>{{ client.title }}</h3>
-        <p>{{ client.description }}</p>
-      </div>
+      @for (client of idealFor; track client.title) {
+        <div class="ideal-card">
+          <span class="ideal-emoji">{{ client.emoji }}</span>
+          <h3>{{ client.title }}</h3>
+          <p>{{ client.description }}</p>
+        </div>
+      }
     </div>
   </div>
 </section>
@@ -99,11 +107,13 @@
   <div class="container">
     <h2>Why Choose AI Code Rescue Sprint?</h2>
     <div class="benefits-grid">
-      <div class="benefit-card" *ngFor="let benefit of benefits">
-        <span class="benefit-icon">{{ benefit.icon }}</span>
-        <h3>{{ benefit.title }}</h3>
-        <p>{{ benefit.description }}</p>
-      </div>
+      @for (benefit of benefits; track benefit.title) {
+        <div class="benefit-card">
+          <span class="benefit-icon">{{ benefit.icon }}</span>
+          <h3>{{ benefit.title }}</h3>
+          <p>{{ benefit.description }}</p>
+        </div>
+      }
     </div>
   </div>
 </section>
@@ -113,13 +123,15 @@
   <div class="container">
     <h2>How It Works</h2>
     <div class="process-timeline">
-      <div class="process-step" *ngFor="let step of processSteps">
-        <div class="step-number">{{ step.step }}</div>
-        <div class="step-content">
-          <h3>{{ step.title }}</h3>
-          <p>{{ step.description }}</p>
+      @for (step of processSteps; track step.step) {
+        <div class="process-step">
+          <div class="step-number">{{ step.step }}</div>
+          <div class="step-content">
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.description }}</p>
+          </div>
         </div>
-      </div>
+      }
     </div>
   </div>
 </section>
@@ -153,11 +165,13 @@
     <div class="add-ons">
       <h3>Optional Add-Ons</h3>
       <div class="add-ons-grid">
-        <div class="add-on-card" *ngFor="let addon of addOns">
-          <h4>{{ addon.title }}</h4>
-          <div class="addon-price">{{ addon.price }}</div>
-          <p>{{ addon.description }}</p>
-        </div>
+        @for (addon of addOns; track addon.title) {
+          <div class="add-on-card">
+            <h4>{{ addon.title }}</h4>
+            <div class="addon-price">{{ addon.price }}</div>
+            <p>{{ addon.description }}</p>
+          </div>
+        }
       </div>
     </div>
   </div>
@@ -168,10 +182,12 @@
   <div class="container">
     <h2>Frequently Asked Questions</h2>
     <div class="faq-list">
-      <div class="faq-item" *ngFor="let item of faq">
-        <h3 class="faq-question">{{ item.question }}</h3>
-        <p class="faq-answer">{{ item.answer }}</p>
-      </div>
+      @for (item of faq; track item.question) {
+        <div class="faq-item">
+          <h3 class="faq-question">{{ item.question }}</h3>
+          <p class="faq-answer">{{ item.answer }}</p>
+        </div>
+      }
     </div>
   </div>
 </section>

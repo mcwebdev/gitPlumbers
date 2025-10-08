@@ -3,6 +3,7 @@ import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { SiteHeaderComponent } from './shared/components/site-header/site-header.component';
 import { SiteFooterComponent } from './shared/components/site-footer/site-footer.component';
 import { ScrollService } from './shared/services/scroll.service';
+import { AnalyticsService } from './shared/services/analytics.service';
 import { DOCUMENT } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
@@ -16,6 +17,7 @@ import { Subscription } from 'rxjs';
 })
 export class App implements OnInit, OnDestroy {
   private scrollService = inject(ScrollService);
+  private analyticsService = inject(AnalyticsService);
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
@@ -31,6 +33,14 @@ export class App implements OnInit, OnDestroy {
 
     // Set initial class
     this.updateBodyClass(this.router.url);
+
+    // Initialize analytics service - ensures constructor runs and email tracking starts
+    // The service automatically sends initial visit email and tracks route changes
+    this.analyticsService.trackEvent({
+      action: 'app_initialized',
+      category: 'system',
+      label: 'gitPlumbers',
+    });
   }
 
   ngOnDestroy(): void {

@@ -5,6 +5,8 @@ import { TitleCasePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 import { AuthUserService } from '../../shared/services/auth-user.service';
 import { RequestStatus, RequestsService } from '../../shared/services/requests.service';
@@ -21,7 +23,8 @@ interface Option<T> {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [FormsModule, RouterModule, TitleCasePipe, MarkdownPipe, MultiSelectModule],
+  imports: [FormsModule, RouterModule, TitleCasePipe, MarkdownPipe, MultiSelectModule, ToastModule],
+  providers: [MessageService],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +34,7 @@ export class AdminDashboardComponent {
   private readonly githubIssuesService = inject(GitHubIssuesService);
   private readonly authUser = inject(AuthUserService);
   private readonly userService = inject(UserService);
+  private readonly messageService = inject(MessageService);
 
   protected readonly profile = this.authUser.profile;
 
@@ -342,10 +346,19 @@ export class AdminDashboardComponent {
   }
 
   protected async copyCloneCommand(repository: string, installationId?: string): Promise<void> {
+    console.log('🔍 DEBUG copyCloneCommand called:', { repository, installationId });
+
     if (!installationId) {
       // Fallback to regular clone if no installation ID
+      console.warn('⚠️ No installation ID provided, using basic clone');
       const cloneCommand = `git clone https://github.com/${repository}.git`;
       await this.copyToClipboard(cloneCommand);
+      this.messageService.add({
+        severity: 'warn',
+        summary: '⚠️ Basic Clone Copied',
+        detail: 'Installation ID missing. You may need to authenticate manually.',
+        life: 5000
+      });
       return;
     }
 
@@ -376,47 +389,68 @@ if "%TOKEN%"=="" (
 echo Token acquired, cloning repository...
 git clone https://x-access-token:%TOKEN%@github.com/%REPO%.git
 
+if errorlevel 1 (
+    echo Clone failed!
+    exit /b 1
+)
+
 echo.
 echo Repository cloned successfully!
 echo.
-echo IMPORTANT: To push changes later, run this command inside the repo folder:
-echo   refresh-token.bat
-echo.
 
-REM Create a helper script to refresh the token for push operations
-cd ${repoName}
+REM Create a helper script to refresh the token for push operations INSIDE the cloned repo
 (
 echo @echo off
 echo echo Refreshing GitHub App token...
 echo curl -s "${apiBaseUrl}/getInstallationAccessToken/${installationId}" ^> token_response.json
-echo for /f "delims=" %%%%i in ^('powershell -Command "^(Get-Content token_response.json ^| ConvertFrom-Json^).token"'^) do set NEW_TOKEN=%%%%i
+echo.
+echo REM Use PowerShell to extract token from JSON
+echo powershell -Command "$json = Get-Content token_response.json | ConvertFrom-Json; $json.token" ^> token.txt
+echo set /p NEW_TOKEN=^<token.txt
 echo del token_response.json
+echo del token.txt
+echo.
+echo if "%%NEW_TOKEN%%"=="" ^(
+echo     echo ❌ Failed to get token!
+echo     exit /b 1
+echo ^)
+echo.
+echo echo Updating git remote with fresh token...
 echo git remote set-url origin https://x-access-token:%%NEW_TOKEN%%@github.com/${repository}.git
-echo echo Token refreshed! You can now push your changes.
-) > refresh-token.bat
+echo.
+echo echo ✅ Token refreshed! You can now push.
+echo echo Run: git push origin main
+) > ${repoName}\refresh-token.bat
 
-echo Helper script created: refresh-token.bat
+echo.
+echo ✅ Setup complete!
+echo.
+echo NEXT STEPS:
+echo   1. cd ${repoName}
+echo   2. Make your code changes
+echo   3. git add .
+echo   4. git commit -m "Your message"
+echo   5. refresh-token.bat
+echo   6. git push origin your-branch-name
+echo.
 `;
 
     await this.copyToClipboard(windowsScript);
 
-    const instructions = `📋 Windows clone script copied to clipboard!
+    this.messageService.add({
+      severity: 'success',
+      summary: '✅ Clone Script Copied!',
+      detail: `Windows batch script copied to clipboard. Save as clone-${repoName}.bat and run it.`,
+      life: 8000
+    });
 
-SETUP INSTRUCTIONS:
-1. Create file: clone-${repoName}.bat
-2. Paste the clipboard content
-3. Run: clone-${repoName}.bat
-
-WORKFLOW:
-• Clone: Run clone-${repoName}.bat (does this once)
-• Make your code fixes
-• Before pushing: Run refresh-token.bat (gets fresh token)
-• Push: git push origin your-branch
-
-The refresh-token.bat script will be created automatically in the cloned repo folder!`;
-
-    alert(instructions);
-    console.log('✅ Windows clone script copied');
+    console.log('✅ Windows clone script copied to clipboard');
+    console.log(`📝 Next steps:
+1. Open Notepad
+2. Paste (Ctrl+V)
+3. Save as: clone-${repoName}.bat
+4. Run the .bat file`);
+    console.log('📋 Script will automatically create refresh-token.bat for push operations');
   }
 
   private async copyToClipboard(text: string): Promise<void> {

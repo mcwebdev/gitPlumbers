@@ -53,7 +53,7 @@ export class AiSeoSprintComponent implements OnInit {
     ],
     description:
       'In just one week, we\'ll build you an AI-powered content engine that uses YOUR industry expertise to create unlimited SEO-optimized content.',
-    ctaPrimary: { label: 'See a Sample Article', href: '/blog/sample' },
+    ctaPrimary: { label: 'See a Sample Article', href: 'https://getintegritylens.com/blog/the-interview-simulation-that-saved-us-from-a-100k-hiring-mistake' },
     ctaSecondary: { label: 'Book Your Sprint – $5,000', href: '/contact' },
     trustLine: 'Cut time-to-publish 70% across 3 pilots',
   };
@@ -166,9 +166,9 @@ export class AiSeoSprintComponent implements OnInit {
 
   protected readonly addOns = [
     {
-      title: 'Ongoing Content Production',
-      price: '$2K/month',
-      description: '20-30 articles/month with continuous optimization',
+      title: 'Integration with your codebase',
+      price: '$2K',
+      description: 'Integrate your AI content engine with your codebase',
     },
     {
       title: 'Advanced SEO Setup',

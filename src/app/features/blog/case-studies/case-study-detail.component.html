@@ -55,6 +55,16 @@
     <section class="diagnostic-report" aria-label="Detailed Diagnostic Report">
       <h2 class="diagnostic-report__title">Comprehensive Analysis Results</h2>
 
+      @if (study().slug === 'sample-diagnostic-report') {
+        <div class="cta-banner">
+          <div class="cta-banner__content">
+            <h3>Get Your Own Code Rescue Sprint</h3>
+            <p>Transform your codebase in just 1 week with our comprehensive audit, fixes, and roadmap — just like this report.</p>
+            <a routerLink="/ai-rescue-sprint" class="cta-banner__button">Book Your Sprint - $5,000</a>
+          </div>
+        </div>
+      }
+
       <!-- Codebase Statistics -->
       <div class="diagnostic-section">
         <h3>Codebase Overview</h3>
@@ -243,6 +253,19 @@
           }
         </div>
       </div>
+
+      @if (study().slug === 'sample-diagnostic-report') {
+        <div class="cta-banner cta-banner--final">
+          <div class="cta-banner__content">
+            <h3>Ready to Fix Your Codebase?</h3>
+            <p>Get the same comprehensive analysis and transformation — whether your code is AI-generated, legacy, offshore work, or just needs cleanup. Book your AI Code Rescue Sprint today.</p>
+            <div class="cta-banner__buttons">
+              <a routerLink="/ai-rescue-sprint" class="cta-banner__button cta-banner__button--primary">Book Your Sprint - $5,000</a>
+              <a routerLink="/contact" class="cta-banner__button cta-banner__button--secondary">Ask a Question</a>
+            </div>
+          </div>
+        </div>
+      }
     </section>
   }
 

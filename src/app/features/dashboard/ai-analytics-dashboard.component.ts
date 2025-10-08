@@ -82,6 +82,22 @@ export class AiAnalyticsDashboardComponent implements OnInit {
     return traffic > 0 ? (conversions / traffic) * 100 : 0;
   });
 
+  // Top pages from today's metrics
+  protected readonly topPagesToday = computed(() => {
+    const metrics = this.dailyMetrics();
+    if (metrics.length === 0) return [];
+
+    // Get the most recent day's data
+    const latestMetrics = metrics[metrics.length - 1];
+    const topPages = latestMetrics.topPages || {};
+
+    // Convert to array and sort by visits
+    return Object.entries(topPages)
+      .map(([url, visits]) => ({ url, visits: visits as number }))
+      .sort((a, b) => b.visits - a.visits)
+      .slice(0, 10); // Top 10 pages
+  });
+
   // Growth trend indicator
   protected readonly growthIndicator = computed(() => {
     const trend = this.growthTrend();
@@ -175,6 +191,12 @@ export class AiAnalyticsDashboardComponent implements OnInit {
     return Math.max(...metrics.map((m) => m.conversionEvents), 1);
   }
 
+  protected getMaxTotalEvents(): number {
+    const metrics = this.dailyMetrics();
+    if (metrics.length === 0) return 1;
+    return Math.max(...metrics.map((m) => m.totalEvents), 1);
+  }
+
   protected getMaxSourceVisits(): number {
     const sources = this.topAiSources();
     if (sources.length === 0) return 1;
@@ -193,7 +215,30 @@ export class AiAnalyticsDashboardComponent implements OnInit {
     return (visits / this.getMaxSourceVisits()) * 100;
   }
 
+  protected getTotalEventsPercentage(totalEvents: number): number {
+    return (totalEvents / this.getMaxTotalEvents()) * 100;
+  }
+
   protected getAbsoluteValue(value: number): number {
     return Math.abs(value);
+  }
+
+  protected getPagePath(url: string): string {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.pathname + urlObj.search;
+    } catch {
+      return url;
+    }
+  }
+
+  protected getMaxPageVisits(): number {
+    const pages = this.topPagesToday();
+    if (pages.length === 0) return 1;
+    return Math.max(...pages.map((p) => p.visits), 1);
+  }
+
+  protected getPagePercentage(visits: number): number {
+    return (visits / this.getMaxPageVisits()) * 100;
   }
 }

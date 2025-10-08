@@ -60,10 +60,21 @@ export class AnalyticsService {
   }
 
   /**
+   * Check if running on localhost
+   */
+  private _isLocalhost(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    const hostname = window.location.hostname;
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+  }
+
+  /**
    * Track initial user visit with minimal data collection
    */
   private _trackInitialVisit(): void {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || this._isLocalhost()) {
       return;
     }
 
@@ -77,6 +88,9 @@ export class AnalyticsService {
    * Track route changes via email
    */
   private _trackRouteChangeViaEmail(route: string): void {
+    if (this._isLocalhost()) {
+      return;
+    }
     const routeInfo: UserVisitInfo = this._collectMinimalUserInfo(route);
     this._sendAnalyticsEmail(routeInfo);
   }
@@ -140,11 +154,11 @@ export class AnalyticsService {
     // Initialize gtag
     script.onload = () => {
       (window as any).dataLayer = (window as any).dataLayer || [];
-      gtag = function () {
+      (window as any).gtag = function () {
         (window as any).dataLayer.push(arguments);
       };
-      gtag('js', new Date());
-      gtag('config', 'GA_MEASUREMENT_ID', {
+      (window as any).gtag('js', new Date());
+      (window as any).gtag('config', 'GA_MEASUREMENT_ID', {
         send_page_view: false, // We'll handle page views manually
         anonymize_ip: true,
         cookie_flags: 'SameSite=None;Secure',
@@ -167,18 +181,18 @@ export class AnalyticsService {
   }
 
   trackPageView(url: string): void {
-    if (!this._isBrowser || !this.initialized) return;
+    if (!this._isBrowser || !this.initialized || this._isLocalhost()) return;
 
-    gtag('config', 'GA_MEASUREMENT_ID', {
+    (window as any).gtag('config', 'GA_MEASUREMENT_ID', {
       page_path: url,
       page_title: document.title,
     });
   }
 
   trackEvent(event: AnalyticsEvent): void {
-    if (!this._isBrowser || !this.initialized) return;
+    if (!this._isBrowser || !this.initialized || this._isLocalhost()) return;
 
-    gtag('event', event.action, {
+    (window as any).gtag('event', event.action, {
       event_category: event.category,
       event_label: event.label,
       value: event.value,
@@ -273,7 +287,7 @@ export class AnalyticsService {
     eventName: string,
     additionalData?: Record<string, unknown>
   ): void {
-    if (!this._isBrowser) {
+    if (!this._isBrowser || this._isLocalhost()) {
       return;
     }
 

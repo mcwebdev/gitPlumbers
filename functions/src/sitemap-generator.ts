@@ -72,6 +72,20 @@ function getStaticUrls(): SitemapUrl[] {
       changefreq: 'monthly',
       priority: 0.9,
     },
+    // AI Rescue Sprint - High priority service page
+    {
+      loc: `${baseUrl}/ai-rescue-sprint/`,
+      lastmod: currentDate,
+      changefreq: 'monthly',
+      priority: 0.9,
+    },
+    // AI SEO Sprint - High priority service page
+    {
+      loc: `${baseUrl}/ai-seo-sprint/`,
+      lastmod: currentDate,
+      changefreq: 'monthly',
+      priority: 0.9,
+    },
     // About Page - Important for E-E-A-T
     {
       loc: `${baseUrl}/about/`,

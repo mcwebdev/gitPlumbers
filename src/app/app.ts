@@ -4,6 +4,7 @@ import { SiteHeaderComponent } from './shared/components/site-header/site-header
 import { SiteFooterComponent } from './shared/components/site-footer/site-footer.component';
 import { ScrollService } from './shared/services/scroll.service';
 import { AnalyticsService } from './shared/services/analytics.service';
+import { AiTrafficTrackingService } from './shared/services/ai-traffic-tracking.service';
 import { DOCUMENT } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
@@ -18,6 +19,7 @@ import { Subscription } from 'rxjs';
 export class App implements OnInit, OnDestroy {
   private scrollService = inject(ScrollService);
   private analyticsService = inject(AnalyticsService);
+  private aiTrafficTracking = inject(AiTrafficTrackingService);
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);

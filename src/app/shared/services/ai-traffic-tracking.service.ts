@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
@@ -24,6 +24,8 @@ export interface AiTrafficMetrics {
 export class AiTrafficTrackingService {
   private readonly _document = inject(DOCUMENT);
   private readonly _router = inject(Router);
+  private readonly _platformId = inject(PLATFORM_ID);
+  private readonly _isBrowser = isPlatformBrowser(this._platformId);
 
   private aiReferrerPatterns = {
     chatgpt: ['chat.openai.com', 'chatgpt.com'],
@@ -47,6 +49,8 @@ export class AiTrafficTrackingService {
   }
 
   private initializeTracking(): void {
+    if (!this._isBrowser) return;
+
     // Track initial page load
     this.trackPageView();
 
@@ -60,6 +64,8 @@ export class AiTrafficTrackingService {
    * Identify if current session is from AI source
    */
   identifyAiTrafficSource(): AiTrafficSource | null {
+    if (!this._isBrowser) return null;
+
     const referrer = this._document.referrer;
     const urlParams = new URLSearchParams(this._document.location.search);
 
@@ -95,6 +101,8 @@ export class AiTrafficTrackingService {
    * Track page view and identify AI traffic
    */
   private trackPageView(): void {
+    if (!this._isBrowser) return;
+
     this.sessionData.pageViews++;
 
     if (this.sessionData.pageViews === 1) {
@@ -120,6 +128,8 @@ export class AiTrafficTrackingService {
    * Track conversion events (contact form, signup, etc.)
    */
   trackConversion(eventName: string, value?: number): void {
+    if (!this._isBrowser) return;
+
     this.sessionData.conversionEvents++;
 
     this.sendTrackingEvent('conversion', {
@@ -135,6 +145,8 @@ export class AiTrafficTrackingService {
    * Track engagement events
    */
   trackEngagement(eventName: string, data: Record<string, unknown> = {}): void {
+    if (!this._isBrowser) return;
+
     this.sendTrackingEvent('engagement', {
       event: eventName,
       ...data,
@@ -194,6 +206,8 @@ export class AiTrafficTrackingService {
    * Send data to custom analytics endpoint
    */
   private sendToCustomAnalytics(data: Record<string, unknown>): void {
+    if (!this._isBrowser) return;
+
     // Send to Firebase Functions AI analytics endpoint
     const endpoint = 'https://us-central1-gitplumbers-35d92.cloudfunctions.net/handleAiAnalytics';
 

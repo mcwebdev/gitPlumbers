@@ -95,6 +95,10 @@
             <div class="bar-label">{{ formatDate(metric.date) }}</div>
             <div class="bar-container">
               <div
+                class="bar total-events"
+                [style.height.%]="getTotalEventsPercentage(metric.totalEvents)"
+              ></div>
+              <div
                 class="bar ai-traffic"
                 [style.height.%]="getAiTrafficPercentage(metric.aiTrafficEvents)"
               ></div>
@@ -104,13 +108,18 @@
               ></div>
             </div>
             <div class="bar-values">
-              <span class="ai-value">{{ metric.aiTrafficEvents }}</span>
-              <span class="conv-value">{{ metric.conversionEvents }}</span>
+              <span class="total-value">Total: {{ metric.totalEvents }}</span>
+              <span class="ai-value">AI: {{ metric.aiTrafficEvents }}</span>
+              <span class="conv-value">Conv: {{ metric.conversionEvents }}</span>
             </div>
           </div>
           }
         </div>
         <div class="chart-legend">
+          <div class="legend-item">
+            <div class="legend-color total-events"></div>
+            <span>Total Events</span>
+          </div>
           <div class="legend-item">
             <div class="legend-color ai-traffic"></div>
             <span>AI Traffic</span>
@@ -143,6 +152,38 @@
         </div>
         }
       </div>
+    </div>
+  </div>
+
+  <!-- Top Pages -->
+  <div class="charts-section">
+    <div class="chart-container">
+      <h3>📄 Top Pages Today</h3>
+      @if (topPagesToday().length > 0) {
+      <div class="sources-chart">
+        @for (page of topPagesToday(); track page.url) {
+        <div class="source-item">
+          <div class="source-info">
+            <span class="source-icon">📄</span>
+            <span class="source-name">{{ getPagePath(page.url) }}</span>
+          </div>
+          <div class="source-bar">
+            <div
+              class="source-fill"
+              [style.width.%]="getPagePercentage(page.visits)"
+              [style.background-color]="'#6366f1'"
+            ></div>
+          </div>
+          <div class="source-value">{{ formatNumber(page.visits) }} visits</div>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="no-citations">
+        <div class="no-citations-icon">📭</div>
+        <p>No page data available</p>
+      </div>
+      }
     </div>
   </div>
 

@@ -42,12 +42,20 @@ export class AiSeoSprintComponent implements OnInit {
   protected readonly upfrontPayment = 2500;
 
   protected readonly heroSection = {
-    headline: 'AI SEO Content Sprint',
-    subheadline: 'Stop writing. Start scaling.',
+    eyebrow: '$5K • 1-Week Sprint',
+    headline: 'AI SEO on Autopilot',
+    subheadline: 'Generate, optimize, and schedule rank-ready articles using your team\'s expertise—in one week.',
+    bullets: [
+      'Topic research',
+      'E-E-A-T schema',
+      'Internal linking',
+      'Scheduled publishing'
+    ],
     description:
       'In just one week, we\'ll build you an AI-powered content engine that uses YOUR industry expertise to create unlimited SEO-optimized content.',
-    ctaPrimary: { label: 'Book Your Sprint', href: '/contact' },
-    ctaSecondary: { label: 'See Sample Content', href: '/blog' },
+    ctaPrimary: { label: 'See a Sample Article', href: '/blog/sample' },
+    ctaSecondary: { label: 'Book Your Sprint – $5,000', href: '/contact' },
+    trustLine: 'Cut time-to-publish 70% across 3 pilots',
   };
 
   protected readonly deliverables = [
@@ -88,12 +96,12 @@ export class AiSeoSprintComponent implements OnInit {
       description:
         'We produce your first batch of AI-generated content: blog posts, landing pages, product descriptions, or whatever you need most.',
       whatYouGet: [
-        'Scheuled content for 90 days',
-        'Generate as much as you want',
-        'Rich metadata for all content',
-        'Social sharing cards (OG, Twitter)',
-        'Schema.org structured data',
-        'Internal linking strategy',
+        '10 optimized topic titles',
+        '10 detailed content outlines',
+        '3 full long-form draft articles',
+        'Schema markup + OG/Twitter cards',
+        'Internal link mapping',
+        '90-day content calendar',
       ],
     },
     {
@@ -153,6 +161,7 @@ export class AiSeoSprintComponent implements OnInit {
     },
     timeline: this.timeline,
     effectiveRate: '$110-140/hr',
+    support: '30-day email support included',
   };
 
   protected readonly addOns = [
@@ -200,6 +209,11 @@ export class AiSeoSprintComponent implements OnInit {
       description: 'Trained on your voice, products, and positioning',
     },
     {
+      icon: '✓',
+      title: 'Quality-Checked',
+      description: 'Evaluation gate before publish (fact-check + links + schema)',
+    },
+    {
       icon: '🤝',
       title: 'Team Owned',
       description: 'You get the prompts, templates, and knowledge to run it',
@@ -210,26 +224,40 @@ export class AiSeoSprintComponent implements OnInit {
     {
       step: '1',
       title: 'Book Your Sprint',
+      duration: '',
       description: 'Contact us and pay 50% upfront to secure your sprint slot',
     },
     {
       step: '2',
       title: 'Knowledge Session',
-      description: 'Day 1: We interview your team to extract expertise and strategy',
+      duration: 'Day 1 • 2h session',
+      description: 'We interview your team to extract expertise and strategy',
     },
     {
       step: '3',
       title: 'Build & Generate',
-      description: 'Days 2-5: We build your AI engine and create initial content',
+      duration: 'Days 2–5',
+      description: 'We build your AI engine and create initial content',
     },
     {
       step: '4',
       title: 'Training & Launch',
-      description: 'Days 6-7: Your team learns to use the system with 30 days support',
+      duration: 'Days 6–7',
+      description: 'Your team learns to use the system with 30 days support',
     },
   ];
 
+  protected readonly socialProof = {
+    quote: 'We shipped 3 months of articles in 2 weeks—and finally ranked for intent terms.',
+    results: '20 outlines, 6 drafts, schema on every page, internal links from 12 legacy posts.',
+  };
+
   protected readonly faq = [
+    {
+      question: 'How do you keep quality high?',
+      answer:
+        'We run an evaluation gate (facts, links, tone), add schema + OG cards, and require human review before publish. Every piece includes proper structured data and internal links.',
+    },
     {
       question: 'Is this just generic AI content?',
       answer:

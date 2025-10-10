@@ -1,4 +1,4 @@
-﻿name: gitPlumbers: PR Scaffold
+name: gitPlumbers: PR Scaffold
 on:
   repository_dispatch:
     types: [gp_scaffold_pr]

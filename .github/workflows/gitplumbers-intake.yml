@@ -1,4 +1,4 @@
-﻿name: gitPlumbers: Intake
+name: gitPlumbers: Intake
 on:
   issues:
     types: [opened, edited]

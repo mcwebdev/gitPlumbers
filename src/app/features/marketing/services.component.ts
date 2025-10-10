@@ -122,7 +122,7 @@ export class ServicesComponent implements OnInit {
     {
       step: '04',
       title: 'Knowledge Transfer',
-      description: 'Complete documentation and team training to maintain improvements',
+      description: 'Complete documentation.',
     },
   ];
 

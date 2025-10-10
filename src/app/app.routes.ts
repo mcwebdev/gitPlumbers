@@ -85,7 +85,7 @@ export const routes: Routes = [
       import('./features/marketing/ai-rescue-sprint.component').then((m) => m.AiRescueSprintComponent),
     data: {
       seo: {
-        title: 'AI Code Rescue Sprint - Transform Your AI-Generated Codebase in 1 Week | $5K',
+        title: 'Rescue Sprint - Transform Your AI-Generated Codebase in 1 Week | $5K',
         description:
           'One-week intensive audit and optimization of your AI-generated codebase. Get a comprehensive code health report, critical fixes implemented, 90-day roadmap, and knowledge transfer session. Perfect for startups and teams dealing with AI-assisted code.',
         keywords: [

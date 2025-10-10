@@ -418,7 +418,7 @@ export const finalizeAndSendStripeInvoice = onCall({ secrets: [STRIPE_SECRET_KEY
 });
 
 // Webhook Handler
-export const stripeWebhook = onRequest(async (req, res) => {
+export const stripeWebhook = onRequest({ secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET] }, async (req, res) => {
   const sig = req.headers['stripe-signature'];
   if (!sig) {
     res.status(400).send('Missing stripe-signature header');

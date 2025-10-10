@@ -28,7 +28,7 @@ export class AiRescueSprintComponent implements OnInit {
 
   ngOnInit(): void {
     this._seoService.updateMetadata({
-      title: 'AI Code Rescue Sprint - Transform Your AI-Generated Codebase in 1 Week | $5K',
+      title: 'Rescue Sprint - Transform Your AI-Generated Codebase in 1 Week | $5K',
       description:
         'One-week intensive audit and optimization of your AI-generated codebase. Get a comprehensive code health report, critical fixes implemented, 90-day roadmap, and knowledge transfer session. Perfect for startups and teams dealing with AI-assisted code.',
       keywords: [
@@ -42,7 +42,7 @@ export class AiRescueSprintComponent implements OnInit {
         'code health report',
         '1 week code sprint',
       ],
-      ogTitle: 'AI Code Rescue Sprint - Fix Your AI Code in 1 Week',
+      ogTitle: 'Rescue Sprint - Fix Your AI Code in 1 Week',
       ogDescription:
         'Transform your AI-generated codebase from fragile prototype to production-ready in just one week. $5,000 flat rate.',
       ogImage: '/promo2.png',
@@ -113,7 +113,7 @@ export class AiRescueSprintComponent implements OnInit {
     {
       weeks: 2,
       name: 'Standard Rescue',
-      price: 8500,
+      price: 10000,
       timeline: '2 weeks',
       description: 'Comprehensive code health assessment with deeper fixes and more thorough documentation.',
       highlights: [
@@ -181,14 +181,13 @@ export class AiRescueSprintComponent implements OnInit {
     {
       weeks: 3,
       name: 'Premium Rescue',
-      price: 12000,
+      price: 14000,
       timeline: '3 weeks',
-      description: 'Complete transformation with extensive fixes, refactoring, testing, and team training.',
+      description: 'Complete transformation with extensive fixes, refactoring, testing.',
       highlights: [
         '🏗️ Architecture refactoring',
         '✨ Top 20+ fixes implemented',
         '🧪 Testing infrastructure',
-        '👥 Team training included'
       ],
       deliverables: [
         {
@@ -271,10 +270,10 @@ export class AiRescueSprintComponent implements OnInit {
   }
 
   protected readonly heroSection = {
-    headline: 'AI Code Rescue Sprint',
+    headline: 'Rescue Sprint',
     subheadline: 'Your AI-generated app works... kinda. Let\'s fix that.',
     description:
-      'Transform your AI-assisted codebase from fragile prototype into production-ready code. Choose your urgency level.',
+      'Transform your AI-assisted codebase from fragile prototype into production-ready code. Choose your urgency level. We can also help with legacy codebases and offshore work.',
     ctaPrimary: { label: 'Book Your Sprint', href: '/contact' },
     ctaSecondary: { label: 'See Sample Report', href: '/blog/case-studies/sample-diagnostic-report' },
   };
@@ -337,12 +336,7 @@ export class AiRescueSprintComponent implements OnInit {
       title: 'Monthly Code Health Retainer',
       price: '$3K/month',
       description: 'Ongoing monitoring and optimization',
-    },
-    {
-      title: 'Team Training Workshop',
-      price: '$2K',
-      description: 'Half-day training for your team',
-    },
+    },   
   ];
 
   protected readonly benefits = [
@@ -420,7 +414,7 @@ export class AiRescueSprintComponent implements OnInit {
     {
       question: 'What\'s the difference between the sprint levels?',
       answer:
-        'Emergency (1 week) focuses on rapid triage and break-fix to unblock your team. Standard (2 weeks) provides comprehensive analysis and more fixes. Premium (3 weeks) includes architecture refactoring, testing infrastructure, and team training.',
+        'Emergency (1 week) focuses on rapid triage and break-fix to unblock your team. Standard (2 weeks) provides comprehensive analysis and more fixes. Premium (3 weeks) includes architecture refactoring, testing infrastructure.',
     },
     {
       question: 'Can you implement all the fixes?',

@@ -12,7 +12,8 @@
       "Bash(then cat .claude/settings.json)",
       "Bash(else echo \"{}\")",
       "Bash(fi)",
-      "Bash(curl -L https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-win64.exe -o /c/Users/d33psp33d/bin/jq.exe)"
+      "Bash(curl -L https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-win64.exe -o /c/Users/d33psp33d/bin/jq.exe)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
